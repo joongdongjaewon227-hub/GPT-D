@@ -178,13 +178,21 @@
     
     <script>
         // ---------------------- Gemini API 설정 ----------------------
-        // ⚠️ 경고: 이 키를 실제 키로 교체해야 합니다! 클라이언트 코드에 노출하는 것은 보안 위험이 큽니다!
+        // 🚨 반드시 이 부분을 실제 발급받은 Gemini API 키로 교체하세요! 🚨
         const API_KEY = "AIzaSyAp_IyUGK9nxXb02hvyUx9xyZHi0fuKdrg"; 
         
         // SDK 초기화
         const { GoogleGenAI } = window.googleGenai;
-        const ai = new GoogleGenAI({ apiKey: API_KEY });
-        const modelName = "gemini-2.5-flash"; // 빠르고 효율적인 모델
+        // ⚠️ API 키가 잘못되면 여기서 오류가 날 가능성이 높습니다.
+        let ai = null;
+        try {
+            ai = new GoogleGenAI({ apiKey: API_KEY });
+        } catch (e) {
+            alert("Gemini SDK 초기화 오류: API 키를 확인해주세요. (콘솔 로그 참고)");
+            console.error("SDK 초기화 실패:", e);
+        }
+        
+        const modelName = "gemini-2.5-flash"; 
 
         // ---------------------- DOM 및 UI 로직 ----------------------
         const main = document.getElementById("main");
@@ -211,20 +219,16 @@
             });
         });
 
-        // 채팅 시작 (초기 화면 요소 숨기기)
         function startChat() { main.classList.add("chatting"); }
 
-        // 메시지를 화면에 추가
         function addMessage(role, text) {
             const msg = document.createElement("div");
             msg.className = `message ${role}`;
             msg.textContent = text;
             messages.appendChild(msg);
-            // 최신 메시지로 스크롤 이동
             main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
         }
 
-        // 로딩 버블 추가
         function addLoadingBubble() {
             const msg = document.createElement("div");
             msg.className = "message bot bot-loading";
@@ -234,10 +238,9 @@
             loadingMsg = msg;
         }
 
-        // 로딩 버블을 최종 텍스트로 대체
         function replaceLoadingBubble(text) {
             if (loadingMsg) {
-                loadingMsg.textContent = text; // 텍스트만 넣도록 수정
+                loadingMsg.textContent = text; 
                 loadingMsg.classList.remove("bot-loading");
                 loadingMsg = null;
             }
@@ -246,37 +249,47 @@
         // ---------------- AI 응답 처리 (Gemini API 사용) ----------------
         async function sendMessage() {
             const text = textarea.value.trim();
-            if (!text || isLoading) return; // 로딩 중이거나 텍스트가 없으면 종료
+            if (!text || isLoading) return; 
 
-            // 1. UI 업데이트
+            // 1. API 키 및 SDK 초기화 여부 확인 (디버깅)
+            if (!ai) {
+                alert("오류: Gemini SDK가 초기화되지 않았습니다. API 키 설정을 확인하세요.");
+                return;
+            }
+            if (API_KEY === "YOUR_GEMINI_API_KEY") {
+                alert("오류: API 키를 'YOUR_GEMINI_API_KEY'에서 실제 키로 교체해야 합니다.");
+                return;
+            }
+
+            // 2. UI 업데이트
             textarea.value = "";
-            textarea.style.height = "auto"; // textarea 크기 초기화
+            textarea.style.height = "auto";
             startChat();
             addMessage("user", text);
             addLoadingBubble();
             isLoading = true;
 
             try {
-                // 2. Gemini API 호출
+                // 3. Gemini API 호출
                 const response = await ai.models.generateContent({
                     model: modelName,
                     contents: [{ 
                         role: "user", 
-                        parts: [{ text: text }] // Gemini 요청 형식
+                        parts: [{ text: text }] 
                     }],
                     config: {
-                        // 모델 응답 길이 제한
                         maxOutputTokens: 500
                     }
                 });
                 
-                // 3. 응답 결과 처리
+                // 4. 응답 결과 처리
                 const aiText = response.text || "응답을 가져오지 못했습니다.";
                 replaceLoadingBubble(aiText);
 
             } catch (err) {
-                // 4. 오류 처리
-                replaceLoadingBubble(`오류가 발생했습니다. 키를 확인하거나 콘솔을 보세요.`);
+                // 5. 오류 처리 및 모바일 알림 (디버깅)
+                alert(`🚨 API 호출 오류 발생: ${err.message}. (키 문제일 가능성이 높습니다.)`);
+                replaceLoadingBubble(`오류가 발생했습니다: ${err.message}`);
                 console.error("Gemini API 호출 오류:", err);
             } finally {
                 isLoading = false;
@@ -285,7 +298,6 @@
 
         // ---------------- 이벤트 리스너 ----------------
         sendBtn.onclick = sendMessage;
-        // Enter 키로 전송 (Shift + Enter는 줄바꿈)
         textarea.addEventListener("keydown", e => {
             if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -293,7 +305,6 @@
             }
         });
 
-        // 사용자 입력에 따라 textarea 높이 자동 조절
         textarea.addEventListener("input", () => {
             textarea.style.height = "auto";
             textarea.style.height = textarea.scrollHeight + "px";
