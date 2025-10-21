@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minsu GPT (Gemini API Test)</title>
+    <title>Minsu GPT (Gemini API Test - 최종 디버그)</title>
 
     <script src="https://unpkg.com/@google/genai@latest/dist/index.umd.js"></script>
 
     <style>
+        /* ... (기존 스타일 코드) ... */
         :root {
             --bg: #ffffff;
             --text: #111;
@@ -178,22 +179,25 @@
     
     <script>
         // ---------------------- Gemini API 설정 ----------------------
-        // 🚨 반드시 이 부분을 실제 발급받은 Gemini API 키로 교체하세요! 🚨
         const API_KEY = "AIzaSyAp_IyUGK9nxXb02hvyUx9xyZHi0fuKdrg"; 
         
-        // SDK 초기화
-        const { GoogleGenAI } = window.googleGenai;
-        // ⚠️ API 키가 잘못되면 여기서 오류가 날 가능성이 높습니다.
-        let ai = null;
-        try {
-            ai = new GoogleGenAI({ apiKey: API_KEY });
-        } catch (e) {
-            alert("Gemini SDK 초기화 오류: API 키를 확인해주세요. (콘솔 로그 참고)");
-            console.error("SDK 초기화 실패:", e);
-        }
-        
+        const { GoogleGenAI } = window.googleGenai || {};
+        let ai = null; // ai 객체를 let으로 선언하고 초기화 여부를 확인합니다.
         const modelName = "gemini-2.5-flash"; 
 
+        if (GoogleGenAI) {
+            try {
+                // SDK 초기화 시도
+                ai = new GoogleGenAI({ apiKey: API_KEY });
+            } catch (e) {
+                // 초기화 오류가 나도 스크립트 실행은 계속됩니다.
+                alert("Gemini SDK 초기화 오류: API 키가 잘못되었을 수 있습니다. 다크 모드만 작동합니다.");
+                console.error("SDK 초기화 실패:", e);
+            }
+        } else {
+             alert("Gemini SDK를 로드하지 못했습니다. 네트워크 연결을 확인하세요.");
+        }
+        
         // ---------------------- DOM 및 UI 로직 ----------------------
         const main = document.getElementById("main");
         const messages = document.getElementById("messages");
@@ -204,7 +208,7 @@
         const body = document.body;
         let isLoading = false, loadingMsg = null;
 
-        // 다크 모드 토글
+        // 다크 모드 토글 (이제 SDK 초기화 실패와 관계없이 작동해야 합니다.)
         darkBtn.addEventListener("click", () => {
             body.classList.toggle("dark");
             darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
@@ -220,7 +224,8 @@
         });
 
         function startChat() { main.classList.add("chatting"); }
-
+        
+        // ... (나머지 UI 함수는 생략, 이전 코드와 동일) ...
         function addMessage(role, text) {
             const msg = document.createElement("div");
             msg.className = `message ${role}`;
@@ -246,6 +251,7 @@
             }
         }
 
+
         // ---------------- AI 응답 처리 (Gemini API 사용) ----------------
         async function sendMessage() {
             const text = textarea.value.trim();
@@ -253,7 +259,7 @@
 
             // 1. API 키 및 SDK 초기화 여부 확인 (디버깅)
             if (!ai) {
-                alert("오류: Gemini SDK가 초기화되지 않았습니다. API 키 설정을 확인하세요.");
+                alert("오류: AI 기능이 비활성화되었습니다. API 키 설정을 확인하세요.");
                 return;
             }
             if (API_KEY === "YOUR_GEMINI_API_KEY") {
@@ -288,7 +294,7 @@
 
             } catch (err) {
                 // 5. 오류 처리 및 모바일 알림 (디버깅)
-                alert(`🚨 API 호출 오류 발생: ${err.message}. (키 문제일 가능성이 높습니다.)`);
+                alert(`🚨 API 호출 오류 발생: ${err.message}. (키 문제, 네트워크, 또는 CORS 문제일 수 있습니다.)`);
                 replaceLoadingBubble(`오류가 발생했습니다: ${err.message}`);
                 console.error("Gemini API 호출 오류:", err);
             } finally {
