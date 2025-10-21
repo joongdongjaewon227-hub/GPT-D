@@ -1,289 +1,303 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minsu GPT (Gemini API)</title>
-  <style>
-    :root {
-      --bg: #ffffff;
-      --text: #111;
-      --input-bg: #f7f7f8;
-      --border: #dcdcdc;
-      --border-strong: #b0b0b0;
-      --button-bg: #000;
-      --button-text: #fff;
-      --menu-bg: rgba(255,255,255,0.95);
-      --menu-text: #444;
-      --transition: 0.3s ease;
-    }
-    body.dark {
-      --bg: #0d0d0d;
-      --text: #e4e4e4;
-      --input-bg: #1a1a1a;
-      --border: #2a2a2a;
-      --border-strong: #555;
-      --button-bg: #fff;
-      --button-text: #000;
-      --menu-bg: rgba(30,30,30,0.9);
-      --menu-text: #ccc;
-    }
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      transition: background var(--transition), color var(--transition), border var(--transition);
-    }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.6rem 1.2rem;
-      z-index: 10;
-    }
-    .logo { font-weight: 600; font-size: 1.05rem; }
-    .actions { display: flex; gap: 10px; align-items: center; }
-    .actions button { border-radius: 20px; font-size: 0.9rem; padding: 0.4rem 1rem; cursor: pointer; }
-    @media (max-width: 600px) {
-      main { padding-bottom: 140px !important; }
-      .actions button { font-size: 0.8rem; padding: 0.35rem 0.8rem; }
-    }
-    .login { background: var(--button-bg); color: var(--button-text); border: none; }
-    .signup { background: transparent; border: 1px solid var(--border); color: var(--text); }
-    .darkmode-toggle { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
-    main {
-      flex: 1;
-      padding: 60px 1rem 120px;
-      overflow-y: auto;
-      scroll-behavior: smooth;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-top: 12rem; transition: opacity 0.5s ease; }
-    main.chatting #title { opacity: 0; pointer-events: none; }
-    .suggestions {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 0.8rem;
-      width: 100%;
-      max-width: 700px;
-      margin-top: 3rem;
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-    main.chatting .suggestions { opacity: 0; transform: translateY(20px); pointer-events: none; }
-    .suggestion-card {
-      background: var(--input-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 1rem;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s ease;
-    }
-    .suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
-    .message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; }
-    .message.user { background: var(--button-bg); color: var(--button-text); align-self: flex-end; }
-    .message.bot { background: var(--input-bg); border: 1px solid var(--border); align-self: flex-start; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    .input-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(to top, var(--bg) 90%, transparent);
-      display: flex;
-      justify-content: center;
-      padding: 0.6rem 1rem 1rem;
-      z-index: 20;
-    }
-    .input-wrapper {
-      display: flex;
-      align-items: flex-end;
-      width: 100%;
-      max-width: 700px;
-      background: var(--input-bg);
-      border-radius: 22px;
-      border: 1.5px solid var(--border-strong);
-      padding: 0.4rem 0.6rem;
-      gap: 0.4rem;
-    }
-    textarea {
-      flex: 1;
-      border: none;
-      background: transparent;
-      color: var(--text);
-      font-size: 1rem;
-      resize: none;
-      overflow-y: auto;
-      min-height: 1.4rem;
-      max-height: 200px;
-      line-height: 1.4rem;
-      padding: 6px 0;
-      outline: none;
-      white-space: pre-wrap;
-    }
-    .btn { border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--button-bg); color: var(--button-text); }
-    .loading-bar { width: 100%; height: 4px; background: var(--border); overflow: hidden; border-radius: 4px; margin-top: 6px; position: relative; }
-    .loading-bar::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--button-bg); animation: barMove 1s linear infinite; }
-    @keyframes barMove { 0% { left: -40%; } 100% { left: 100%; } }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minsu GPT (Gemini API Test)</title>
+
+    <script src="https://unpkg.com/@google/genai@latest/dist/index.umd.js"></script>
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111;
+            --input-bg: #f7f7f8;
+            --border: #dcdcdc;
+            --border-strong: #b0b0b0;
+            --button-bg: #000;
+            --button-text: #fff;
+            --menu-bg: rgba(255,255,255,0.95);
+            --menu-text: #444;
+            --transition: 0.3s ease;
+        }
+        body.dark {
+            --bg: #0d0d0d;
+            --text: #e4e4e4;
+            --input-bg: #1a1a1a;
+            --border: #2a2a2a;
+            --border-strong: #555;
+            --button-bg: #fff;
+            --button-text: #000;
+            --menu-bg: rgba(30,30,30,0.9);
+            --menu-text: #ccc;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            transition: background var(--transition), color var(--transition), border var(--transition);
+        }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 1.2rem;
+            z-index: 10;
+        }
+        .logo { font-weight: 600; font-size: 1.05rem; }
+        .actions { display: flex; gap: 10px; align-items: center; }
+        .actions button { border-radius: 20px; font-size: 0.9rem; padding: 0.4rem 1rem; cursor: pointer; }
+        @media (max-width: 600px) {
+            main { padding-bottom: 140px !important; }
+            .actions button { font-size: 0.8rem; padding: 0.35rem 0.8rem; }
+        }
+        .login { background: var(--button-bg); color: var(--button-text); border: none; }
+        .signup { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .darkmode-toggle { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
+        main {
+            flex: 1;
+            padding: 60px 1rem 120px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-top: 12rem; transition: opacity 0.5s ease; }
+        main.chatting #title { opacity: 0; pointer-events: none; }
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 0.8rem;
+            width: 100%;
+            max-width: 700px;
+            margin-top: 3rem;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        main.chatting .suggestions { opacity: 0; transform: translateY(20px); pointer-events: none; }
+        .suggestion-card {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+        .suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
+        .message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; }
+        .message.user { background: var(--button-bg); color: var(--button-text); align-self: flex-end; }
+        .message.bot { background: var(--input-bg); border: 1px solid var(--border); align-self: flex-start; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .input-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--bg) 90%, transparent);
+            display: flex;
+            justify-content: center;
+            padding: 0.6rem 1rem 1rem;
+            z-index: 20;
+        }
+        .input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            width: 100%;
+            max-width: 700px;
+            background: var(--input-bg);
+            border-radius: 22px;
+            border: 1.5px solid var(--border-strong);
+            padding: 0.4rem 0.6rem;
+            gap: 0.4rem;
+        }
+        textarea {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 1rem;
+            resize: none;
+            overflow-y: auto;
+            min-height: 1.4rem;
+            max-height: 200px;
+            line-height: 1.4rem;
+            padding: 6px 0;
+            outline: none;
+            white-space: pre-wrap;
+        }
+        .btn { border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--button-bg); color: var(--button-text); }
+        .loading-bar { width: 100%; height: 4px; background: var(--border); overflow: hidden; border-radius: 4px; margin-top: 6px; position: relative; }
+        .loading-bar::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--button-bg); animation: barMove 1s linear infinite; }
+        @keyframes barMove { 0% { left: -40%; } 100% { left: 100%; } }
+    </style>
 </head>
 <body>
-  <nav>
-    <div class="logo">Minsu GPT</div>
-    <div class="actions">
-      <button class="login" id="loginBtn">로그인</button>
-      <button class="signup" id="signupBtn">무료로 회원 가입</button>
-      <button class="darkmode-toggle" id="darkBtn">🌙</button>
-    </div>
-  </nav>
-  <main id="main">
-    <h1 id="title">어디서부터 시작할까요?</h1>
-    <div class="suggestions" id="suggestions">
-      <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
-      <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
-      <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
-      <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
-    </div>
-    <div class="messages" id="messages"></div>
-  </main>
-  <div class="input-bar">
-    <div class="input-wrapper">
-      <button class="btn" id="plusBtn">＋</button>
-      <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
-      <button class="btn" id="sendBtn">➤</button>
-    </div>
-  </div>
-  <script src="https://unpkg.com/@google/genai@latest/dist/index.umd.js"></script>
-  <script>
-    // ---------------------- Gemini API 설정 ----------------------
-    // ⚠️ 경고: 테스트 목적으로만 사용하세요. API 키를 클라이언트 코드에 노출하는 것은 보안 위험이 큽니다!
-    const API_KEY = "AIzaSyAp_IyUGK9nxXb02hvyUx9xyZHi0fuKdrg"; 
+    <nav>
+        <div class="logo">Minsu GPT</div>
+        <div class="actions">
+            <button class="login" id="loginBtn">로그인</button>
+            <button class="signup" id="signupBtn">무료로 회원 가입</button>
+            <button class="darkmode-toggle" id="darkBtn">🌙</button>
+        </div>
+    </nav>
+    <main id="main">
+        <h1 id="title">어디서부터 시작할까요?</h1>
+        <div class="suggestions" id="suggestions">
+            <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
+            <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
+            <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
+            <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
+        </div>
+        <div class="messages" id="messages"></div>
+    </main>
+    <div class="input-bar">
+        <div class="input-wrapper">
+            <button class="btn" id="plusBtn">＋</button>
+            <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+            <button class="btn" id="sendBtn">➤</button>
+        </div>
+    </div>
     
-    // SDK 초기화
-    const { GoogleGenAI } = window.googleGenai;
-    const ai = new GoogleGenAI({ apiKey: API_KEY });
-    const modelName = "gemini-2.5-flash"; // 빠르고 효율적인 모델
-
-    // ---------------------- 기존 DOM 및 UI 로직 (변화 없음) ----------------------
-    const main = document.getElementById("main");
-    const messages = document.getElementById("messages");
-    const textarea = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const darkBtn = document.getElementById("darkBtn");
-    const cards = document.querySelectorAll(".suggestion-card");
-    const body = document.body;
-    let isLoading = false, loadingMsg = null;
-
-    darkBtn.addEventListener("click", () => {
-      body.classList.toggle("dark");
-      darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
-    });
-
-    cards.forEach(card => {
-      card.addEventListener("click", () => {
-        const prompt = card.dataset.prompt;
-        textarea.value = prompt;
-        sendMessage();
-      });
-    });
-
-    function startChat() { main.classList.add("chatting"); }
-
-    function addMessage(role, text) {
-      const msg = document.createElement("div");
-      msg.className = `message ${role}`;
-      msg.textContent = text;
-      messages.appendChild(msg);
-      main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
-    }
-
-    function addLoadingBubble() {
-      const msg = document.createElement("div");
-      msg.className = "message bot bot-loading";
-      msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
-      messages.appendChild(msg);
-      main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
-      loadingMsg = msg;
-    }
-
-    function replaceLoadingBubble(text) {
-      if (loadingMsg) {
-        loadingMsg.innerHTML = text;
-        loadingMsg.classList.remove("bot-loading");
-        loadingMsg = null;
-      }
-    }
-
-    // ---------------- AI 응답 처리 (Gemini API로 수정됨) ----------------
-    async function sendMessage() {
-      const text = textarea.value.trim();
-      if (!text) return;
-      
-      // UI 업데이트
-      textarea.value = "";
-      textarea.style.height = "auto";
-      startChat();
-      addMessage("user", text);
-      addLoadingBubble();
-      isLoading = true;
-
-      try {
-        // Gemini API 호출은 generateContent 메서드를 사용
-        const response = await ai.models.generateContent({
-          model: modelName,
-          contents: [{ 
-                role: "user", 
-                parts: [{ text: text }] // Gemini 요청 형식
-            }],
-          config: {
-                // OpenAI의 max_tokens와 유사한 기능
-              maxOutputTokens: 500
-          }
-        });
+    <script>
+        // ---------------------- Gemini API 설정 ----------------------
+        // ⚠️ 경고: 이 키를 실제 키로 교체해야 합니다! 클라이언트 코드에 노출하는 것은 보안 위험이 큽니다!
+        const API_KEY = "AIzaSyAp_IyUGK9nxXb02hvyUx9xyZHi0fuKdrg"; 
         
-        // 응답에서 텍스트 결과 추출
-        const aiText = response.text || "응답을 가져오지 못했습니다.";
-        replaceLoadingBubble(aiText);
+        // SDK 초기화
+        const { GoogleGenAI } = window.googleGenai;
+        const ai = new GoogleGenAI({ apiKey: API_KEY });
+        const modelName = "gemini-2.5-flash"; // 빠르고 효율적인 모델
 
-      } catch (err) {
-        replaceLoadingBubble(`오류가 발생했습니다: ${err.message}`);
-        console.error("Gemini API 호출 오류:", err);
-      } finally {
-        isLoading = false;
-      }
-    }
+        // ---------------------- DOM 및 UI 로직 ----------------------
+        const main = document.getElementById("main");
+        const messages = document.getElementById("messages");
+        const textarea = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const darkBtn = document.getElementById("darkBtn");
+        const cards = document.querySelectorAll(".suggestion-card");
+        const body = document.body;
+        let isLoading = false, loadingMsg = null;
 
-    sendBtn.onclick = sendMessage;
-    textarea.addEventListener("keydown", e => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
-      }
-    });
+        // 다크 모드 토글
+        darkBtn.addEventListener("click", () => {
+            body.classList.toggle("dark");
+            darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
+        });
 
-    textarea.addEventListener("input", () => {
-      textarea.style.height = "auto";
-      textarea.style.height = textarea.scrollHeight + "px";
-    });
-  </script>
+        // 추천 카드 클릭 이벤트
+        cards.forEach(card => {
+            card.addEventListener("click", () => {
+                const prompt = card.dataset.prompt;
+                textarea.value = prompt;
+                sendMessage();
+            });
+        });
+
+        // 채팅 시작 (초기 화면 요소 숨기기)
+        function startChat() { main.classList.add("chatting"); }
+
+        // 메시지를 화면에 추가
+        function addMessage(role, text) {
+            const msg = document.createElement("div");
+            msg.className = `message ${role}`;
+            msg.textContent = text;
+            messages.appendChild(msg);
+            // 최신 메시지로 스크롤 이동
+            main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
+        }
+
+        // 로딩 버블 추가
+        function addLoadingBubble() {
+            const msg = document.createElement("div");
+            msg.className = "message bot bot-loading";
+            msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
+            messages.appendChild(msg);
+            main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
+            loadingMsg = msg;
+        }
+
+        // 로딩 버블을 최종 텍스트로 대체
+        function replaceLoadingBubble(text) {
+            if (loadingMsg) {
+                loadingMsg.textContent = text; // 텍스트만 넣도록 수정
+                loadingMsg.classList.remove("bot-loading");
+                loadingMsg = null;
+            }
+        }
+
+        // ---------------- AI 응답 처리 (Gemini API 사용) ----------------
+        async function sendMessage() {
+            const text = textarea.value.trim();
+            if (!text || isLoading) return; // 로딩 중이거나 텍스트가 없으면 종료
+
+            // 1. UI 업데이트
+            textarea.value = "";
+            textarea.style.height = "auto"; // textarea 크기 초기화
+            startChat();
+            addMessage("user", text);
+            addLoadingBubble();
+            isLoading = true;
+
+            try {
+                // 2. Gemini API 호출
+                const response = await ai.models.generateContent({
+                    model: modelName,
+                    contents: [{ 
+                        role: "user", 
+                        parts: [{ text: text }] // Gemini 요청 형식
+                    }],
+                    config: {
+                        // 모델 응답 길이 제한
+                        maxOutputTokens: 500
+                    }
+                });
+                
+                // 3. 응답 결과 처리
+                const aiText = response.text || "응답을 가져오지 못했습니다.";
+                replaceLoadingBubble(aiText);
+
+            } catch (err) {
+                // 4. 오류 처리
+                replaceLoadingBubble(`오류가 발생했습니다. 키를 확인하거나 콘솔을 보세요.`);
+                console.error("Gemini API 호출 오류:", err);
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // ---------------- 이벤트 리스너 ----------------
+        sendBtn.onclick = sendMessage;
+        // Enter 키로 전송 (Shift + Enter는 줄바꿈)
+        textarea.addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // 사용자 입력에 따라 textarea 높이 자동 조절
+        textarea.addEventListener("input", () => {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + "px";
+        });
+    </script>
 </body>
 </html>
