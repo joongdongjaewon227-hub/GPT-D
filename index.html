@@ -1,613 +1,399 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPT-J Clone</title>
-    <style>
-        :root {
-            --bg: #1a1a1a;
-            --text: #e8eaed;
-            --text-secondary: #9aa0a6;
-            --input-bg: #282a2d;
-            --border: #3c4043;
-            --button-bg: #8ab4f8; /* 기존 버튼 색상 (미사용) */
-            --button-text: #1a1a1a; /* 기존 버튼 텍스트 색상 (미사용) */
-            --send-btn-bg: #3c4043; /* 회색 계열 전송/멈춤 버튼 배경 */
-            --send-btn-icon: #e8eaed; /* 전송/멈춤 버튼 아이콘 색상 */
-            --message-bg-user: #44474a; 
-            --message-bg-bot: #303134; 
-            --glow-color: rgba(138, 180, 248, 0.15); /* 은은한 글로우 색상 (밝은 파랑) */
-            --transition: 0.3s ease;
-        }
-        body.light {
-            --bg: #ffffff;
-            --text: #1f1f1f;
-            --text-secondary: #5f6368;
-            --input-bg: #f1f3f4;
-            --border: #dadce0;
-            --button-bg: #1a73e8;
-            --button-text: #ffffff;
-            --send-btn-bg: #dadce0;
-            --send-btn-icon: #1f1f1f;
-            --message-bg-user: #e8eaed;
-            --message-bg-bot: #f8f9fa;
-            --glow-color: rgba(26, 115, 232, 0.1); 
-        }
-        * {
-            box-sizing: border-box;
-            transition: background var(--transition), color var(--transition), border var(--transition), box-shadow var(--transition);
-        }
-        body {
-            margin: 0;
-            font-family: 'Google Sans', -apple-system, BlinkMacMacFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        /* === 네비게이션 바 === */
-        nav {
-            position: fixed; top: 0; left: 0; width: 100%; height: 64px;
-            background: var(--bg); border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 24px; z-index: 10; flex-wrap: nowrap; 
-        }
-        .logo { font-weight: 400; font-size: 22px; color: var(--text); flex-shrink: 0; }
-        .actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
-        .actions button {
-            border-radius: 24px; font-size: 14px; padding: 10px 16px; cursor: pointer; border: none; font-weight: 500;
-        }
-        @media (max-width: 768px) {
-            nav { padding: 0 12px; }
-            .logo { font-size: 20px; }
-            .actions button { font-size: 12px; padding: 8px 12px; }
-            .darkmode-toggle { width: 36px; height: 36px; }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPT-J Clone Refined</title>
+<style>
+:root {
+  --bg: #1a1a1a;
+  --text: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --input-bg: #2c2f33;
+  --border: #3c4043;
+  --button-bg: #8ab4f8;
+  --button-text: #1a1a1a;
+  --message-bg-user: #ffffff;
+  --message-text-user: #000000;
+  --message-bg-bot: #2e2e2e;
+  --bar-color: #8ab4f8;
+  --transition: 0.4s ease;
+}
 
-        /* === 메인 콘텐츠 및 환영 섹션 === */
-        main {
-            flex: 1; padding: 64px 16px 0; overflow-y: auto; scroll-behavior: smooth; display: flex;
-            flex-direction: column; align-items: center;
-        }
-        .welcome-section {
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            padding-top: 50px; min-height: calc(100vh - 240px); width: 100%; max-width: 768px;
-            padding-bottom: 150px; 
-        }
-        .welcome-section.hidden { display: none; }
-        #title { 
-            font-size: 48px; font-weight: 400; text-align: center; margin-bottom: 48px; color: var(--text); 
-            opacity: 0; transform: translateY(20px);
-            animation: slideInUp 0.8s ease-out forwards;
-        }
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* 모바일에서 H1 텍스트를 위쪽으로 올리기 */
-        @media (max-width: 600px) {
-            .welcome-section {
-                padding-top: 20px; /* 상단 여백 줄임 */
-                justify-content: flex-start; /* 중앙 정렬 대신 상단 정렬 */
-            }
-            #title {
-                font-size: 32px;
-                margin-bottom: 20px;
-            }
-        }
+body.light {
+  --bg: #ffffff;
+  --text: #1f1f1f;
+  --text-secondary: #5f6368;
+  --input-bg: #f1f3f4;
+  --border: #dadce0;
+  --button-bg: #1a73e8;
+  --button-text: #ffffff;
+  --message-bg-user: #333333;
+  --message-text-user: #ffffff;
+  --message-bg-bot: #e8eaed;
+  --bar-color: #1a73e8;
+}
 
-        /* === 카드 레이아웃 (2x2 모바일 최적화) === */
-        .suggestions {
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 12px; 
-            width: 100%; 
-            max-width: 600px; 
-            margin-bottom: 20px;
-        }
-        .suggestion-card {
-            background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; 
-            padding: 15px; cursor: pointer; text-align: center; 
-            transition: all 0.2s ease; font-size: 14px; color: var(--text);
-            display: flex; flex-direction: column; justify-content: center; min-height: 90px;
-            /* 카드에 글로우 효과 */
-            box-shadow: 0 0 5px var(--glow-color);
-        }
-        .suggestion-card:hover { 
-            background: var(--message-bg-user); 
-            box-shadow: 0 0 10px var(--glow-color); 
-        }
-        
-        @media (max-width: 600px) {
-            .suggestions {
-                padding: 0 10px;
-                max-width: 100%;
-                grid-template-columns: repeat(2, 1fr); 
-            }
-            .suggestion-card {
-                padding: 10px; 
-                font-size: 13px; 
-                min-height: 90px;
-            }
-        }
-        
-        /* === 메시징 영역 === */
-        .messages {
-            display: flex; flex-direction: column; width: 100%; max-width: 768px; padding: 24px 0;
-            margin-bottom: 120px; gap: 20px;
-            padding-top: 20px; 
-        }
+/* 공통 스타일 */
+* {
+  box-sizing: border-box;
+  transition: background var(--transition), color var(--transition), border var(--transition);
+}
 
-        /* 사용자 메시지 버블 */
-        .message.user {
-            background-color: var(--message-bg-user);
-            color: var(--text);
-            border-radius: 18px 18px 0 18px; 
-            padding: 8px 12px; 
-            max-width: 60%;
-            font-size: 14px; 
-            line-height: 1.4;
-            /* 버블에 글로우 효과 */
-            box-shadow: 0 0 5px var(--glow-color);
-        }
+body {
+  margin: 0;
+  font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-        /* 봇 메시지 버블 */
-        .message.bot {
-            background-color: var(--message-bg-bot);
-            border-radius: 18px; 
-            padding: 12px; 
-            width: auto; 
-            max-width: 80%; 
-            color: var(--text);
-            font-size: 15px; 
-            line-height: 1.5;
-            word-break: break-word;
-            opacity: 0; 
-            transform: scale(0.8); 
-            transform-origin: top left;
-            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.6, 0.4, 1.2); 
-            /* 버블에 글로우 효과 */
-            box-shadow: 0 0 5px var(--glow-color);
-        }
-        .message.bot.loaded {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        /* 타이핑 효과를 위한 커서 */
-        .typing-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em; 
-            background-color: var(--text);
-            margin-left: 2px;
-            animation: blink 0.7s infinite;
-        }
+/* 네비게이션 */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 58px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 20;
+}
 
-        /* 로딩 인디케이터 (점 3개, 버블 안에) */
-        .loading-indicator-bubble {
-            background-color: var(--message-bg-bot);
-            border-radius: 18px; 
-            padding: 10px 16px;
-            width: auto; 
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0.8;
-            transform: scale(0.9);
-            transform-origin: top left;
-             /* 로딩 버블에 글로우 효과 */
-            box-shadow: 0 0 8px var(--glow-color); 
-        }
-        .loading-indicator { display: flex; gap: 4px; margin-right: 5px; }
-        .loading-dot {
-            width: 8px; height: 8px; background: var(--text-secondary); border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        
-        /* === 입력창 스타일 === */
-        .input-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg); display: flex;
-            justify-content: center; padding: 8px 16px 20px; z-index: 20;
-        }
-        .input-wrapper {
-            display: flex; align-items: flex-end; width: 100%; max-width: 768px; background: var(--input-bg);
-            border-radius: 28px; border: 1px solid var(--border); padding: 8px 16px; gap: 12px;
-            /* 입력창 테두리에 글로우 효과 */
-            box-shadow: 0 0 8px var(--glow-color);
-        }
-        textarea {
-            flex: 1; border: none; background: transparent; color: var(--text); font-size: 16px;
-            resize: none; overflow-y: auto; min-height: 24px; max-height: 200px; line-height: 24px;
-            padding: 8px 0; outline: none; font-family: inherit;
-        }
-        .btn-group { display: flex; gap: 4px; margin-bottom: 4px; }
-        .btn {
-            border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; font-size: 18px;
-            /* 모던 버튼 스타일 */
-            background: var(--send-btn-bg);
-            color: var(--send-btn-icon);
-        }
-        /* 전송 버튼 (모던 화살표) */
-        .btn.send { 
-            font-size: 16px; 
-            padding-left: 2px; /* 화살표 중심 맞추기 */
-        }
-        /* 취소 버튼 (모던 정지) */
-        .btn.cancel {
-            font-size: 12px;
-        }
-        
-        /* === 모달 스타일 === */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 100;
-        }
-        .modal-content {
-            background: var(--bg); padding: 30px; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); width: 90%; max-width: 400px;
-            animation: fadeInModal 0.3s ease-out; border: 1px solid var(--border);
-        }
-        .modal-content h2 { margin-top: 0; font-size: 24px; color: var(--text); text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
-        .modal-content input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text); font-size: 16px; }
-        .modal-content button { width: 100%; padding: 12px; background: var(--button-bg); color: var(--button-text); border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: 500; }
-        
-        /* 불필요한 요소 제거 */
-        .chat-ui-header, #plusBtn, #micBtn, .tool-icon, .version-controls, .bot-actions { display: none !important; }
-    </style>
+nav .logo {
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+}
+
+#darkBtn {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+#darkBtn:hover {
+  background: var(--input-bg);
+}
+
+/* 메인 */
+main {
+  flex: 1;
+  padding: 58px 12px 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 환영 텍스트 */
+.welcome-section {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: all 0.8s ease;
+}
+.welcome-text {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #2979ff, #81d4fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientFlow 4s ease infinite alternate;
+  transition: all 0.8s ease;
+}
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* 환영 텍스트가 왼쪽 상단으로 이동 */
+.welcome-small {
+  position: fixed;
+  top: 60px;
+  left: 16px;
+  font-size: 16px !important;
+  opacity: 0.6;
+  z-index: 10;
+  text-align: left;
+}
+
+/* 메시지 영역 */
+.messages {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  max-width: 768px;
+  padding: 12px 0;
+  margin-bottom: 100px;
+  gap: 16px;
+}
+
+/* 사용자 메시지 */
+.message-row.user-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 12px;
+}
+.message-row.bot-row {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 12px;
+}
+
+/* 버블 둥글게 (4개 다) */
+.message {
+  border-radius: 20px;
+  padding: 12px 16px;
+  max-width: 70%;
+  font-size: 15px;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  word-break: break-word;
+}
+
+.message.user {
+  background-color: var(--message-bg-user);
+  color: var(--message-text-user);
+}
+
+.message.bot {
+  background-color: var(--message-bg-bot);
+  color: var(--text);
+  opacity: 0;
+  transform: scale(0.9);
+  transform-origin: top left;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.message.bot.loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 로딩 인디케이터 */
+.loading-indicator-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-left: 16px;
+}
+.loading-indicator-bubble {
+  width: 120px;
+  height: 8px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.loading-bar {
+  position: absolute;
+  height: 100%;
+  width: 40%;
+  background: var(--bar-color);
+  animation: moveBar 1.3s infinite linear;
+}
+@keyframes moveBar {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+/* 입력 영역 */
+.input-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  padding: 6px 16px 16px;
+  z-index: 20;
+}
+.input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 768px;
+  background: var(--input-bg);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  gap: 10px;
+}
+textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  resize: none;
+  overflow-y: auto;
+  min-height: 24px;
+  max-height: 200px;
+  padding: 8px 0;
+  outline: none;
+  font-family: inherit;
+}
+.btn.send {
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+.btn.cancel {
+  display: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+</style>
 </head>
+
 <body>
-    <div class="modal-overlay" id="nameModal">
-        <div class="modal-content">
-            <h2>환영합니다!</h2>
-            <p style="color:var(--text-secondary); text-align:center; margin-bottom: 20px;">대화를 시작하기 위해 이름을 입력해주세요.</p>
-            <input type="text" id="nameInput" placeholder="이름을 입력하세요" maxlength="15">
-            <button id="saveNameBtn">시작하기</button>
-        </div>
+  <nav>
+    <div class="logo">GPT-J</div>
+    <button id="darkBtn">다크모드</button>
+  </nav>
+
+  <main id="main">
+    <div class="welcome-section" id="welcome">
+      <div class="welcome-text" id="welcomeText">안녕하세요, 반갑습니다!</div>
     </div>
+    <div class="messages" id="messages"></div>
+  </main>
 
-    <nav>
-        <div class="logo">GPT-J</div>
-        <div class="actions">
-            <button class="login">로그인</button>
-            <button class="signup">무료로 회원 가입</button>
-            <button class="darkmode-toggle" id="darkBtn">☀️</button>
-        </div>
-    </nav>
-    <main id="main">
-        <div class="messages" id="messages">
-            </div>
-        <div class="welcome-section" id="welcomeSection">
-            <h1 id="title">안녕하세요, 사용자님</h1>
-            <div class="suggestions">
-                <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
-                <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
-                <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
-                <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
-            </div>
-        </div>
-    </main>
-    <div class="input-bar" id="inputBar">
-        <div class="input-wrapper">
-            <textarea id="userInput" placeholder="GPT-J에게 물어보기" rows="1"></textarea>
-            <div class="btn-group">
-                <button class="btn send" id="sendBtn">▶</button>
-                <button class="btn cancel" id="cancelBtn" style="display:none;">◼</button>
-            </div>
-        </div>
+  <div class="input-bar" id="inputBar">
+    <div class="input-wrapper">
+      <textarea id="userInput" placeholder="메시지를 입력하세요" rows="1"></textarea>
+      <button class="btn send" id="sendBtn">➤</button>
+      <button class="btn cancel" id="cancelBtn">❌</button>
     </div>
-    <script>
-        const darkBtn = document.getElementById("darkBtn");
-        const messages = document.getElementById("messages");
-        const textarea = document.getElementById("userInput");
-        const sendBtn = document.getElementById("sendBtn");
-        const cancelBtn = document.getElementById("cancelBtn");
-        const cards = document.querySelectorAll(".suggestion-card");
-        const body = document.body;
-        const welcomeSection = document.getElementById("welcomeSection");
-        const mainContent = document.getElementById("main");
-        const titleElement = document.getElementById("title");
-        
-        // 모달 관련 요소
-        const nameModal = document.getElementById("nameModal");
-        const nameInput = document.getElementById("nameInput");
-        const saveNameBtn = document.getElementById("saveNameBtn");
+  </div>
 
-        const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
-        
-        let conversationHistory = [];
-        let isBotThinking = false;
-        let abortController = null;
-        let messageCounter = 0; 
-        let typingInterval = null;
+<script>
+const darkBtn = document.getElementById("darkBtn");
+const body = document.body;
+const welcome = document.getElementById("welcome");
+const welcomeText = document.getElementById("welcomeText");
+const messages = document.getElementById("messages");
+const textarea = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const cancelBtn = document.getElementById("cancelBtn");
 
-        // === 이름 입력 모달 로직 ===
-        function initializeName() {
-            const userName = localStorage.getItem('gptj_user_name');
-            if (userName) {
-                titleElement.textContent = `안녕하세요, ${userName}님`;
-                nameModal.style.display = 'none';
-            } else {
-                titleElement.textContent = `안녕하세요, 반갑습니다!`;
-                nameModal.style.display = 'flex';
-                nameInput.focus();
-            }
-        }
+const BACKEND_URL = "https://jaewons0227.pythonanywhere.com/ask";
+let abortController = null;
+let isBotThinking = false;
 
-        saveNameBtn.addEventListener('click', () => {
-            let name = nameInput.value.trim();
-            if (name) {
-                if (name.endsWith('님')) {
-                    name = name.slice(0, -1);
-                }
-                localStorage.setItem('gptj_user_name', name);
-                titleElement.textContent = `안녕하세요, ${name}님`;
-                nameModal.style.display = 'none';
-            } else {
-                alert("이름을 입력해주세요.");
-            }
-        });
-        
-        nameInput.addEventListener('keydown', (e) => {
-            if (e.key === "Enter") {
-                saveNameBtn.click();
-            }
-        });
+darkBtn.addEventListener("click", () => {
+  body.classList.toggle("light");
+  darkBtn.textContent = body.classList.contains("light") ? "화이트모드" : "다크모드";
+});
 
-        // 다크모드 토글
-        darkBtn.addEventListener("click", () => {
-            body.classList.toggle("light");
-            darkBtn.textContent = body.classList.contains("light") ? "🌙" : "☀️";
-        });
+function renderMarkdown(text) {
+  text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  text = text.replace(/`([^`]+)`/g, "<code>$1</code>");
+  text = text.replace(/\n/g, "<br>");
+  return text;
+}
 
-        // 카드 클릭 시 텍스트 복사 후 전송
-        cards.forEach(card => {
-            card.addEventListener("click", () => {
-                textarea.value = card.dataset.prompt;
-                sendMessage();
-            });
-        });
+function moveWelcomeUp() {
+  welcomeText.classList.add("welcome-small");
+  welcome.style.justifyContent = "flex-start";
+}
 
-        // 마크다운 렌더링 함수
-        function renderMarkdown(text) {
-            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-            text = text.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-            text = text.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-            text = text.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-            text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-            text = text.replace(/```(\w+)?\n([\s\S]+?)```/g, function(match, lang, code) {
-                // 코드 블록 내부의 <br>을 \n으로 다시 변환
-                return '<pre><code>' + code.replace(/<br>/g, '\n') + '</code></pre>';
-            });
-            text = text.replace(/\n/g, '<br>'); // 일반 줄바꿈은 <br>로 유지
-            return text;
-        }
+function addMessage(role, text) {
+  if (!welcomeText.classList.contains("welcome-small")) moveWelcomeUp();
+  messages.style.display = "flex";
 
-        // === 타이핑 애니메이션 함수 ===
-        function startTyping(element, fullText, callback) {
-            let index = 0;
-            const textContainer = element;
-            textContainer.innerHTML = `<span class="typing-cursor"></span>`;
-            
-            clearInterval(typingInterval); 
-            
-            typingInterval = setInterval(() => {
-                if (index < fullText.length) {
-                    textContainer.textContent = textContainer.textContent.replace(/\s*$/, ''); // 커서 제거
-                    textContainer.textContent += fullText.charAt(index);
-                    textContainer.innerHTML += `<span class="typing-cursor"></span>`; // 커서 추가
-                    index++;
-                    mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
-                } else {
-                    clearInterval(typingInterval);
-                    textContainer.querySelector('.typing-cursor')?.remove(); 
-                    if (callback) callback();
-                }
-            }, 30); // 타이핑 속도 (30ms)
-        }
-        
-        // 메시지 추가/렌더링 함수
-        function addMessage(role, text, messageId, isTyping = false) {
-            const row = document.createElement("div");
-            row.className = `message-row ${role}-row`;
-            row.dataset.id = messageId;
+  const row = document.createElement("div");
+  row.className = `message-row ${role}-row`;
+  const msg = document.createElement("div");
+  msg.className = `message ${role}`;
+  msg.innerHTML = renderMarkdown(text);
+  row.appendChild(msg);
+  messages.appendChild(row);
+  setTimeout(() => { if (role === "bot") msg.classList.add("loaded"); }, 10);
+  messages.scrollTo({ top: messages.scrollHeight, behavior: "smooth" });
+}
 
-            const msg = document.createElement("div");
-            msg.className = `message ${role}`;
+function addLoadingIndicator() {
+  const row = document.createElement("div");
+  row.className = "loading-indicator-row";
+  const bubble = document.createElement("div");
+  bubble.className = "loading-indicator-bubble";
+  const bar = document.createElement("div");
+  bar.className = "loading-bar";
+  bubble.appendChild(bar);
+  row.appendChild(bubble);
+  messages.appendChild(row);
+  messages.scrollTo({ top: messages.scrollHeight, behavior: "smooth" });
+  return row;
+}
 
-            if (role === 'user') {
-                msg.innerHTML = `<span>${text}</span>`;
-            } else { // bot
-                const contentWrapper = document.createElement("div");
-                contentWrapper.className = "bot-content-wrapper";
-                
-                const icon = document.createElement("span");
-                icon.className = "bot-icon";
-                icon.textContent = "✨";
-                
-                const botText = document.createElement("div");
-                botText.className = "bot-text";
-                
-                contentWrapper.appendChild(icon);
-                contentWrapper.appendChild(botText);
-                msg.appendChild(contentWrapper);
+function setThinkingState(thinking) {
+  isBotThinking = thinking;
+  sendBtn.style.display = thinking ? "none" : "inline-block";
+  cancelBtn.style.display = thinking ? "inline-block" : "none";
+  textarea.disabled = thinking;
+}
 
-                row.appendChild(msg);
-                messages.appendChild(row);
+async function sendMessage() {
+  const text = textarea.value.trim();
+  if (!text || isBotThinking) return;
+  textarea.value = "";
+  addMessage("user", text);
+  const loader = addLoadingIndicator();
+  setThinkingState(true);
+  abortController = new AbortController();
 
-                if (isTyping) {
-                    // 타이핑에 적합하도록 마크다운 요소를 제거/정제하여 사용
-                    const cleanText = text.replace(/\*\*/g, '').replace(/###/g, '').replace(/##/g, '').replace(/#/g, '').replace(/`/g, '').replace(/<br>/g, '\n'); 
-                    
-                    startTyping(botText, cleanText, () => {
-                        // 타이핑 완료 후 실제 마크다운 렌더링
-                        botText.innerHTML = renderMarkdown(text);
-                    });
-                } else {
-                    botText.innerHTML = renderMarkdown(text);
-                }
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+      signal: abortController.signal,
+    });
+    const data = await res.json();
+    loader.remove();
+    addMessage("bot", data.reply);
+  } catch (err) {
+    loader.remove();
+    if (err.name !== "AbortError") addMessage("bot", "⚠️ 오류가 발생했습니다.");
+  } finally {
+    setThinkingState(false);
+    abortController = null;
+  }
+}
 
-                setTimeout(() => {
-                    msg.classList.add('loaded');
-                }, 10); 
-            }
-
-            if (role === 'user') {
-                 row.appendChild(msg);
-                 messages.appendChild(row);
-            }
-
-            if (welcomeSection.style.display !== 'none' && role === 'user') {
-                welcomeSection.classList.add('hidden');
-                welcomeSection.style.display = 'none';
-                messages.style.paddingTop = '20px'; 
-            }
-
-            mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
-            return row;
-        }
-
-        // 로딩 인디케이터 (점 3개, 버블 안에) 추가 함수
-        function addLoadingIndicator() {
-            const row = document.createElement("div");
-            row.className = "loading-indicator-row";
-            row.dataset.id = 'loading';
-
-            const bubble = document.createElement("div");
-            bubble.className = "loading-indicator-bubble message bot"; 
-            
-            const contentWrapper = document.createElement("div");
-            contentWrapper.className = "bot-content-wrapper";
-
-            const icon = document.createElement("span");
-            icon.className = "bot-icon";
-            icon.textContent = "✨";
-
-            const loadingIndicator = document.createElement("div");
-            loadingIndicator.className = "loading-indicator";
-            loadingIndicator.innerHTML = '<div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>';
-
-            contentWrapper.appendChild(icon);
-            contentWrapper.appendChild(loadingIndicator);
-            bubble.appendChild(contentWrapper);
-            row.appendChild(bubble);
-
-            messages.appendChild(row);
-            mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
-            return row;
-        }
-
-        // UI 상태 관리 함수 (전송/취소 버튼)
-        function setThinkingState(isThinking) {
-            isBotThinking = isThinking;
-            if (isThinking) {
-                sendBtn.style.display = 'none';
-                cancelBtn.style.display = 'flex';
-                textarea.disabled = true;
-            } else {
-                sendBtn.style.display = 'flex';
-                cancelBtn.style.display = 'none';
-                textarea.disabled = false;
-            }
-        }
-
-        async function sendMessage() {
-            const text = textarea.value.trim();
-            if (!text || isBotThinking) return;
-
-            welcomeSection.classList.add('hidden');
-            welcomeSection.style.display = 'none';
-
-            textarea.value = "";
-            textarea.style.height = "auto";
-            
-            messageCounter++;
-            const currentMessageId = messageCounter;
-
-            const userHistoryItem = { role: 'user', content: text, id: currentMessageId };
-            conversationHistory.push(userHistoryItem);
-            addMessage("user", text, currentMessageId);
-            
-            const loadingWrapper = addLoadingIndicator();
-            setThinkingState(true);
-            abortController = new AbortController();
-
-            try {
-                const res = await fetch(BACKEND_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: text }),
-                    signal: abortController.signal
-                });
-                
-                const data = await res.json();
-                
-                loadingWrapper.remove();
-                
-                messageCounter++;
-                const botMessageId = messageCounter;
-                
-                const botHistoryItem = { 
-                    role: 'bot', 
-                    content: data.reply, 
-                    id: botMessageId
-                };
-                conversationHistory.push(botHistoryItem);
-                
-                addMessage("bot", data.reply, botMessageId, true); 
-                
-            } catch (e) {
-                loadingWrapper.remove();
-                clearInterval(typingInterval);
-                if (e.name === 'AbortError') {
-                    conversationHistory = conversationHistory.filter(item => item.id !== currentMessageId);
-                    const userMessageRow = messages.querySelector(`.message-row[data-id="${currentMessageId}"]`);
-                    if (userMessageRow) userMessageRow.remove();
-                } else {
-                    console.error(e);
-                    
-                    messageCounter++;
-                    const botMessageId = messageCounter;
-                    const errorMessage = "⚠️ 응답을 가져오는 중 오류가 발생했습니다.";
-                    conversationHistory.push({ role: 'bot', content: errorMessage, id: botMessageId });
-                    addMessage("bot", errorMessage, botMessageId);
-                }
-            } finally {
-                setThinkingState(false);
-                abortController = null;
-                mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
-            }
-        }
-
-        // 취소 버튼 이벤트 리스너
-        cancelBtn.addEventListener("click", () => {
-            if (abortController) {
-                abortController.abort();
-            }
-        });
-
-        sendBtn.addEventListener("click", sendMessage);
-        textarea.addEventListener("keydown", e => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        textarea.addEventListener("input", () => {
-            textarea.style.height = "auto";
-            textarea.style.height = textarea.scrollHeight + "px";
-        });
-        
-        window.addEventListener('load', initializeName);
-    </script>
+sendBtn.addEventListener("click", sendMessage);
+cancelBtn.addEventListener("click", () => abortController && abortController.abort());
+textarea.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+</script>
 </body>
 </html>
