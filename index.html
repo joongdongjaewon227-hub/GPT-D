@@ -1,321 +1,214 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Minsu GPT (Gemini API Test - 최종 디버그)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minsu GPT</title>
+<style>
+/* ... (CSS 코드 생략) ... */
+:root {
+  --bg: #ffffff;
+  --text: #111;
+  --input-bg: #f7f7f8;
+  --border: #dcdcdc;
+  --border-strong: #b0b0b0;
+  --button-bg: #000;
+  --button-text: #fff;
+  --menu-bg: rgba(255,255,255,0.95);
+  --menu-text: #444;
+  --transition: 0.3s ease;
+}
+body.dark {
+  --bg: #0d0d0d;
+  --text: #e4e4e4;
+  --input-bg: #1a1a1a;
+  --border: #2a2a2a;
+  --border-strong: #555;
+  --button-bg: #fff;
+  --button-text: #000;
+  --menu-bg: rgba(30,30,30,0.9);
+  --menu-text: #ccc;
+}
+* { box-sizing: border-box; transition: background var(--transition), color var(--transition), border var(--transition); }
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+nav { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.2rem; z-index: 10; }
+.logo { font-weight: 600; font-size: 1.05rem; }
+.actions { display: flex; gap: 10px; align-items: center; }
+.actions button { border-radius: 20px; font-size: 0.9rem; padding: 0.4rem 1rem; cursor: pointer; }
+.login { background: var(--button-bg); color: var(--button-text); border: none; }
+.signup { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.darkmode-toggle { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
+main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smooth; display: flex; flex-direction: column; align-items: center; }
+#title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-top: 12rem; transition: opacity 0.5s ease; }
+.suggestions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 3rem;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.suggestion-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease; }
+.suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
+.message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; font-size: 1rem; }
+.message.user { background: var(--button-bg); color: var(--button-text); align-self: flex-end; font-weight: bold; }
+.message.bot { background: var(--input-bg); border: 1px solid var(--border); align-self: flex-start; font-size: 1rem; }
+.message.bot code { background: #eee; padding: 2px 4px; border-radius: 4px; display: block; white-space: pre-wrap; font-family: monospace; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.input-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, var(--bg) 90%, transparent); display: flex; justify-content: center; padding: 0.6rem 1rem 1rem; z-index: 20; }
+.input-wrapper { display: flex; align-items: flex-end; width: 100%; max-width: 700px; background: var(--input-bg); border-radius: 22px; border: 1.5px solid var(--border-strong); padding: 0.4rem 0.6rem; gap: 0.4rem; }
+textarea { flex: 1; border: none; background: transparent; color: var(--text); font-size: 1rem; resize: none; overflow-y: auto; min-height: 1.4rem; max-height: 200px; line-height: 1.4rem; padding: 6px 0; outline: none; white-space: pre-wrap; }
+.btn { border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--button-bg); color: var(--button-text); }
+.loading-bar { width: 100%; height: 4px; background: var(--border); overflow: hidden; border-radius: 4px; margin-top: 6px; position: relative; }
+.loading-bar::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--button-bg); animation: barMove 1s linear infinite; }
+@keyframes barMove { 0% { left: -40%; } 100% { left: 100%; } }
 
-    <script src="https://unpkg.com/@google/genai@latest/dist/index.umd.js"></script>
-
-    <style>
-        /* ... (기존 스타일 코드) ... */
-        :root {
-            --bg: #ffffff;
-            --text: #111;
-            --input-bg: #f7f7f8;
-            --border: #dcdcdc;
-            --border-strong: #b0b0b0;
-            --button-bg: #000;
-            --button-text: #fff;
-            --menu-bg: rgba(255,255,255,0.95);
-            --menu-text: #444;
-            --transition: 0.3s ease;
-        }
-        body.dark {
-            --bg: #0d0d0d;
-            --text: #e4e4e4;
-            --input-bg: #1a1a1a;
-            --border: #2a2a2a;
-            --border-strong: #555;
-            --button-bg: #fff;
-            --button-text: #000;
-            --menu-bg: rgba(30,30,30,0.9);
-            --menu-text: #ccc;
-        }
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            transition: background var(--transition), color var(--transition), border var(--transition);
-        }
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.6rem 1.2rem;
-            z-index: 10;
-        }
-        .logo { font-weight: 600; font-size: 1.05rem; }
-        .actions { display: flex; gap: 10px; align-items: center; }
-        .actions button { border-radius: 20px; font-size: 0.9rem; padding: 0.4rem 1rem; cursor: pointer; }
-        @media (max-width: 600px) {
-            main { padding-bottom: 140px !important; }
-            .actions button { font-size: 0.8rem; padding: 0.35rem 0.8rem; }
-        }
-        .login { background: var(--button-bg); color: var(--button-text); border: none; }
-        .signup { background: transparent; border: 1px solid var(--border); color: var(--text); }
-        .darkmode-toggle { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
-        main {
-            flex: 1;
-            padding: 60px 1rem 120px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-top: 12rem; transition: opacity 0.5s ease; }
-        main.chatting #title { opacity: 0; pointer-events: none; }
-        .suggestions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 0.8rem;
-            width: 100%;
-            max-width: 700px;
-            margin-top: 3rem;
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-        main.chatting .suggestions { opacity: 0; transform: translateY(20px); pointer-events: none; }
-        .suggestion-card {
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 1rem;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s ease;
-        }
-        .suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
-        .message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; }
-        .message.user { background: var(--button-bg); color: var(--button-text); align-self: flex-end; }
-        .message.bot { background: var(--input-bg); border: 1px solid var(--border); align-self: flex-start; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .input-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(to top, var(--bg) 90%, transparent);
-            display: flex;
-            justify-content: center;
-            padding: 0.6rem 1rem 1rem;
-            z-index: 20;
-        }
-        .input-wrapper {
-            display: flex;
-            align-items: flex-end;
-            width: 100%;
-            max-width: 700px;
-            background: var(--input-bg);
-            border-radius: 22px;
-            border: 1.5px solid var(--border-strong);
-            padding: 0.4rem 0.6rem;
-            gap: 0.4rem;
-        }
-        textarea {
-            flex: 1;
-            border: none;
-            background: transparent;
-            color: var(--text);
-            font-size: 1rem;
-            resize: none;
-            overflow-y: auto;
-            min-height: 1.4rem;
-            max-height: 200px;
-            line-height: 1.4rem;
-            padding: 6px 0;
-            outline: none;
-            white-space: pre-wrap;
-        }
-        .btn { border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--button-bg); color: var(--button-text); }
-        .loading-bar { width: 100%; height: 4px; background: var(--border); overflow: hidden; border-radius: 4px; margin-top: 6px; position: relative; }
-        .loading-bar::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--button-bg); animation: barMove 1s linear infinite; }
-        @keyframes barMove { 0% { left: -40%; } 100% { left: 100%; } }
-    </style>
+/* 모바일 대응 */
+@media(max-width:700px){
+  .suggestions { grid-template-columns: repeat(2, 1fr); }
+  .message { font-size: 1.1rem; }
+}
+</style>
 </head>
 <body>
-    <nav>
-        <div class="logo">Minsu GPT</div>
-        <div class="actions">
-            <button class="login" id="loginBtn">로그인</button>
-            <button class="signup" id="signupBtn">무료로 회원 가입</button>
-            <button class="darkmode-toggle" id="darkBtn">🌙</button>
-        </div>
-    </nav>
-    <main id="main">
-        <h1 id="title">어디서부터 시작할까요?</h1>
-        <div class="suggestions" id="suggestions">
-            <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
-            <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
-            <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
-            <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
-        </div>
-        <div class="messages" id="messages"></div>
-    </main>
-    <div class="input-bar">
-        <div class="input-wrapper">
-            <button class="btn" id="plusBtn">＋</button>
-            <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
-            <button class="btn" id="sendBtn">➤</button>
-        </div>
-    </div>
-    
-    <script>
-        // ---------------------- Gemini API 설정 ----------------------
-        const API_KEY = "AIzaSyBv3qLaGWZm9IJAvEEwri3mrM51MqhR8r0"; 
-        
-        const { GoogleGenAI } = window.googleGenai || {};
-        let ai = null; // ai 객체를 let으로 선언하고 초기화 여부를 확인합니다.
-        const modelName = "gemini-2.5-flash"; 
+<nav>
+  <div class="logo">Minsu GPT</div>
+  <div class="actions">
+    <button class="login">로그인</button>
+    <button class="signup">무료로 회원 가입</button>
+    <button class="darkmode-toggle" id="darkBtn">🌙</button>
+  </div>
+</nav>
+<main id="main">
+  <h1 id="title">어디서부터 시작할까요?</h1>
+  <div class="suggestions">
+    <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
+    <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
+    <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
+    <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
+  </div>
+  <div class="messages" id="messages"></div>
+</main>
+<div class="input-bar">
+  <div class="input-wrapper">
+    <button class="btn" id="plusBtn">＋</button>
+    <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+    <button class="btn" id="sendBtn">➤</button>
+  </div>
+</div>
 
-        if (GoogleGenAI) {
-            try {
-                // SDK 초기화 시도
-                ai = new GoogleGenAI({ apiKey: API_KEY });
-            } catch (e) {
-                // 초기화 오류가 나도 스크립트 실행은 계속됩니다.
-                alert("Gemini SDK 초기화 오류: API 키가 잘못되었을 수 있습니다. 다크 모드만 작동합니다.");
-                console.error("SDK 초기화 실패:", e);
-            }
-        } else {
-             alert("Gemini SDK를 로드하지 못했습니다. 네트워크 연결을 확인하세요.");
-        }
-        
-        // ---------------------- DOM 및 UI 로직 ----------------------
-        const main = document.getElementById("main");
-        const messages = document.getElementById("messages");
-        const textarea = document.getElementById("userInput");
-        const sendBtn = document.getElementById("sendBtn");
-        const darkBtn = document.getElementById("darkBtn");
-        const cards = document.querySelectorAll(".suggestion-card");
-        const body = document.body;
-        let isLoading = false, loadingMsg = null;
+<script>
+const darkBtn = document.getElementById("darkBtn");
+const messages = document.getElementById("messages");
+const textarea = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendBtn");
+const cards = document.querySelectorAll(".suggestion-card");
+const body = document.body;
+let loadingMsg = null;
 
-        // 다크 모드 토글 (이제 SDK 초기화 실패와 관계없이 작동해야 합니다.)
-        darkBtn.addEventListener("click", () => {
-            body.classList.toggle("dark");
-            darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
-        });
+// 🌟🌟🌟🌟🌟 당신의 PythonAnywhere 백엔드 주소입니다! 🌟🌟🌟🌟🌟
+const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
+// 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟
 
-        // 추천 카드 클릭 이벤트
-        cards.forEach(card => {
-            card.addEventListener("click", () => {
-                const prompt = card.dataset.prompt;
-                textarea.value = prompt;
-                sendMessage();
-            });
-        });
+// 다크모드 토글
+darkBtn.addEventListener("click", () => {
+  body.classList.toggle("dark");
+  darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
+});
 
-        function startChat() { main.classList.add("chatting"); }
-        
-        // ... (나머지 UI 함수는 생략, 이전 코드와 동일) ...
-        function addMessage(role, text) {
-            const msg = document.createElement("div");
-            msg.className = `message ${role}`;
-            msg.textContent = text;
-            messages.appendChild(msg);
-            main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
-        }
+// 카드 클릭
+cards.forEach(card => {
+  card.addEventListener("click", () => {
+    textarea.value = card.dataset.prompt;
+    sendMessage();
+  });
+});
 
-        function addLoadingBubble() {
-            const msg = document.createElement("div");
-            msg.className = "message bot bot-loading";
-            msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
-            messages.appendChild(msg);
-            main.scrollTo({ top: main.scrollHeight, behavior: "smooth" });
-            loadingMsg = msg;
-        }
+function addMessage(role, text, isCode=false) {
+  const msg = document.createElement("div");
+  msg.className = `message ${role}`;
+  if(isCode){
+    const codeBlock = document.createElement("code");
+    codeBlock.textContent = text;
+    msg.appendChild(codeBlock);
+  } else {
+    msg.textContent = text;
+  }
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+}
 
-        function replaceLoadingBubble(text) {
-            if (loadingMsg) {
-                loadingMsg.textContent = text; 
-                loadingMsg.classList.remove("bot-loading");
-                loadingMsg = null;
-            }
-        }
+// 타이핑 효과
+async function typeText(container, text, delay=20){
+  container.textContent = "";
+  for(let char of text){
+    container.textContent += char;
+    messages.scrollTop = messages.scrollHeight;
+    await new Promise(r=>setTimeout(r, delay));
+  }
+}
 
+function addLoadingBubble(){
+  const msg = document.createElement("div");
+  msg.className = "message bot bot-loading";
+  msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+  loadingMsg = msg;
+}
 
-        // ---------------- AI 응답 처리 (Gemini API 사용) ----------------
-        async function sendMessage() {
-            const text = textarea.value.trim();
-            if (!text || isLoading) return; 
+function replaceLoadingBubble(text){
+  if(loadingMsg){
+    loadingMsg.classList.remove("bot-loading");
+    loadingMsg.textContent = "";
+    messages.scrollTop = messages.scrollHeight;
+    // 코드 블록 처리
+    if(text.startsWith("```") && text.endsWith("```")){
+      const codeText = text.slice(3,-3);
+      const codeEl = document.createElement("code");
+      codeEl.textContent = codeText;
+      loadingMsg.appendChild(codeEl);
+    } else {
+      typeText(loadingMsg, text, 15);
+    }
+    loadingMsg = null;
+  }
+}
 
-            // 1. API 키 및 SDK 초기화 여부 확인 (디버깅)
-            if (!ai) {
-                alert("오류: AI 기능이 비활성화되었습니다. API 키 설정을 확인하세요.");
-                return;
-            }
-            if (API_KEY === "YOUR_GEMINI_API_KEY") {
-                alert("오류: API 키를 'YOUR_GEMINI_API_KEY'에서 실제 키로 교체해야 합니다.");
-                return;
-            }
+// 메시지 전송
+async function sendMessage(){
+  const text = textarea.value.trim();
+  if(!text) return;
+  textarea.value="";
+  addMessage("user", text, false);
+  addLoadingBubble();
+  try{
+    const res = await fetch(BACKEND_URL, { // 👈 수정된 부분: 절대 경로인 BACKEND_URL 사용
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({message:text})
+    });
+    const data = await res.json();
+    replaceLoadingBubble(data.reply);
+  } catch(e){
+    replaceLoadingBubble("⚠️ 오류가 발생했습니다.");
+  }
+}
 
-            // 2. UI 업데이트
-            textarea.value = "";
-            textarea.style.height = "auto";
-            startChat();
-            addMessage("user", text);
-            addLoadingBubble();
-            isLoading = true;
+sendBtn.addEventListener("click", sendMessage);
+textarea.addEventListener("keydown", e=>{
+  if(e.key==="Enter" && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+});
 
-            try {
-                // 3. Gemini API 호출
-                const response = await ai.models.generateContent({
-                    model: modelName,
-                    contents: [{ 
-                        role: "user", 
-                        parts: [{ text: text }] 
-                    }],
-                    config: {
-                        maxOutputTokens: 500
-                    }
-                });
-                
-                // 4. 응답 결과 처리
-                const aiText = response.text || "응답을 가져오지 못했습니다.";
-                replaceLoadingBubble(aiText);
-
-            } catch (err) {
-                // 5. 오류 처리 및 모바일 알림 (디버깅)
-                alert(`🚨 API 호출 오류 발생: ${err.message}. (키 문제, 네트워크, 또는 CORS 문제일 수 있습니다.)`);
-                replaceLoadingBubble(`오류가 발생했습니다: ${err.message}`);
-                console.error("Gemini API 호출 오류:", err);
-            } finally {
-                isLoading = false;
-            }
-        }
-
-        // ---------------- 이벤트 리스너 ----------------
-        sendBtn.onclick = sendMessage;
-        textarea.addEventListener("keydown", e => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
-        textarea.addEventListener("input", () => {
-            textarea.style.height = "auto";
-            textarea.style.height = textarea.scrollHeight + "px";
-        });
-    </script>
+textarea.addEventListener("input", ()=>{
+  textarea.style.height="auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+});
+</script>
 </body>
 </html>
-
