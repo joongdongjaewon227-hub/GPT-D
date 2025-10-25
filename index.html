@@ -16,7 +16,7 @@
             --message-bg-user: #44474a; 
             --message-bg-bot: #303134; 
             --transition: 0.3s ease;
-            --bar-color: #8ab4f8; /* 로딩 바 색상 */
+            --bar-color: #8ab4f8;
         }
         body.light {
             --bg: #ffffff;
@@ -59,7 +59,7 @@
             align-items: center;
             padding: 0 24px;
             z-index: 10;
-            flex-wrap: nowrap; /* 모바일에서 줄바꿈 방지 */
+            flex-wrap: nowrap; 
         }
         .logo { font-weight: 400; font-size: 22px; color: var(--text); flex-shrink: 0; }
         .actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
@@ -78,8 +78,8 @@
             nav { padding: 0 12px; }
             .logo { font-size: 20px; }
             .actions button {
-                font-size: 12px; /* 글씨 크기 줄임 */
-                padding: 8px 12px; /* 패딩 줄임 */
+                font-size: 12px; 
+                padding: 8px 12px; 
             }
             .darkmode-toggle { width: 36px; height: 36px; }
         }
@@ -96,7 +96,7 @@
         .welcome-section.hidden { display: none; }
         #title { 
             font-size: 48px; font-weight: 400; text-align: center; margin-bottom: 48px; color: var(--text); 
-            opacity: 0; /* 초기 애니메이션을 위해 숨김 */
+            opacity: 0; 
             transform: translateY(20px);
             animation: slideInUp 0.8s ease-out forwards;
         }
@@ -104,22 +104,47 @@
             from { opacity: 0; transform: translateY(50px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        /* === 카드 레이아웃 === */
         .suggestions {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 600px; margin-bottom: 20px;
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-bottom: 20px;
         }
         .suggestion-card {
             background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
             cursor: pointer; text-align: left; transition: all 0.2s ease; font-size: 14px; color: var(--text);
+            display: flex; /* 내용 정렬 */
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100px;
         }
         .suggestion-card:hover { background: var(--message-bg-user); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        
+        /* 모바일 카드 최적화 (1열 배치) */
+        @media (max-width: 600px) {
+            .suggestions {
+                grid-template-columns: 1fr; /* 1열 배치 */
+                gap: 10px;
+                padding: 0 10px;
+                max-width: 100%;
+            }
+            .suggestion-card {
+                padding: 15px;
+                font-size: 16px;
+                text-align: center;
+            }
+        }
         
         /* === 메시징 영역 === */
         .messages {
             display: flex; flex-direction: column; width: 100%; max-width: 768px; padding: 24px 0;
-            margin-bottom: 120px; gap: 20px; padding-top: 0;
+            margin-bottom: 120px; gap: 20px;
+            padding-top: 20px; /* 첫 메시지 입력 시 상단 여백 추가 */
         }
-
-        /* 메시지 wrapper */
         .message-row {
             display: flex; width: 100%; padding: 0 16px; animation: fadeIn 0.3s ease forwards;
             position: relative; 
@@ -138,9 +163,8 @@
             line-height: 1.5;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        .message.user > span { word-break: break-word; }
 
-        /* 봇 메시지 버블 (4개 모서리 모두 둥글게, 애니메이션 추가) */
+        /* 봇 메시지 버블 */
         .message.bot {
             background-color: var(--message-bg-bot);
             border-radius: 18px; 
@@ -162,46 +186,26 @@
         }
 
         /* 봇 메시지 아이콘 및 텍스트 */
-        .bot-content-wrapper {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
+        .bot-content-wrapper { display: flex; align-items: flex-start; gap: 10px; }
         .bot-icon { font-size: 20px; color: var(--button-bg); flex-shrink: 0; }
-        .bot-text { width: 100%; }
 
-        /* 로딩 인디케이터 (가로 막대) */
+        /* 로딩 인디케이터 (막대) */
         .loading-indicator-row {
-            display: flex; 
-            justify-content: flex-start;
-            align-items: center;
-            padding: 0 16px;
+            display: flex; justify-content: flex-start; align-items: center; padding: 0 16px;
         }
         .loading-indicator-bubble {
-            background-color: transparent; /* 로딩바는 버블 배경 없음 */
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 0;
-            width: 100%;
-            max-width: 150px; /* 로딩 바 최대 너비 */
+            background-color: transparent; 
+            display: flex; align-items: center; gap: 10px;
+            padding: 16px 0; width: 100%; max-width: 150px; 
         }
-        .loading-indicator-bubble .bot-icon { margin-left: 0; }
 
         .loading-bar-container {
-            width: 100%;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--border);
-            overflow: hidden;
-            position: relative;
+            width: 100%; height: 4px; border-radius: 2px;
+            background: var(--border); overflow: hidden; position: relative;
         }
         .loading-bar {
-            height: 100%;
-            width: 40%;
-            background-color: var(--bar-color);
-            position: absolute;
-            animation: moveBar 1.5s infinite linear;
+            height: 100%; width: 40%; background-color: var(--bar-color);
+            position: absolute; animation: moveBar 1.5s infinite linear;
         }
         @keyframes moveBar {
             0% { left: -40%; }
@@ -224,19 +228,75 @@
         }
         textarea::placeholder { color: var(--text-secondary); }
         .btn-group { display: flex; gap: 4px; margin-bottom: 4px; }
-        .btn {
-            border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center;
-            justify-content: center; cursor: pointer; background: transparent; color: var(--text-secondary); font-size: 18px;
-        }
         .btn.send { background: var(--button-bg); color: var(--button-text); font-size: 18px; }
-        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .btn.cancel { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); }
+        
+        /* === 모달 스타일 (이름 입력 창) === */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 400px;
+            animation: fadeInModal 0.3s ease-out;
+            border: 1px solid var(--border);
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 24px;
+            color: var(--text);
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 16px;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         /* 불필요한 요소 제거 */
         .chat-ui-header, #plusBtn, #micBtn, .tool-icon, .version-controls, .bot-actions { display: none !important; }
     </style>
 </head>
 <body>
+    <div class="modal-overlay" id="nameModal">
+        <div class="modal-content">
+            <h2>환영합니다!</h2>
+            <p style="color:var(--text-secondary); text-align:center; margin-bottom: 20px;">대화를 시작하기 위해 이름을 입력해주세요.</p>
+            <input type="text" id="nameInput" placeholder="이름을 입력하세요" maxlength="15">
+            <button id="saveNameBtn">시작하기</button>
+        </div>
+    </div>
+
     <nav>
         <div class="logo">GPT-J</div>
         <div class="actions">
@@ -249,8 +309,7 @@
         <div class="messages" id="messages">
             </div>
         <div class="welcome-section" id="welcomeSection">
-            <h1 id="title">안녕하세요, 반가워요!</h1>
-            <div class="suggestions">
+            <h1 id="title">안녕하세요, 사용자님</h1> <div class="suggestions">
                 <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
                 <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
                 <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
@@ -277,6 +336,12 @@
         const body = document.body;
         const welcomeSection = document.getElementById("welcomeSection");
         const mainContent = document.getElementById("main");
+        const titleElement = document.getElementById("title");
+        
+        // 모달 관련 요소
+        const nameModal = document.getElementById("nameModal");
+        const nameInput = document.getElementById("nameInput");
+        const saveNameBtn = document.getElementById("saveNameBtn");
 
         const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
         
@@ -284,6 +349,35 @@
         let isBotThinking = false;
         let abortController = null;
         let messageCounter = 0; 
+
+        // === 이름 입력 모달 로직 ===
+        function initializeName() {
+            const userName = localStorage.getItem('gptj_user_name');
+            if (userName) {
+                titleElement.textContent = `안녕하세요, ${userName}님`;
+                nameModal.style.display = 'none';
+            } else {
+                nameModal.style.display = 'flex';
+                nameInput.focus();
+            }
+        }
+
+        saveNameBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                localStorage.setItem('gptj_user_name', name);
+                titleElement.textContent = `안녕하세요, ${name}님`;
+                nameModal.style.display = 'none';
+            } else {
+                alert("이름을 입력해주세요.");
+            }
+        });
+        
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === "Enter") {
+                saveNameBtn.click();
+            }
+        });
 
         // 다크모드 토글
         darkBtn.addEventListener("click", () => {
@@ -351,6 +445,7 @@
             if (welcomeSection.style.display !== 'none' && role === 'user') {
                 welcomeSection.classList.add('hidden');
                 welcomeSection.style.display = 'none';
+                messages.style.paddingTop = '20px'; // 첫 메시지 입력 시 여백 추가
             }
 
             mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
@@ -486,6 +581,9 @@
             textarea.style.height = "auto";
             textarea.style.height = textarea.scrollHeight + "px";
         });
+        
+        // 페이지 로드 시 이름 초기화 함수 실행
+        window.addEventListener('load', initializeName);
     </script>
 </body>
 </html>
