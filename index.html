@@ -1,11 +1,28 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Minsu GPT</title>
 <style>
-:root {
+:root{
+  --bg:#0d0d0d;
+  --text:#e4e4e4;
+  --input-bg:#111;
+  --border:#2a2a2a;
+  --border-strong:#444;
+  --button-bg:#fff;
+  --button-text:#000;
+  --menu-bg:rgba(30,30,30,0.95);
+  --menu-text:#ccc;
+  --accent-1: linear-gradient(45deg,#0099ff,#66ccff);
+  --transition:0.25s ease;
+  --small-font: 0.92rem;
+}
+/* 모바일 탭 하이라이트 제거 */
+*{ -webkit-tap-highlight-color: transparent; box-sizing: border-box; transition: color var(--transition), background var(--transition), border-color var(--transition); }
+html,body{ height:100%; margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; background:var(--bg); color:var(--text); font-size:var(--small-font); }
+body.light {
   --bg: #ffffff;
   --text: #111;
   --input-bg: #f7f7f8;
@@ -15,271 +32,82 @@
   --button-text: #fff;
   --menu-bg: rgba(255,255,255,0.95);
   --menu-text: #444;
-  --transition: 0.3s ease;
 }
 
-/* 기본 다크모드 */
-body.dark {
-  --bg: #0d0d0d;
-  --text: #e4e4e4;
-  --input-bg: #1a1a1a;
-  --border: #2a2a2a;
-  --border-strong: #555;
-  --button-bg: #fff;
-  --button-text: #000;
-  --menu-bg: rgba(30,30,30,0.9);
-  --menu-text: #ccc;
-}
+/* 상단 */
+nav{ position:fixed; top:0; left:0; right:0; height:56px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; z-index:30; border-bottom:1px solid var(--border); background:var(--bg); }
+.logo{ font-weight:600; font-size:0.98rem; white-space:nowrap; }
+.actions{ display:flex; gap:8px; align-items:center; }
+.mode-toggle{ width:44px; height:34px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; font-size:0.92rem; }
 
-* {
-  box-sizing: border-box;
-  transition: background var(--transition), color var(--transition), border var(--transition);
-}
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  font-size: 0.95rem;
-}
+/* main area */
+main{ padding:64px 12px 180px; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; align-items:center; height:100vh; }
+#title{ margin-top:48px; font-size:1.4rem; font-weight:700; text-align:center; background:var(--accent-1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:18px; }
+.suggestion-card{ background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:10px; cursor:pointer; font-size:0.92rem; }
+.suggestion-card:active{ transform:translateY(1px); }
 
-/* 상단바 */
-nav {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 56px;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem 1rem;
-  z-index: 10;
-}
-.logo { font-weight: 600; font-size: 0.95rem; white-space: nowrap; }
-.actions { display: flex; gap: 8px; align-items: center; }
-.darkmode-toggle {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: var(--text);
-}
+/* messages */
+.messages{ width:100%; max-width:720px; margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+.message{ max-width:80%; padding:10px 12px; border-radius:14px; white-space:pre-wrap; word-break:break-word; font-size:0.95rem; }
+.message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
+.message.bot{ align-self:flex-start; background:var(--input-bg); border:1px solid var(--border); color:var(--text); font-weight:normal; }
+/* large and bold modifiers */
+.message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
+.message strong { font-weight:700; }
 
-/* 정보버튼 */
-.info-btn {
-  position: fixed; bottom: 80px; right: 15px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  width: 36px; height: 36px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  font-size: 1.1rem;
-  z-index: 25;
-  color: var(--text);
-}
-.info-popup {
-  position: fixed;
-  bottom: 130px; right: 20px;
-  background: var(--menu-bg);
-  color: var(--menu-text);
-  border-radius: 10px;
-  padding: 0.9rem;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-  display: none;
-  width: 220px;
-  font-size: 0.85rem;
-  line-height: 1.3rem;
-}
+/* code block */
+.code-wrap{ position:relative; margin-top:8px; }
+.code-block{ display:block; padding:10px; border-radius:8px; background:#111; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
+.copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
-/* 본문 */
-main {
-  flex: 1;
-  padding: 60px 1rem 110px;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-#title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  background: linear-gradient(45deg, #0099ff, #66ccff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-align: center;
-  margin-top: 7rem;
-}
-.suggestions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.7rem;
-  width: 100%;
-  max-width: 680px;
-  margin-top: 1.8rem;
-}
-.suggestion-card {
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.8rem;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-}
-.suggestion-card:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-}
+/* loading bar */
+.loading-bar{ width:100%; height:3px; background:var(--border); border-radius:4px; overflow:hidden; margin-top:6px; position:relative; }
+.loading-bar::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--button-bg); animation:barMove 900ms linear infinite; }
+@keyframes barMove{ 0%{ left:-40% } 100%{ left:100% } }
 
-/* 채팅 */
-.messages {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-  width: 100%;
-  max-width: 680px;
-  margin-top: 1.8rem;
-}
-.message {
-  max-width: 80%;
-  padding: 0.6rem 0.9rem;
-  border-radius: 14px;
-  word-break: break-word;
-  white-space: pre-wrap;
-  animation: fadeIn 0.25s ease forwards;
-  font-size: 0.95rem;
-}
-.message.user {
-  background: var(--button-bg);
-  color: var(--button-text);
-  align-self: flex-end;
-}
-.message.bot {
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  align-self: flex-start;
-  font-weight: normal;
-}
-.message.bot code {
-  background: #222;
-  color: #f1f1f1;
-  padding: 6px 8px;
-  border-radius: 6px;
-  display: block;
-  white-space: pre-wrap;
-  font-family: monospace;
-  margin-top: 0.4rem;
-  position: relative;
-  font-size: 0.9rem;
-}
-.copy-btn {
-  position: absolute;
-  top: 6px; right: 6px;
-  background: var(--button-bg);
-  color: var(--button-text);
-  border: none;
-  border-radius: 5px;
-  padding: 2px 6px;
-  cursor: pointer;
-  font-size: 0.75rem;
-}
+/* input area - Gemini style */
+.input-bar{ position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); }
+.input-wrapper{ max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:12px; background:var(--input-bg); border-radius:32px; border:1px solid var(--border-strong); padding:14px 18px; min-height:100px; }
+.textarea-area{ width:100%; }
+textarea{ width:100%; resize:none; min-height:50px; max-height:200px; overflow:auto; border:none; outline:none; background:transparent; color:var(--text); font-family:inherit; font-size:1.05rem; line-height:1.5rem; padding:4px 0; }
+.bottom-row{ display:flex; align-items:center; gap:12px; }
+.icon-btn{ width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.5rem; opacity:0.8; flex-shrink:0; }
+.icon-btn:hover{ opacity:1; background:rgba(128,128,128,0.1); }
+.spacer{ flex:1; }
+.model-selector{ position:relative; }
+.model-select-btn{ background:transparent; border:none; color:var(--text); font-size:0.95rem; cursor:pointer; padding:8px 14px; border-radius:20px; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.model-select-btn:hover{ background:rgba(128,128,128,0.1); }
+.model-dropdown{ position:absolute; bottom:calc(100% + 8px); right:0; background:var(--menu-bg); border:1px solid var(--border); border-radius:12px; padding:6px; min-width:160px; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
+.model-dropdown.show{ display:block; }
+.model-option{ padding:10px 14px; border-radius:8px; cursor:pointer; font-size:0.95rem; color:var(--menu-text); }
+.model-option:hover{ background:rgba(128,128,128,0.15); }
+.model-option.active{ background:rgba(0,153,255,0.15); color:#66ccff; }
+.btn{ width:44px; height:44px; border-radius:50%; border:none; background:var(--button-bg); color:var(--button-text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+.btn:disabled{ opacity:0.3; cursor:not-allowed; }
+.stop-btn{ width:44px; height:44px; border-radius:50%; background:#c53030; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
+.stop-btn::before{ content:''; width:14px; height:14px; background:white; }
 
-/* 로딩바 */
-.loading-bar {
-  width: 100%;
-  height: 3px;
-  background: var(--border);
-  overflow: hidden;
-  border-radius: 4px;
-  margin-top: 6px;
-  position: relative;
-}
-.loading-bar::after {
-  content: "";
-  position: absolute;
-  top: 0; left: -40%;
-  width: 40%; height: 100%;
-  background: var(--button-bg);
-  animation: barMove 1s linear infinite;
-}
-@keyframes barMove { 0% { left: -40%; } 100% { left: 100%; } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+/* info button */
+.info-btn{ position:fixed; right:14px; bottom:96px; width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
+.info-popup{ position:fixed; right:14px; bottom:150px; width:240px; background:var(--menu-bg); color:var(--menu-text); border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); display:none; z-index:46; font-size:0.9rem; }
 
-/* 입력창 */
-.input-bar {
-  position: fixed;
-  bottom: 0; left: 0;
-  width: 100%;
-  background: linear-gradient(to top, var(--bg) 90%, transparent);
-  display: flex;
-  justify-content: center;
-  padding: 0.5rem 1rem 0.9rem;
-  z-index: 20;
-}
-.input-wrapper {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  max-width: 680px;
-  background: var(--input-bg);
-  border-radius: 20px;
-  border: 1.3px solid var(--border-strong);
-  padding: 0.35rem 0.5rem;
-  gap: 0.4rem;
-}
-textarea {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font-size: 0.95rem;
-  resize: none;
-  overflow-y: auto;
-  min-height: 1.3rem;
-  max-height: 180px;
-  line-height: 1.4rem;
-  padding: 5px 0;
-  outline: none;
-}
-.btn {
-  border: none;
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: var(--button-bg);
-  color: var(--button-text);
-}
-.stop-btn {
-  background: red;
-  color: #fff;
-  border-radius: 18px;
-  padding: 0.35rem 0.9rem;
-  border: none;
-  margin-left: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
+/* reset popup overlay */
+#resetPopup{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.32s ease; z-index:999; }
+#resetPopup.visible{ opacity:1; pointer-events:auto; }
+.reset-card{ width:320px; background:var(--input-bg); color:var(--text); padding:18px; border-radius:12px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.5); }
+.reset-card p{ margin:0 0 14px; font-size:0.98rem; }
+.reset-actions{ display:flex; gap:12px; justify-content:center; }
+.reset-actions button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-size:0.95rem; }
+.reset-yes{ background:#c53030; color:#fff; }
+.reset-no{ background:var(--button-bg); color:var(--button-text); }
 
+/* small screens */
 @media(max-width:700px){
-  nav { height: 52px; }
-  .logo { font-size: 0.85rem; }
-  .suggestions { grid-template-columns: repeat(2, 1fr); margin-top: 0.8rem; }
-  #title { margin-top: 4.5rem; font-size: 1.3rem; }
-  .message { font-size: 0.9rem; }
+  .suggestions{ grid-template-columns:repeat(2,1fr); gap:8px; }
+  #title{ margin-top:30px; font-size:1.15rem; }
+  .logo{ font-size:0.9rem; }
+  .message{ font-size:0.9rem; }
 }
 </style>
 </head>
@@ -287,187 +115,386 @@ textarea {
 <nav>
   <div class="logo">Minsu GPT</div>
   <div class="actions">
-    <button class="darkmode-toggle" id="darkBtn">☀️</button>
+    <button id="modeToggle" class="mode-toggle">모드</button>
   </div>
 </nav>
 
 <main id="main">
   <h1 id="title">안녕하세요!</h1>
-  <div class="suggestions">
+
+  <div class="suggestions" id="suggestions">
     <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">창의적인 글쓰기 아이디어를 제안해줘</div>
     <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">파이썬으로 간단한 게임 만드는 법 알려줘</div>
     <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">효과적인 시간 관리 방법 추천해줘</div>
     <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">재미있는 과학 사실 알려줘</div>
   </div>
+
   <div class="messages" id="messages"></div>
 </main>
 
-<div class="input-bar">
+<div class="input-bar" id="inputBar">
   <div class="input-wrapper">
-    <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
-    <button class="btn" id="sendBtn">➤</button>
-    <button class="stop-btn" id="stopBtn" style="display:none;">응답 중지</button>
+    <div class="textarea-area">
+      <textarea id="userInput" placeholder="Gemini에게 물어보기" rows="1" aria-label="메시지 입력"></textarea>
+    </div>
+    <div class="bottom-row">
+      <button class="icon-btn" id="addBtn" title="파일 첨부">+</button>
+      <div class="spacer"></div>
+      <div class="model-selector">
+        <button class="model-select-btn" id="modelSelectBtn">
+          <span id="selectedModel">2.5 Flash</span>
+          <span>▼</span>
+        </button>
+        <div class="model-dropdown" id="modelDropdown">
+          <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
+          <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
+        </div>
+      </div>
+      <button class="btn" id="sendBtn" disabled>➤</button>
+      <button class="stop-btn" id="stopBtn"></button>
+    </div>
   </div>
 </div>
 
 <div class="info-btn" id="infoBtn">i</div>
-<div class="info-popup" id="infoPopup">
-  AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원
+<div class="info-popup" id="infoPopup">⚠️ AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div>
+
+<!-- reset popup -->
+<div id="resetPopup" aria-hidden="true">
+  <div class="reset-card">
+    <p>대화기록을 초기화할까요?</p>
+    <div class="reset-actions">
+      <button class="reset-yes" id="resetYes">초기화</button>
+      <button class="reset-no" id="resetNo">유지</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const darkBtn = document.getElementById("darkBtn");
-const messages = document.getElementById("messages");
-const textarea = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
-const stopBtn = document.getElementById("stopBtn");
-const cards = document.querySelectorAll(".suggestion-card");
-const infoBtn = document.getElementById("infoBtn");
-const infoPopup = document.getElementById("infoPopup");
-const title = document.getElementById("title");
-const body = document.body;
-let loadingMsg = null;
-let abortController = null;
-let username = "";
-
+/* ------------- 설정 ------------- */
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
+/* --------------------------------- */
 
-window.addEventListener("load", ()=>{
-  username = localStorage.getItem("username") || prompt("이름을 입력해주세요");
-  if(username){
-    localStorage.setItem("username", username);
-    title.textContent = `안녕하세요! ${username}님`;
+const body = document.body;
+const mainEl = document.getElementById('main');
+const messagesEl = document.getElementById('messages');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const stopBtn = document.getElementById('stopBtn');
+const modeToggle = document.getElementById('modeToggle');
+const suggestionsEl = document.getElementById('suggestions');
+const infoBtn = document.getElementById('infoBtn');
+const infoPopup = document.getElementById('infoPopup');
+const resetPopup = document.getElementById('resetPopup');
+const resetYes = document.getElementById('resetYes');
+const resetNo = document.getElementById('resetNo');
+const inputBar = document.getElementById('inputBar');
+
+let abortController = null;
+let loadingMsg = null;
+let chatHistory = [];
+
+/* 기본 다크모드 적용 (요청대로) */
+if(!body.classList.contains('dark')) body.classList.add('dark');
+
+/* 이름 입력 및 제목 업데이트 */
+let username = localStorage.getItem('username') || null;
+if(!username){
+  const ask = prompt('이름을 입력해주세요');
+  if(ask && ask.trim()){
+    username = ask.trim();
+    localStorage.setItem('username', username);
   }
-});
+}
+const titleEl = document.getElementById('title');
+if(username) titleEl.textContent = `안녕하세요! ${username}님`;
 
-darkBtn.addEventListener("click", () => {
-  body.classList.toggle("dark");
-  darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
-});
-
-infoBtn.addEventListener("click", ()=>{
-  infoPopup.style.display = infoPopup.style.display === "none" || !infoPopup.style.display ? "block" : "none";
-});
-
-cards.forEach(card => {
-  card.addEventListener("click", () => {
-    textarea.value = card.dataset.prompt;
-    sendMessage();
-  });
-});
-
-function scrollToBottom() {
-  messages.scrollTop = messages.scrollHeight;
+/* 유틸: 스크롤 끝으로 */
+function scrollToBottom(){
+  requestAnimationFrame(()=>{ messagesEl.scrollTop = messagesEl.scrollHeight; });
 }
 
-function addMessage(role, text, isCode=false) {
-  const msg = document.createElement("div");
-  msg.className = `message ${role}`;
-  if(isCode){
-    const codeBlock = document.createElement("code");
-    codeBlock.textContent = text;
-    const copyBtn = document.createElement("button");
-    copyBtn.className = "copy-btn";
-    copyBtn.textContent = "복사";
-    copyBtn.onclick = ()=>navigator.clipboard.writeText(text);
-    msg.appendChild(copyBtn);
-    msg.appendChild(codeBlock);
-  } else {
-    msg.textContent = text;
-  }
-  messages.appendChild(msg);
+/* 저장/복원 */
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem('chatHistory');
+    chatHistory = raw ? JSON.parse(raw) : [];
+  }catch(e){ chatHistory = []; }
+  messagesEl.innerHTML = '';
+  chatHistory.forEach(item => renderMessage(item.role, item.content));
   scrollToBottom();
 }
-
-async function typeText(container, text, delay=15){
-  container.textContent = "";
-  for(let char of text){
-    container.textContent += char;
-    scrollToBottom();
-    await new Promise(r=>setTimeout(r, delay));
-  }
+function saveHistory(){
+  try{ localStorage.setItem('chatHistory', JSON.stringify(chatHistory)); }catch(e){}
 }
 
-function addLoadingBubble(){
-  const msg = document.createElement("div");
-  msg.className = "message bot bot-loading";
-  msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
-  messages.appendChild(msg);
-  scrollToBottom();
-  loadingMsg = msg;
-}
+/* -------------- 핵심 수정: renderMessage -------------- */
+/* 이제 코드펜스, **bold**, #/##/### 헤더를 올바르게 처리합니다. */
+function renderMessage(role, text) {
+  const wrap = document.createElement('div');
+  wrap.className = 'message ' + (role === 'user' ? 'user' : 'bot');
 
-function replaceLoadingBubble(text){
-  if(loadingMsg){
-    loadingMsg.classList.remove("bot-loading");
-    loadingMsg.textContent = "";
-    if(text.startsWith("```") && text.endsWith("```")){
-      const codeText = text.slice(3,-3);
-      const codeEl = document.createElement("code");
-      codeEl.textContent = codeText;
-      const copyBtn = document.createElement("button");
-      copyBtn.className = "copy-btn";
-      copyBtn.textContent = "복사";
-      copyBtn.onclick = ()=>navigator.clipboard.writeText(codeText);
-      loadingMsg.appendChild(copyBtn);
-      loadingMsg.appendChild(codeEl);
+  // 안전 처리: null/undefined -> ''
+  text = (text === null || text === undefined) ? '' : String(text);
+
+  // code fence 분리: parts 에서 홀수 인덱스가 코드
+  const codeFenceRegex = /```([\s\S]*?)```/g;
+  const parts = text.split(codeFenceRegex);
+
+  for (let i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      // 일반 텍스트: 헤더/볼드/줄바꿈 변환
+      let html = parts[i]
+        .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
+        .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
+        .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+      // 삽입
+      wrap.insertAdjacentHTML('beforeend', html);
     } else {
-      typeText(loadingMsg, text, 15);
+      // 코드 블록 부분
+      const code = parts[i];
+      const codeWrap = document.createElement('div');
+      codeWrap.className = 'code-wrap';
+      codeWrap.innerHTML = `
+        <pre class="code-block">${escapeHtml(code)}</pre>
+        <button class="copy-btn">복사</button>
+      `;
+      const btn = codeWrap.querySelector('.copy-btn');
+      btn.addEventListener('click', () => navigator.clipboard.writeText(code).catch(()=>{}));
+      wrap.appendChild(codeWrap);
     }
-    loadingMsg = null;
   }
+
+  messagesEl.appendChild(wrap);
+  scrollToBottom();
+  return wrap;
 }
 
-async function sendMessage(){
-  const text = textarea.value.trim();
-  if(!text) return;
-  textarea.value="";
-  addMessage("user", text, false);
-  addLoadingBubble();
+/* 간단한 escape: 코드 내용만 escape 처리 */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+  });
+}
+/* -------------- 수정 끝 -------------- */
 
-  // 버튼 상태 변경
-  sendBtn.style.display = "none";
-  stopBtn.style.display = "inline-block";
+/* Loading bubble */
+function addLoading(){
+  const el = document.createElement('div');
+  el.className = 'message bot';
+  el.innerHTML = `<div>생각 중...</div><div class="loading-bar" aria-hidden="true"></div>`;
+  messagesEl.appendChild(el);
+  loadingMsg = el;
+  scrollToBottom();
+}
+
+/* replace loading with typing animation */
+async function replaceLoading(text){
+  if(!loadingMsg) return;
+  // remove loading markup
+  loadingMsg.innerHTML = '';
+  const isCodeFence = /^```[\s\S]*```$/.test(text);
+  if(isCodeFence){
+    // 코드 전체가 펜스인 경우, 제거 후 renderMessage로 출력
+    loadingMsg.remove();
+    renderMessage('bot', text);
+    loadingMsg = null;
+    return;
+  }
+  // Type character by character
+  const container = document.createElement('div');
+  loadingMsg.appendChild(container);
+  for(const ch of text){
+    container.textContent += ch;
+    scrollToBottom();
+    await new Promise(r=>setTimeout(r, 16));
+    // If aborted externally, exit early
+    if(!document.body.contains(loadingMsg)) return;
+  }
+  // After done, render the final text using renderMessage (to apply bold/headers)
+  const composed = container.textContent;
+  loadingMsg.remove();
+  renderMessage('bot', composed);
+  loadingMsg = null;
+}
+
+/* Send message with history; uses AbortController for cancel */
+async function sendMessage(){
+  const text = userInput.value.trim();
+  if(!text) return;
+  userInput.value = '';
+  sendBtn.disabled = true;
+  // render user
+  renderMessage('user', text);
+  chatHistory.push({role:'user', content:text});
+  saveHistory();
+
+  // UI: show loading, adjust buttons
+  addLoading();
+  sendBtn.style.display = 'none';
+  stopBtn.style.display = 'flex';
   abortController = new AbortController();
 
   try{
+    const payload = { message: text, history: chatHistory };
     const res = await fetch(BACKEND_URL, {
-      method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({message:text}),
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
       signal: abortController.signal
     });
-    const data = await res.json();
-    replaceLoadingBubble(data.reply);
-  } catch(e){
-    if(e.name === "AbortError"){
-      replaceLoadingBubble("응답이 취소되었습니다.");
-    } else {
-      replaceLoadingBubble("오류가 발생했습니다.");
+    if(!res.ok){
+      throw new Error('network');
     }
-  } finally {
-    sendBtn.style.display = "inline-block";
-    stopBtn.style.display = "none";
+    const data = await res.json();
+    const replyText = data.reply ?? '';
+    await replaceLoading(replyText);
+    chatHistory.push({role:'bot', content:replyText});
+    saveHistory();
+  }catch(err){
+    if(err && err.name === 'AbortError'){
+      await replaceLoading('응답이 취소되었습니다.');
+    } else {
+      await replaceLoading('오류가 발생했습니다.');
+    }
+  }finally{
+    sendBtn.style.display = 'flex';
+    stopBtn.style.display = 'none';
+    abortController = null;
   }
 }
 
-stopBtn.addEventListener("click", ()=>{
-  if(abortController){
-    abortController.abort();
-  }
+/* stop button -> abort */
+stopBtn.addEventListener('click', ()=>{
+  if(abortController) abortController.abort();
 });
 
-sendBtn.addEventListener("click", sendMessage);
-textarea.addEventListener("keydown", e=>{
-  if(e.key==="Enter" && !e.shiftKey){
+/* Enter to send (Shift+Enter for newline) */
+userInput.addEventListener('keydown', e=>{
+  if(e.key === 'Enter' && !e.shiftKey){
     e.preventDefault();
-    sendMessage();
+    if(sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
   }
 });
 
-textarea.addEventListener("input", ()=>{
-  textarea.style.height="auto";
-  textarea.style.height = textarea.scrollHeight + "px";
+/* model selector interactions */
+const modelSelectBtn = document.getElementById('modelSelectBtn');
+const modelDropdown = document.getElementById('modelDropdown');
+const selectedModelEl = document.getElementById('selectedModel');
+
+modelSelectBtn.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  modelDropdown.classList.toggle('show');
+});
+
+modelDropdown.addEventListener('click', (e)=>{
+  const option = e.target.closest('.model-option');
+  if(!option) return;
+  const model = option.dataset.model;
+  selectedModelEl.textContent = model;
+  document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
+  option.classList.add('active');
+  modelDropdown.classList.remove('show');
+});
+
+document.addEventListener('click', ()=>{
+  modelDropdown.classList.remove('show');
+});
+
+/* input autosize and send button enable/disable */
+userInput.addEventListener('input', ()=>{
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 200) + 'px';
+  sendBtn.disabled = !userInput.value.trim();
+});
+
+/* suggestions click */
+suggestionsEl.addEventListener('click', (ev)=>{
+  const card = ev.target.closest('.suggestion-card');
+  if(!card) return;
+  userInput.value = card.dataset.prompt || card.textContent || '';
+  userInput.focus();
+  userInput.dispatchEvent(new Event('input'));
+  sendMessage();
+});
+
+/* info popup */
+infoBtn.addEventListener('click', ()=>{
+  infoPopup.style.display = infoPopup.style.display === 'block' ? 'none' : 'block';
+});
+
+/* mode toggle */
+modeToggle.addEventListener('click', ()=>{
+  if(body.classList.contains('light')){
+    body.classList.remove('light');
+    localStorage.setItem('mode','dark');
+  } else {
+    body.classList.add('light');
+    localStorage.setItem('mode','light');
+  }
+});
+
+/* visualViewport adjustments for mobile keyboard */
+function adjustForViewport(){
+  if(window.visualViewport){
+    const vb = window.visualViewport;
+    const bottomOffset = Math.max(0, window.innerHeight - vb.height - vb.offsetTop);
+    inputBar.style.bottom = bottomOffset + 'px';
+    mainEl.style.paddingBottom = (140 + bottomOffset) + 'px';
+    scrollToBottom();
+  } else {
+    inputBar.style.bottom = '0px';
+    mainEl.style.paddingBottom = '140px';
+  }
+}
+if(window.visualViewport){
+  visualViewport.addEventListener('resize', adjustForViewport);
+  visualViewport.addEventListener('scroll', adjustForViewport);
+}
+window.addEventListener('resize', adjustForViewport);
+adjustForViewport();
+
+/* load history and initial state */
+loadHistory();
+
+/* reset popup on reload */
+function showResetPopup(){ resetPopup.classList.add('visible'); resetPopup.style.pointerEvents='auto'; }
+function hideResetPopup(){ resetPopup.classList.remove('visible'); resetPopup.style.pointerEvents='none'; }
+window.addEventListener('load', ()=>{
+  // detect reload
+  const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+  const navType = navEntries && navEntries[0] ? navEntries[0].type : (performance.navigation ? performance.navigation.type : 0);
+  const isReload = (navType === 'reload' || navType === 1);
+  const hasHistory = chatHistory && chatHistory.length > 0;
+  if(isReload && hasHistory){
+    showResetPopup();
+  }
+});
+resetYes.addEventListener('click', ()=>{
+  localStorage.removeItem('chatHistory');
+  hideResetPopup();
+  setTimeout(()=> location.reload(), 200);
+});
+resetNo.addEventListener('click', ()=>{
+  hideResetPopup();
+});
+
+/* clicking messages focuses input (ux) */
+messagesEl.addEventListener('click', ()=> userInput.focus());
+
+/* initial mode from storage */
+const savedMode = localStorage.getItem('mode');
+if(savedMode === 'light') body.classList.add('light'); else body.classList.remove('light');
+
+/* initial send button behavior */
+sendBtn.addEventListener('click', sendMessage);
+
+/* safe console notice for CORS/backend issues */
+window.addEventListener('error', (e) => {
+  // don't spam user; log for dev
+  console.error('Error detected:', e.message);
 });
 </script>
 </body>
