@@ -1,541 +1,483 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Minsu GPT — 개선된 UI</title>
-<style>
-  :root{
-    --bg:#ffffff; --text:#111; --muted:#7a7a7a;
-    --input-bg:#f2f3f5; --panel:#fafafa;
-    --border:#dcdcdc; --accent:#000;
-    --radius:14px; --transition:200ms;
-  }
-  body.dark{ --bg:#0d0d0d; --text:#e8e8e8; --muted:#b5b5b5; --input-bg:#121214; --panel:#161618; --border:#2a2a2a; --accent:#fff; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-J Clone</title>
+    <style>
+        :root {
+            --bg: #1a1a1a;
+            --text: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --input-bg: #282a2d;
+            --border: #3c4043;
+            --button-bg: #8ab4f8;
+            --button-text: #1a1a1a;
+            /* 버블 배경 */
+            --message-bg-user: #44474a; 
+            --message-bg-bot: #303134; 
+            --loading-bar: #8ab4f8; /* 로딩 바 색상 */
+            --transition: 0.3s ease;
+        }
+        body.light {
+            --bg: #ffffff;
+            --text: #1f1f1f;
+            --text-secondary: #5f6368;
+            --input-bg: #f1f3f4;
+            --border: #dadce0;
+            --button-bg: #1a73e8;
+            --button-text: #ffffff;
+            --message-bg-user: #e8eaed;
+            --message-bg-bot: #f8f9fa;
+            --loading-bar: #1a73e8;
+        }
+        * {
+            box-sizing: border-box;
+            transition: background var(--transition), color var(--transition), border var(--transition);
+        }
+        body {
+            margin: 0;
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 10;
+        }
+        .logo { font-weight: 400; font-size: 22px; color: var(--text); }
+        .actions { display: flex; gap: 8px; align-items: center; }
+        .actions button {
+            border-radius: 24px; font-size: 14px; padding: 10px 24px; cursor: pointer; border: none; font-weight: 500;
+        }
+        .login { background: transparent; color: var(--button-bg); }
+        .signup { background: var(--button-bg); color: var(--button-text); }
+        .darkmode-toggle {
+            background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); padding: 0;
+        }
 
-  *{box-sizing:border-box}
-  html,body{height:100%; margin:0; background:var(--bg); color:var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased;}
-  nav{
-    position:fixed; top:0; left:0; right:0; height:60px;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:0 14px; border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg, rgba(255,255,255,0.85), transparent);
-    backdrop-filter: blur(6px); z-index:40;
-  }
-  .logo{ font-weight:700; font-size:18px; letter-spacing:0.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60%; }
-  .actions{ display:flex; gap:8px; align-items:center; }
-  .actions button{ border:1px solid var(--border); background:transparent; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:14px; }
-  .login{ background:var(--accent); color:var(--bg); border:none; }
-  .dark-toggle{ width:40px; height:40px; border-radius:10px; display:inline-grid; place-items:center; }
+        /* 초기 접속 애니메이션 */
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-  main{ padding:72px 16px 120px; height:100vh; overflow:auto; display:flex; flex-direction:column; align-items:center; gap:18px; }
+        main {
+            flex: 1; padding: 64px 16px 0; overflow-y: auto; scroll-behavior: smooth; display: flex;
+            flex-direction: column; align-items: center;
+            /* 초기 접속 애니메이션 적용 */
+            animation: slideInUp 0.6s ease-out forwards;
+        }
+        .welcome-section {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 50px; min-height: calc(100vh - 240px); width: 100%; max-width: 768px;
+        }
+        .welcome-section.hidden { display: none; }
+        #title { font-size: 48px; font-weight: 400; text-align: center; margin-bottom: 48px; color: var(--text); }
+        .suggestions {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 600px; margin-bottom: 20px;
+        }
+        .suggestion-card {
+            background: var(--input-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+            cursor: pointer; text-align: left; transition: all 0.2s ease; font-size: 14px; color: var(--text);
+        }
+        .suggestion-card:hover { background: var(--message-bg-user); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        
+        .messages {
+            display: flex; flex-direction: column; width: 100%; max-width: 768px; padding: 24px 0;
+            margin-bottom: 120px; gap: 20px; padding-top: 0;
+        }
 
-  #title{ margin-top:44px; font-size:28px; font-weight:700; text-align:center; transition:opacity var(--transition); color:var(--text); }
-  .suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; width:100%; max-width:900px; margin-top:8px; }
-  .suggestion-card{ background:var(--panel); border:1px solid var(--border); padding:12px; border-radius:12px; cursor:pointer; font-size:14px; display:flex; gap:8px; align-items:flex-start; }
-  .suggestion-card:hover{ transform:translateY(-4px); transition:transform var(--transition); box-shadow:0 8px 24px rgba(0,0,0,0.06); }
+        /* 메시지 wrapper (전체 줄) */
+        .message-row {
+            display: flex; width: 100%; padding: 0 16px; animation: fadeIn 0.3s ease forwards;
+            position: relative; 
+        }
+        .message-row.user-row { justify-content: flex-end; }
+        .message-row.bot-row { justify-content: flex-start; }
 
-  .chat-wrap{ width:100%; max-width:900px; display:flex; flex-direction:column; gap:10px; }
-  .messages{ display:flex; flex-direction:column; gap:10px; }
+        /* 사용자 메시지 버블 */
+        .message.user {
+            background-color: var(--message-bg-user);
+            color: var(--text);
+            border-radius: 18px 18px 0 18px; 
+            padding: 10px 14px;
+            max-width: 60%;
+            font-size: 15px;
+            line-height: 1.5;
+            position: relative;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .message.user > span { word-break: break-word; }
 
-  /* 메시지 버블 */
-  .message{ max-width:78%; padding:10px 12px; border-radius:14px; word-break:break-word; white-space:pre-wrap; position:relative; }
-  .message.user{ align-self:flex-end; background:var(--accent); color:var(--bg); font-weight:400; /* 사용자가 보낸 메시지 볼드 해제 */ }
-  .message.bot{ align-self:flex-start; background:var(--panel); border:1px solid var(--border); color:var(--text); font-size:15px; }
+        /* 봇 메시지 버블 */
+        .message.bot {
+            background-color: var(--message-bg-bot);
+            border-radius: 18px; 
+            padding: 16px;
+            width: auto; 
+            max-width: 80%; 
+            color: var(--text);
+            font-size: 16px;
+            line-height: 1.6;
+            word-break: break-word;
+            opacity: 0; 
+            transform: scale(0.8); 
+            transform-origin: top left;
+            transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.6, 0.4, 1.2); 
+        }
+        
+        .message.bot.loaded {
+            opacity: 1;
+            transform: scale(1);
+        }
 
-  /* 봇 내부 - 큰 텍스트 */
-  .bot .big{ display:block; font-size:20px; font-weight:700; margin-bottom:8px; }
+        /* 봇 메시지 아이콘 및 텍스트 */
+        .bot-content-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .bot-icon { font-size: 20px; color: var(--button-bg); flex-shrink: 0; }
+        .bot-text { width: 100%; }
 
-  /* 코드 표시 - 내부 창 */
-  .code-box{ background: #0f1724; color:#e6eef8; border-radius:10px; padding:10px; margin-top:8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px; position:relative; overflow:auto; }
-  .code-header{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding-bottom:8px; color:var(--muted); font-size:13px; }
-  .code-lang{ font-weight:600; font-size:13px; color:#e6eef8; opacity:0.85; }
-  .copy-btn{ background:transparent; border:1px solid rgba(255,255,255,0.08); color:inherit; padding:6px 8px; border-radius:8px; cursor:pointer; font-size:13px; }
+        /* 로딩 인디케이터 (막대 스타일) */
+        .loading-indicator-row {
+            display: flex; 
+            justify-content: flex-start;
+            padding: 0 16px;
+        }
+        .loading-indicator-bubble {
+            background-color: var(--message-bg-bot);
+            border-radius: 18px; 
+            padding: 10px 16px;
+            width: 100px; /* 로딩 바를 포함하기 위한 고정 너비 */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .loading-indicator-bubble .bot-icon { margin-left: -5px; } 
 
-  /* assistant code color in light theme */
-  body:not(.dark) .code-box{ background:#f3f5f7; color:#0b1220; }
-  body:not(.dark) .code-header{ color:var(--muted); }
-  body:not(.dark) .copy-btn{ border:1px solid rgba(0,0,0,0.06); }
+        .bar-loader-container {
+            width: 60px;
+            height: 4px;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--border);
+            border-radius: 2px;
+            margin-top: 2px;
+        }
+        .bar-loader {
+            position: absolute;
+            height: 100%;
+            width: 40%;
+            background-color: var(--loading-bar);
+            border-radius: 2px;
+            animation: barMove 1.5s infinite linear;
+        }
+        @keyframes barMove {
+            0% { left: -40%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* loading bubble */
-  .loading { display:flex; gap:10px; align-items:center; }
-  .loading .dots span{ display:inline-block; width:6px; height:6px; background:var(--muted); border-radius:50%; margin:0 2px; opacity:0.6; animation:blink 1s infinite; }
-  .loading .dots span:nth-child(2){ animation-delay:0.15s } .loading .dots span:nth-child(3){ animation-delay:0.3s }
-  @keyframes blink{ 0%,100%{opacity:0.2} 50%{opacity:1} }
+        /* 입력창 스타일 */
+        .input-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg); display: flex;
+            justify-content: center; padding: 8px 16px 20px; z-index: 20;
+        }
+        .input-wrapper {
+            display: flex; align-items: flex-end; width: 100%; max-width: 768px; background: var(--input-bg);
+            border-radius: 28px; border: 1px solid var(--border); padding: 8px 16px; gap: 12px;
+        }
+        textarea {
+            flex: 1; border: none; background: transparent; color: var(--text); font-size: 16px;
+            resize: none; overflow-y: auto; min-height: 24px; max-height: 200px; line-height: 24px;
+            padding: 8px 0; outline: none; font-family: inherit;
+        }
+        textarea::placeholder { color: var(--text-secondary); }
+        .btn-group { display: flex; gap: 4px; margin-bottom: 4px; }
+        .btn {
+            border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; background: transparent; color: var(--text-secondary); font-size: 18px;
+        }
+        .btn.send { background: var(--button-bg); color: var(--button-text); font-size: 18px; }
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn.cancel { background: var(--input-bg); color: var(--text-secondary); border: 1px solid var(--border); }
 
-  /* message controls */
-  .msg-controls{ position:absolute; top:6px; right:8px; display:flex; gap:6px; opacity:0; transition:opacity var(--transition); }
-  .message:hover .msg-controls{ opacity:1; }
-  .ctrl-btn{ background:transparent; border:none; cursor:pointer; font-size:13px; padding:6px; border-radius:8px; color:var(--muted); }
-
-  /* input bar (Gemini-ish) */
-  .input-bar{ position:fixed; left:0; right:0; bottom:0; padding:12px; display:flex; justify-content:center; z-index:50; background:linear-gradient(0deg, rgba(0,0,0,0.04), transparent); }
-  .input-panel{ width:100%; max-width:900px; display:flex; gap:10px; align-items:flex-end; background:var(--input-bg); border-radius:16px; padding:10px; border:1px solid var(--border); box-shadow:0 6px 18px rgba(0,0,0,0.05); }
-  .left-icons{ display:flex; gap:8px; align-items:center; }
-  .attach-btn, .plus-btn{ width:44px; height:44px; border-radius:10px; display:grid; place-items:center; cursor:pointer; border:1px solid var(--border); background:transparent; }
-  .text-area{ flex:1; min-height:46px; max-height:180px; padding:8px 10px; border-radius:10px; resize:none; border:none; outline:none; background:transparent; color:var(--text); font-size:15px; }
-  .send-btn{ width:56px; height:46px; border-radius:12px; border:none; cursor:pointer; display:grid; place-items:center; font-weight:700; background:var(--accent); color:var(--bg); }
-
-  /* attachment preview */
-  .attachments{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
-  .attach-item{ background:var(--panel); border:1px solid var(--border); padding:6px 8px; border-radius:10px; font-size:13px; display:flex; gap:8px; align-items:center; }
-
-  /* previous reply modal */
-  .prev-modal{ position:fixed; inset:0; display:none; background:rgba(0,0,0,0.4); align-items:center; justify-content:center; z-index:70; }
-  .prev-card{ width:92%; max-width:760px; background:var(--bg); border-radius:12px; padding:16px; border:1px solid var(--border); max-height:80vh; overflow:auto; }
-
-  /* responsive tweaks */
-  @media(max-width:900px){ .suggestions{ grid-template-columns:repeat(2,1fr) } }
-  @media(max-width:700px){
-    .suggestions{ grid-template-columns:repeat(2,1fr); gap:10px; }
-    .logo{ font-size:14px; } /* 모바일에서 줄바꿈 방지: 글자축소 */
-    #title{ font-size:20px; margin-top:60px; }
-  }
-</style>
+        /* 불필요한 요소 제거 */
+        .chat-ui-header, #plusBtn, #micBtn, .tool-icon, .version-controls, .bot-actions { display: none !important; }
+    </style>
 </head>
 <body>
-<nav>
-  <div class="logo" id="logo">Minsu GPT</div>
-  <div class="actions">
-    <button class="login">로그인</button>
-    <button class="signup">무료로 회원 가입</button>
-    <button class="dark-toggle" id="darkBtn">🌙</button>
-  </div>
-</nav>
-
-<main>
-  <h1 id="title">어디서부터 시작할까요?</h1>
-
-  <div class="suggestions" aria-hidden="false">
-    <div class="suggestion-card" data-prompt="✍️ 창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
-    <div class="suggestion-card" data-prompt="🎮 파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
-    <div class="suggestion-card" data-prompt="⏰ 효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
-    <div class="suggestion-card" data-prompt="🔬 재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
-  </div>
-
-  <div class="chat-wrap">
-    <div class="messages" id="messages" role="log" aria-live="polite"></div>
-  </div>
-</main>
-
-<div class="input-bar">
-  <div class="input-panel" role="region" aria-label="메시지 입력">
-    <div class="left-icons">
-      <button class="plus-btn" id="plusBtn" title="더보기">＋</button>
-      <label class="attach-btn" for="fileInput" title="파일 첨부">📎</label>
-      <input id="fileInput" type="file" multiple style="display:none" />
+    <nav>
+        <div class="logo">GPT-J</div>
+        <div class="actions">
+            <button class="login">로그인</button>
+            <button class="signup">무료로 회원 가입</button>
+            <button class="darkmode-toggle" id="darkBtn">☀️</button>
+        </div>
+    </nav>
+    <main id="main">
+        <div class="messages" id="messages">
+            </div>
+        <div class="welcome-section" id="welcomeSection">
+            <h1 id="title">안녕하세요, 송하영</h1>
+            <div class="suggestions">
+                <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
+                <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
+                <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
+                <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
+            </div>
+        </div>
+    </main>
+    <div class="input-bar" id="inputBar">
+        <div class="input-wrapper">
+            <textarea id="userInput" placeholder="GPT-J에게 물어보기" rows="1"></textarea>
+            <div class="btn-group">
+                <button class="btn send" id="sendBtn">➤</button>
+                <button class="btn cancel" id="cancelBtn" style="display:none;">❌</button>
+            </div>
+        </div>
     </div>
+    <script>
+        const darkBtn = document.getElementById("darkBtn");
+        const messages = document.getElementById("messages");
+        const textarea = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const cancelBtn = document.getElementById("cancelBtn");
+        const cards = document.querySelectorAll(".suggestion-card");
+        const body = document.body;
+        const welcomeSection = document.getElementById("welcomeSection");
+        const mainContent = document.getElementById("main");
 
-    <textarea id="userInput" class="text-area" placeholder="Gemini에게 물어보기 — 메시지를 입력하세요 (Shift+Enter 줄바꿈)" rows="1"></textarea>
+        const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
+        
+        let conversationHistory = [];
+        let isBotThinking = false;
+        let abortController = null;
+        let messageCounter = 0;
 
-    <button id="sendBtn" class="send-btn" title="보내기">➤</button>
-  </div>
-
-  <div style="max-width:900px;width:100%;margin-top:8px;">
-    <div class="attachments" id="attachments"></div>
-  </div>
-</div>
-
-<!-- 이전 답변 모달 -->
-<div class="prev-modal" id="prevModal">
-  <div class="prev-card" role="dialog" aria-modal="true">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <strong>이전 답변</strong>
-      <button id="closePrev" class="ctrl-btn">닫기 ✕</button>
-    </div>
-    <div id="prevContent"></div>
-  </div>
-</div>
-
-<script>
-/* ------------- 설정: 백엔드 주소 ------------- */
-const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; // 기존 URL 사용
-const BACKEND_FILE_URL = BACKEND_URL; // 파일도 같은 엔드포인트로 보냄 (백엔드가 multipart 처리 필요)
-
-/* ------------- 상태 관리 ------------- */
-// 메시지 객체 구조 예시:
-// { id, role: 'user'|'bot', text, attachments: [FileMeta], replies: [replyObj], timestamp }
-// replyObj: { id, text, createdAt }
-let messagesState = []; // 모든 메시지(사용자+봇)
-let replyHistory = {}; // messageId -> array of previous replies (most recent last)
-const messagesEl = document.getElementById('messages');
-
-let loadingBubble = null;
-
-/* ------------- 유틸 ------------- */
-function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
-function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
-
-/* ------------- DOM 렌더링 ------------- */
-function renderMessages(){
-  messagesEl.innerHTML = '';
-  for(const msg of messagesState){
-    const el = document.createElement('div');
-    el.className = 'message ' + (msg.role === 'user' ? 'user' : 'bot');
-    el.dataset.id = msg.id;
-
-    // 컨텐츠: 사용자/봇 다르게 렌더링
-    if(msg.role === 'user'){
-      // 사용자 메시지 (편집 가능)
-      const textDiv = document.createElement('div');
-      textDiv.className = 'user-text';
-      textDiv.innerText = msg.text;
-      el.appendChild(textDiv);
-
-      // controls: edit
-      const ctrl = document.createElement('div');
-      ctrl.className = 'msg-controls';
-      const editBtn = document.createElement('button');
-      editBtn.className = 'ctrl-btn'; editBtn.title='수정'; editBtn.innerText='수정';
-      editBtn.onclick = ()=> startEditMessage(msg.id);
-      ctrl.appendChild(editBtn);
-      el.appendChild(ctrl);
-
-      // attachments (if any)
-      if(msg.attachments && msg.attachments.length){
-        const attachWrap = document.createElement('div');
-        attachWrap.style.marginTop='8px'; attachWrap.style.display='flex'; attachWrap.style.flexDirection='column'; attachWrap.style.gap='6px';
-        msg.attachments.forEach(a=>{
-          const ai = document.createElement('div');
-          ai.className='attach-item';
-          ai.innerHTML = `<span style="font-weight:600">${escapeHtml(a.name)}</span> <span style="opacity:.7;font-size:13px">(${a.sizeHuman})</span>`;
-          attachWrap.appendChild(ai);
+        // 다크모드 토글
+        darkBtn.addEventListener("click", () => {
+            body.classList.toggle("light");
+            darkBtn.textContent = body.classList.contains("light") ? "🌙" : "☀️";
         });
-        el.appendChild(attachWrap);
-      }
-    } else {
-      // 봇 메시지: 텍스트에서 간단한 마크다운/포맷 해석
-      // 포맷 규칙 (간단 파서):
-      // - ```lang\ncode\n``` => 코드 박스
-      // - 라인 시작에 "# " => 큰 글씨(block .big)
-      // - **bold** => <strong>
-      const contentWrap = document.createElement('div');
-      contentWrap.className = 'bot-content';
-      const parts = parseBotText(msg.text);
-      parts.forEach(p=>{
-        if(p.type==='text'){
-          const div = document.createElement('div'); div.innerHTML = p.html;
-          contentWrap.appendChild(div);
-        } else if(p.type==='big'){
-          const d = document.createElement('div'); d.className='big'; d.innerHTML = p.html; contentWrap.appendChild(d);
-        } else if(p.type==='code'){
-          const cb = document.createElement('div'); cb.className='code-box';
-          const header = document.createElement('div'); header.className='code-header';
-          const langSpan = document.createElement('div'); langSpan.className='code-lang'; langSpan.innerText = p.lang || 'code';
-          const headerRight = document.createElement('div');
-          const copyBtn = document.createElement('button'); copyBtn.className='copy-btn'; copyBtn.innerText='복사';
-          copyBtn.onclick = ()=> {
-            navigator.clipboard.writeText(p.code).then(()=> copyBtn.innerText='복사됨').catch(()=> copyBtn.innerText='에러');
-            setTimeout(()=>copyBtn.innerText='복사',1200);
-          };
-          headerRight.appendChild(copyBtn);
-          header.appendChild(langSpan); header.appendChild(headerRight);
-          const pre = document.createElement('pre'); pre.style.margin='0'; pre.style.whiteSpace='pre-wrap';
-          pre.textContent = p.code;
-          cb.appendChild(header); cb.appendChild(pre);
-          contentWrap.appendChild(cb);
+
+        // 카드 클릭 시 텍스트 복사 후 전송
+        cards.forEach(card => {
+            card.addEventListener("click", () => {
+                textarea.value = card.dataset.prompt;
+                sendMessage();
+            });
+        });
+
+        // 마크다운 렌더링 함수
+        function renderMarkdown(text) {
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+            text = text.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+            text = text.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+            text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+            text = text.replace(/```(\w+)?\n([\s\S]+?)```/g, '<pre><code>$2</code></pre>');
+            text = text.replace(/\n/g, '<br>');
+            return text;
         }
-      });
-      el.appendChild(contentWrap);
 
-      // 아래에 '이전 답변' 버튼 추가 (if history exists)
-      const controlsWrap = document.createElement('div'); controlsWrap.style.marginTop='8px';
-      const prevBtn = document.createElement('button'); prevBtn.className='ctrl-btn'; prevBtn.innerText='Previous'; prevBtn.onclick = ()=> showPreviousReplies(msg.sourceUserId);
-      controlsWrap.appendChild(prevBtn);
-      el.appendChild(controlsWrap);
-    }
+        // 메시지 추가/렌더링 함수
+        function addMessage(role, text, messageId) {
+            const row = document.createElement("div");
+            row.className = `message-row ${role}-row`;
+            row.dataset.id = messageId;
 
-    messagesEl.appendChild(el);
-  }
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
+            const msg = document.createElement("div");
+            msg.className = `message ${role}`;
 
-/* 간단한 파서: code blocks, heading(# ), bold */
-function parseBotText(text){
-  const out = [];
-  let remaining = text;
-  const codeRegex = /```(\w+)?\n([\s\S]*?)```/m;
-  while(true){
-    const m = remaining.match(codeRegex);
-    if(!m) break;
-    const idx = m.index;
-    if(idx>0){
-      const before = remaining.slice(0, idx);
-      out.push(...parseInline(before));
-    }
-    out.push({type:'code', lang: m[1]||'code', code: m[2]});
-    remaining = remaining.slice(idx + m[0].length);
-  }
-  if(remaining.trim().length) out.push(...parseInline(remaining));
-  return out;
-}
-function parseInline(text){
-  // split lines; if a line starts with "# " => big
-  const lines = text.split(/\n/);
-  const res=[];
-  for(const line of lines){
-    if(line.startsWith('# ')){
-      const html = inlineFormat(escapeHtml(line.slice(2)));
-      res.push({type:'big', html});
-    } else {
-      const html = inlineFormat(escapeHtml(line));
-      res.push({type:'text', html});
-    }
-  }
-  // preserve newlines by joining with <br>
-  const merged = [];
-  let bufferHtml = '';
-  for(const r of res){
-    if(r.type==='text'){
-      bufferHtml += (bufferHtml?'<br/>':'') + r.html;
-    } else {
-      if(bufferHtml) merged.push({type:'text', html:bufferHtml});
-      merged.push(r);
-      bufferHtml = '';
-    }
-  }
-  if(bufferHtml) merged.push({type:'text', html:bufferHtml});
-  return merged;
-}
-function inlineFormat(s){
-  // **bold**
-  return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-}
+            if (role === 'user') {
+                msg.innerHTML = `<span>${text}</span>`;
+            } else { // bot
+                const contentWrapper = document.createElement("div");
+                contentWrapper.className = "bot-content-wrapper";
+                
+                const icon = document.createElement("span");
+                icon.className = "bot-icon";
+                icon.textContent = "✨";
+                
+                const botText = document.createElement("div");
+                botText.className = "bot-text";
+                botText.innerHTML = renderMarkdown(text);
+                
+                contentWrapper.appendChild(icon);
+                contentWrapper.appendChild(botText);
+                msg.appendChild(contentWrapper);
+                
+                // 부드럽게 커지는 애니메이션 실행
+                setTimeout(() => {
+                    msg.classList.add('loaded');
+                }, 10); 
+            }
 
-/* ------------- 메세지 생성/전송 로직 ------------- */
-function addUserMessage(text, filesMeta=[]){
-  const id = uid('msg');
-  const msg = { id, role:'user', text, attachments: filesMeta.slice(), timestamp:Date.now() };
-  messagesState.push(msg);
-  // 초기 reply history for this user message
-  replyHistory[id] = [];
-  renderMessages();
-  return id;
-}
-function addBotReply(userMsgId, replyText){
-  const id = uid('reply');
-  const botMsg = { id, role:'bot', text: replyText, timestamp:Date.now(), sourceUserId: userMsgId };
-  messagesState.push(botMsg);
-  // push into reply history for that user message
-  if(!replyHistory[userMsgId]) replyHistory[userMsgId]=[];
-  replyHistory[userMsgId].push({ id, text: replyText, createdAt: Date.now() });
-  renderMessages();
-  return id;
-}
+            row.appendChild(msg);
+            messages.appendChild(row);
 
-/* ------------- 로딩 표시 ------------- */
-function showLoadingUnderUser(userMsgId){
-  loadingBubble = { id: uid('loading'), userId:userMsgId };
-  const el = document.createElement('div');
-  el.className = 'message bot';
-  el.dataset.id = loadingBubble.id;
-  el.innerHTML = `<div class="loading"><div>생각 중...</div><div class="dots"><span></span><span></span><span></span></div></div>`;
-  messagesState.push({ id: loadingBubble.id, role:'bot', text:'', temp:true, sourceUserId:userMsgId });
-  renderMessages();
-}
-function removeLoading(){
-  if(!loadingBubble) return;
-  const idx = messagesState.findIndex(m=>m.id===loadingBubble.id);
-  if(idx>=0) messagesState.splice(idx,1);
-  loadingBubble=null;
-}
+            if (welcomeSection.style.display !== 'none' && role === 'user') {
+                welcomeSection.classList.add('hidden');
+                welcomeSection.style.display = 'none';
+            }
 
-/* ------------- 파일 처리 UI ------------- */
-const fileInput = document.getElementById('fileInput');
-const attachmentsEl = document.getElementById('attachments');
-let pendingFiles = []; // File objects
+            mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
+            return row;
+        }
 
-fileInput.addEventListener('change', e=>{
-  const files = Array.from(e.target.files);
-  for(const f of files){
-    pendingFiles.push(f);
-  }
-  renderAttachments();
-});
-function renderAttachments(){
-  attachmentsEl.innerHTML = '';
-  pendingFiles.forEach((f,i)=>{
-    const div = document.createElement('div'); div.className='attach-item';
-    div.innerHTML = `<strong>${escapeHtml(f.name)}</strong><span style="opacity:.7">(${niceBytes(f.size)})</span>`;
-    const removeBtn = document.createElement('button'); removeBtn.className='ctrl-btn'; removeBtn.style.marginLeft='8px'; removeBtn.innerText='제거';
-    removeBtn.onclick = ()=>{ pendingFiles.splice(i,1); renderAttachments(); };
-    div.appendChild(removeBtn);
-    attachmentsEl.appendChild(div);
-  });
-}
-function niceBytes(bytes){
-  if(bytes<1024) return bytes+'B';
-  const units=['KB','MB','GB','TB'];
-  let u=-1; do{ bytes=bytes/1024; u++; } while(bytes>=1024 && u<units.length-1);
-  return bytes.toFixed(bytes>=10?0:1)+units[u];
-}
+        // 로딩 인디케이터 함수 (가로 막대 스타일)
+        function addLoadingIndicator() {
+            const row = document.createElement("div");
+            row.className = "loading-indicator-row";
+            row.dataset.id = 'loading';
 
-/* ------------- 전송 로직: 텍스트+파일 ------------- */
-const sendBtn = document.getElementById('sendBtn');
-const textarea = document.getElementById('userInput');
+            const bubble = document.createElement("div");
+            bubble.className = "loading-indicator-bubble";
+            
+            const icon = document.createElement("span");
+            icon.className = "bot-icon";
+            icon.textContent = "✨";
 
-async function sendMessage(){
-  const text = textarea.value.trim();
-  if(!text && pendingFiles.length===0) return;
-  // create attachments meta (local preview)
-  const filesMeta = pendingFiles.map(f=>({ name:f.name, size:f.size, sizeHuman:niceBytes(f.size) }));
-  const userMsgId = addUserMessage(text || '[파일 전송]', filesMeta);
-  textarea.value = '';
-  pendingFiles = []; renderAttachments();
+            const barContainer = document.createElement("div");
+            barContainer.className = "bar-loader-container";
+            barContainer.innerHTML = '<div class="bar-loader"></div>';
 
-  showLoadingUnderUser(userMsgId);
+            bubble.appendChild(icon);
+            bubble.appendChild(barContainer);
+            row.appendChild(bubble);
 
-  try{
-    // if there are files, send multipart/form-data; otherwise JSON
-    let responseData = null;
-    if(filesMeta.length>0){
-      const fd = new FormData();
-      fd.append('message', text);
-      pendingFiles = []; // already copied to filesMeta; but original File objects were cleared above -> we need actual files. To fix: capture files before clearing.
-      // NOTE: we need original Files — we captured them above as pendingFiles but then cleared them. Fix: store files before clearing.
-    }
-  } catch(e){
-    // fallback: try JSON without files
-    console.error(e);
-  }
+            messages.appendChild(row);
+            mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
+            return row;
+        }
 
-  // --- To avoid tricky file state bugs, we'll do the actual send with preserved files.
-  await sendToBackendAndHandle(userMsgId, text, filesMeta);
-}
+        // UI 상태 관리 함수 (전송/취소 버튼)
+        function setThinkingState(isThinking) {
+            isBotThinking = isThinking;
+            if (isThinking) {
+                sendBtn.style.display = 'none';
+                cancelBtn.style.display = 'flex';
+                textarea.disabled = true;
+            } else {
+                sendBtn.style.display = 'flex';
+                cancelBtn.style.display = 'none';
+                textarea.disabled = false;
+            }
+        }
 
-async function sendToBackendAndHandle(userMsgId, text, filesMeta){
-  // We need the actual File objects. We'll get them from the file input element's files (which were cleared if user removed).
-  // To keep behavior robust: check fileInput.files.
-  const actualFiles = Array.from(fileInput.files || []).slice(0); // may be empty
-  // Build request
-  try{
-    let res;
-    if(actualFiles.length>0){
-      const fd = new FormData();
-      fd.append('message', text);
-      actualFiles.forEach((f,i)=> fd.append('file'+i, f));
-      res = await fetch(BACKEND_FILE_URL, { method:'POST', body: fd });
-    } else {
-      res = await fetch(BACKEND_URL, {
-        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message:text })
-      });
-    }
-    if(!res.ok){ throw new Error('Network error: '+res.status); }
-    const data = await res.json();
-    // assume backend returns { reply: "..." }
-    removeLoading();
-    addBotReply(userMsgId, data.reply || '응답이 비어있습니다.');
-    // clear native file input
-    fileInput.value='';
-    renderAttachments();
-  }catch(err){
-    removeLoading();
-    addBotReply(userMsgId, '⚠️ 오류가 발생했습니다: ' + (err.message || err));
-    console.error(err);
-  }
-}
+        async function sendMessage() {
+            const text = textarea.value.trim();
+            if (!text || isBotThinking) return;
 
-/* ------------- 사용자 메시지 수정 ------------- */
-function startEditMessage(msgId){
-  const msg = messagesState.find(m=>m.id===msgId && m.role==='user');
-  if(!msg) return;
-  // prefill textarea and focus
-  textarea.value = msg.text;
-  textarea.focus();
-  // mark editing state
-  textarea.dataset.editing = msgId;
-  sendBtn.innerText = '수정';
-}
-async function applyEdit(){
-  const editId = textarea.dataset.editing;
-  if(!editId) return;
-  const newText = textarea.value.trim();
-  if(!newText) return;
-  // update the message
-  const msgIdx = messagesState.findIndex(m=>m.id===editId && m.role==='user');
-  if(msgIdx===-1) return;
-  messagesState[msgIdx].text = newText;
-  // delete all bot replies that are tied to this user message (but keep them in history)
-  const removed = [];
-  for(let i = messagesState.length-1; i>=0; i--){
-    const m = messagesState[i];
-    if(m.role==='bot' && m.sourceUserId === editId){
-      removed.unshift(m); // keep order
-      messagesState.splice(i,1);
-    }
-  }
-  // save removed replies into replyHistory (already saved) — they are already there because replyHistory kept earlier replies.
-  // After editing we send the edited message again and get new reply.
-  renderMessages();
-  // cleanup edit UI
-  delete textarea.dataset.editing;
-  sendBtn.innerText = '➤';
-  // send to backend again
-  showLoadingUnderUser(editId);
-  await sendToBackendAndHandle(editId, newText, []);
-}
+            welcomeSection.classList.add('hidden');
+            welcomeSection.style.display = 'none';
 
-/* ------------- Previous replies modal ------------- */
-const prevModal = document.getElementById('prevModal'), prevContent = document.getElementById('prevContent'), closePrev = document.getElementById('closePrev');
-closePrev.onclick = ()=> { prevModal.style.display='none'; prevContent.innerHTML=''; }
-function showPreviousReplies(userMsgId){
-  const hist = replyHistory[userMsgId] || [];
-  prevContent.innerHTML = '';
-  if(hist.length===0){ prevContent.innerHTML = '<div>이전에 답변이 없습니다.</div>'; prevModal.style.display='flex'; return; }
-  hist.slice().reverse().forEach(h=>{
-    const block = document.createElement('div'); block.style.borderBottom='1px solid var(--border)'; block.style.padding='8px 0';
-    block.innerHTML = `<div style="font-size:13px;color:var(--muted);margin-bottom:6px;">${new Date(h.createdAt).toLocaleString()}</div><div>${escapeHtml(h.text).replace(/\n/g,'<br/>')}</div>`;
-    prevContent.appendChild(block);
-  });
-  prevModal.style.display = 'flex';
-}
+            textarea.value = "";
+            textarea.style.height = "auto";
+            
+            messageCounter++;
+            const currentMessageId = messageCounter;
 
-/* ------------- 이벤트 바인딩 ------------- */
-sendBtn.addEventListener('click', async ()=>{
-  if(textarea.dataset.editing) await applyEdit(); else await sendMessage();
-});
+            // 사용자 메시지 히스토리 업데이트 및 화면 표시
+            const userHistoryItem = { role: 'user', content: text, id: currentMessageId };
+            conversationHistory.push(userHistoryItem);
+            addMessage("user", text, currentMessageId);
+            
+            // 로딩 인디케이터 표시
+            const loadingWrapper = addLoadingIndicator();
+            setThinkingState(true);
+            abortController = new AbortController();
 
-textarea.addEventListener('keydown', async (e)=>{
-  if(e.key==='Enter' && !e.shiftKey){
-    e.preventDefault();
-    if(textarea.dataset.editing) await applyEdit(); else await sendMessage();
-  }
-});
+            try {
+                const res = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: text }),
+                    signal: abortController.signal
+                });
+                
+                const data = await res.json();
+                
+                // 로딩 인디케이터 제거
+                loadingWrapper.remove();
+                
+                // 새 답변
+                messageCounter++;
+                const botMessageId = messageCounter;
+                
+                const botHistoryItem = { 
+                    role: 'bot', 
+                    content: data.reply, 
+                    id: botMessageId
+                };
+                conversationHistory.push(botHistoryItem);
+                addMessage("bot", data.reply, botMessageId);
+                
+            } catch (e) {
+                loadingWrapper.remove();
+                if (e.name === 'AbortError') {
+                    // 취소 시, 히스토리에서 해당 요청 삭제 및 사용자 메시지 제거
+                    conversationHistory = conversationHistory.filter(item => item.id !== currentMessageId);
+                    const userMessageRow = messages.querySelector(`.message-row[data-id="${currentMessageId}"]`);
+                    if (userMessageRow) userMessageRow.remove();
+                } else {
+                    console.error(e);
+                    
+                    messageCounter++;
+                    const botMessageId = messageCounter;
+                    const errorMessage = "⚠️ 응답을 가져오는 중 오류가 발생했습니다.";
+                    conversationHistory.push({ role: 'bot', content: errorMessage, id: botMessageId });
+                    addMessage("bot", errorMessage, botMessageId);
+                }
+            } finally {
+                setThinkingState(false);
+                abortController = null;
+                mainContent.scrollTo({ top: mainContent.scrollHeight, behavior: 'smooth' });
+            }
+        }
 
-// suggestion cards click
-document.querySelectorAll('.suggestion-card').forEach(c=>{
-  c.onclick = ()=>{
-    textarea.value = c.dataset.prompt;
-    textarea.focus();
-  };
-});
+        // 취소 버튼 이벤트 리스너
+        cancelBtn.addEventListener("click", () => {
+            if (abortController) {
+                abortController.abort();
+            }
+        });
 
-// dark mode toggle
-const darkBtn = document.getElementById('darkBtn'); darkBtn.onclick = ()=>{
-  document.body.classList.toggle('dark');
-  darkBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
-};
+        sendBtn.addEventListener("click", sendMessage);
+        textarea.addEventListener("keydown", e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
-// support copy-of-message (복사)
-messagesEl.addEventListener('click', (e)=>{
-  const t = e.target;
-  if(t && t.classList && t.classList.contains('copy-btn')){
-    // already handled in individual handler
-  }
-});
-
-// close prev modal when clicking outside
-prevModal.addEventListener('click', (ev)=>{ if(ev.target===prevModal) prevModal.style.display='none'; });
-
-/* ------------- 초기 렌더링 ------------- */
-renderMessages();
-
-/* ------------- 주의: 파일 전송 안정성 보완 -------------
-현재 로직은 실제 File 객체를 fileInput.files에서 읽어 전송합니다.
-만약 사용자가 첨부 후 fileInput을 비우면 파일 전송이 안 됩니다.
-이 부분은 백엔드와 UI 흐름에 따라 세부 조정하시면 됩니다.
----------------------------------------------------- */
-
-</script>
+        textarea.addEventListener("input", () => {
+            textarea.style.height = "auto";
+            textarea.style.height = textarea.scrollHeight + "px";
+        });
+    </script>
 </body>
 </html>
