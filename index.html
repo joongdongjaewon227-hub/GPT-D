@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Minsu GPT</title>
 <style>
+/* ... (기존 CSS 코드 유지) ... */
 :root {
   --bg: #ffffff;
   --text: #111;
@@ -16,8 +17,7 @@
   --menu-bg: rgba(255,255,255,0.95);
   --menu-text: #444;
   --transition: 0.3s ease;
-  --user-bubble-bg: #e0e0e0; /* 사용자 메시지 배경색 */
-  --code-bg: #f5f5f5; /* 코드 블록 배경색 (밝은 모드) */
+  --code-bg: #f0f0f0; /* 코드 블록 배경색 (밝은 모드) */
 }
 body.dark {
   --bg: #0d0d0d;
@@ -29,7 +29,6 @@ body.dark {
   --button-text: #000;
   --menu-bg: rgba(30,30,30,0.9);
   --menu-text: #ccc;
-  --user-bubble-bg: #333;
   --code-bg: #2b2b2b; /* 코드 블록 배경색 (다크 모드) */
 }
 * { box-sizing: border-box; transition: background var(--transition), color var(--transition), border var(--transition); }
@@ -54,27 +53,24 @@ main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smo
 }
 .suggestion-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease; }
 .suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 900px; margin-top: 2rem; }
-.message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; position: relative; animation: fadeIn 0.3s ease forwards; font-size: 1rem; }
-
-/* 🌟 사용자 메시지 스타일 (볼드체 제거, Gemini 스타일) 🌟 */
-.message.user {
-  background: var(--user-bubble-bg);
-  color: var(--text);
-  align-self: flex-end;
+.messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
+.message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; font-size: 1rem; }
+/* 🌟 사용자 메시지: 볼드체 제거 */
+.message.user { 
+  background: var(--button-bg); 
+  color: var(--button-text); 
+  align-self: flex-end; 
   font-weight: normal; /* 볼드체 제거 */
-  border-radius: 18px 18px 2px 18px;
-  padding: 0.8rem 1.1rem;
 }
-/* 🌟 봇 메시지 스타일 및 마크다운 스타일 🌟 */
-.message.bot {
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  align-self: flex-start;
-  font-size: 1rem;
-  border-radius: 18px 18px 18px 2px;
-  padding: 0.8rem 1.1rem;
+/* 봇 메시지 */
+.message.bot { 
+  background: var(--input-bg); 
+  border: 1px solid var(--border); 
+  align-self: flex-start; 
+  font-size: 1rem; 
 }
+
+/* 🌟 마크다운 스타일 추가 🌟 */
 .message.bot ul,
 .message.bot ol {
   padding-left: 20px;
@@ -98,6 +94,7 @@ main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smo
   color: var(--menu-text);
   margin: 0.5rem 0;
 }
+/* 🌟 인라인 코드 스타일 유지 */
 .message.bot code:not(pre code) {
   background: var(--border);
   padding: 2px 4px;
@@ -105,28 +102,23 @@ main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smo
   font-size: 0.95em;
   font-family: monospace;
 }
-
 /* 🌟 코드 블록 (pre) 스타일 및 복사 버튼 🌟 */
 .message.bot pre {
   background: var(--code-bg);
-  padding: 0;
+  padding: 0; /* padding을 0으로 설정하고 header와 code에서 패딩 처리 */
   border-radius: 6px;
-  overflow: hidden; /* 내부 요소를 감춤 */
-  margin: 1rem -1rem; /* 좌우 여백을 확장하여 메시지 영역을 벗어나게 */
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  margin: 1rem 0; /* 메시지 버블 내 여백 */
   position: relative;
 }
-/* 코드 블록 헤더 (파일명 및 복사 버튼) */
 .code-header {
   background: var(--border);
   color: var(--text);
-  padding: 0.5rem 1rem;
-  font-size: 0.9em;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.85em;
   display: flex;
-  justify-content: flex-end; /* 오른쪽 정렬 */
+  justify-content: flex-end;
   align-items: center;
-  height: 36px;
 }
 .code-header .copy-btn {
   background: var(--button-bg);
@@ -143,106 +135,82 @@ main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smo
   background: #4CAF50; /* 복사 완료 색상 */
   color: #fff;
 }
-
 .message.bot pre code {
   display: block;
   padding: 1rem;
   overflow-x: auto;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-family: monospace;
   font-size: 0.95rem;
   line-height: 1.4;
-  /* 구문 강조 모방 색상 (실제 구문 강조는 JS 라이브러리가 필요하지만, 모방 스타일 적용) */
-  color: #D4D4D4; /* 기본 코드 색상 (다크모드 기준) */
+  /* 구문 강조 모방 */
+  color: var(--text);
 }
-body.dark .message.bot pre code { color: #D4D4D4; }
-body .message.bot pre code { color: #1e1e1e; }
-/* 🌟 코드 블록 스타일 끝 🌟 */
-
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.input-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: transparent;
-  display: flex;
-  justify-content: center;
-  padding: 1.2rem 1rem 1.5rem;
-  z-index: 20;
-  box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.05);
-}
-body.dark .input-bar {
-  box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.2);
-}
-.input-wrapper {
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-  max-width: 900px;
-  background: var(--input-bg);
-  border-radius: 28px;
-  border: 1px solid var(--border);
-  padding: 0.6rem 0.8rem;
-  gap: 0.4rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-textarea {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font-size: 1.05rem;
-  resize: none;
-  overflow-y: auto;
-  min-height: 1.6rem;
-  max-height: 200px;
-  line-height: 1.6rem;
-  padding: 8px 0;
-  outline: none;
-  white-space: pre-wrap;
-  scrollbar-width: none;
-}
-textarea::-webkit-scrollbar { display: none; }
-textarea:disabled { opacity: 0.6; cursor: not-allowed; } /* 비활성화 시 스타일 */
 
-.btn {
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: transparent;
-  color: var(--menu-text);
-  font-size: 1.4rem;
-  margin-right: 0.2rem;
-  transition: background 0.2s ease, color 0.2s ease;
+/* 🌟 입력창 스타일 (원래대로 유지) 🌟 */
+.input-bar { 
+  position: fixed; 
+  bottom: 0; 
+  left: 0; 
+  width: 100%; 
+  background: linear-gradient(to top, var(--bg) 90%, transparent); 
+  display: flex; 
+  justify-content: center; 
+  padding: 0.6rem 1rem 1rem; 
+  z-index: 20; 
 }
-.btn#sendBtn {
-  background: var(--button-bg);
-  color: var(--button-text);
-  font-size: 1.3rem;
-  margin-right: 0;
+.input-wrapper { 
+  display: flex; 
+  align-items: flex-end; 
+  width: 100%; 
+  max-width: 700px; 
+  background: var(--input-bg); 
+  border-radius: 22px; 
+  border: 1.5px solid var(--border-strong); 
+  padding: 0.4rem 0.6rem; 
+  gap: 0.4rem; 
 }
+textarea { 
+  flex: 1; 
+  border: none; 
+  background: transparent; 
+  color: var(--text); 
+  font-size: 1rem; 
+  resize: none; 
+  overflow-y: auto; 
+  min-height: 1.4rem; 
+  max-height: 200px; 
+  line-height: 1.4rem; 
+  padding: 6px 0; 
+  outline: none; 
+  white-space: pre-wrap; 
+}
+textarea:disabled { opacity: 0.6; cursor: not-allowed; } /* 비활성화 시 스타일 추가 */
+
+.btn { 
+  border: none; 
+  border-radius: 50%; 
+  width: 36px; 
+  height: 36px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  cursor: pointer; 
+  background: var(--button-bg); 
+  color: var(--button-text); 
+}
+/* 🌟 응답 중지 버튼 스타일 추가 */
 .btn#stopBtn {
   background: #f00; /* 중지 버튼은 빨간색 */
   color: #fff;
   font-size: 0.9rem;
   width: auto; /* 너비 자동 설정 */
-  height: 40px;
+  height: 36px;
   border-radius: 20px;
   padding: 0 1rem;
-  margin-right: 0;
 }
-body.dark .btn#sendBtn {
-  background: var(--button-bg);
-  color: var(--button-text);
-}
-.btn:hover { background: var(--border); }
-.btn#sendBtn:hover { opacity: 0.9; }
+/* 🌟 */
 
 .loading-bar { width: 100%; height: 4px; background: var(--border); overflow: hidden; border-radius: 4px; margin-top: 6px; position: relative; }
 .loading-bar::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--button-bg); animation: barMove 1s linear infinite; }
@@ -251,9 +219,7 @@ body.dark .btn#sendBtn {
 /* 모바일 대응 */
 @media(max-width:700px){
   .suggestions { grid-template-columns: repeat(2, 1fr); }
-  .message { font-size: 1rem; max-width: 95%; }
-  .input-wrapper { max-width: 100%; border-radius: 24px; }
-  .message.bot pre { margin: 1rem -0.5rem; } /* 모바일에서 코드 블록 여백 조정 */
+  .message { font-size: 1.1rem; }
 }
 </style>
 </head>
@@ -285,6 +251,7 @@ body.dark .btn#sendBtn {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <script>
 const darkBtn = document.getElementById("darkBtn");
 const messages = document.getElementById("messages");
@@ -293,8 +260,8 @@ const sendBtn = document.getElementById("sendBtn");
 const inputWrapper = sendBtn.parentElement; // input-wrapper를 찾습니다.
 const cards = document.querySelectorAll(".suggestion-card");
 const body = document.body;
-
 let loadingMsg = null;
+
 let isResponding = false; // 🌟 상태 관리 변수
 let abortController = null; // 🌟 요청 중지 컨트롤러
 
@@ -317,7 +284,8 @@ cards.forEach(card => {
   });
 });
 
-function addMessage(role, text) { // isCode 파라미터 제거
+// 🌟 addMessage 함수 수정 (볼드체 제거를 위해 font-weight: normal을 CSS에 적용)
+function addMessage(role, text) { 
   const msg = document.createElement("div");
   msg.className = `message ${role}`;
   msg.textContent = text;
@@ -369,6 +337,8 @@ function attachCopyFunctionality(element) {
   });
 }
 
+
+// 🌟 replaceLoadingBubble 함수 수정 (marked.js 및 복사 기능 적용)
 function replaceLoadingBubble(text){
   if(loadingMsg){
     loadingMsg.classList.remove("bot-loading");
@@ -378,13 +348,14 @@ function replaceLoadingBubble(text){
 
     loadingMsg.innerHTML = htmlContent;
     
-    // 🌟 복사 기능 추가 호출
+    // 복사 기능 추가 호출
     attachCopyFunctionality(loadingMsg);
 
     loadingMsg = null;
     messages.scrollTop = messages.scrollHeight;
   }
 }
+
 
 // 🌟 UI 상태를 업데이트하는 함수
 function updateUI(loading) {
@@ -431,7 +402,7 @@ async function sendMessage(){
   if(!text) return;
   
   textarea.value="";
-  addMessage("user", text); // isCode 파라미터 제거
+  addMessage("user", text);
   addLoadingBubble();
   updateUI(true); // 🌟 로딩 상태로 변경 및 UI 업데이트
   
@@ -458,9 +429,7 @@ async function sendMessage(){
       replaceLoadingBubble("⚠️ 오류가 발생했습니다: " + e.message);
     }
   } finally {
-    // 🌟 응답 완료 후 로딩 상태 해제 및 UI 업데이트
-    // AbortError로 중지된 경우는 이미 stopResponse에서 처리했으므로,
-    // 여기서는 정상 완료 또는 네트워크 오류 시에만 호출
+    // 응답 완료 후 로딩 상태 해제 및 UI 업데이트
     if (isResponding) {
       updateUI(false); 
     }
