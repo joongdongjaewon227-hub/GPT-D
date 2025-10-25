@@ -1,453 +1,427 @@
 <!DOCTYPE html>
+
 <html lang="ko">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Minsu GPT</title>
+
 <style>
-/* ... (기존 CSS 코드 유지) ... */
+
+/* ... (CSS 코드 생략) ... */
+
 :root {
-  --bg: #ffffff;
-  --text: #111;
-  --input-bg: #f7f7f8;
-  --border: #dcdcdc;
-  --border-strong: #b0b0b0;
-  --button-bg: #000;
-  --button-text: #fff;
-  --menu-bg: rgba(255,255,255,0.95);
-  --menu-text: #444;
-  --transition: 0.3s ease;
-  --code-bg: #f0f0f0; /* 코드 블록 배경색 (밝은 모드) */
-}
-body.dark {
-  --bg: #0d0d0d;
-  --text: #e4e4e4;
-  --input-bg: #1a1a1a;
-  --border: #2a2a2a;
-  --border-strong: #555;
-  --button-bg: #fff;
-  --button-text: #000;
-  --menu-bg: rgba(30,30,30,0.9);
-  --menu-text: #ccc;
-  --code-bg: #2b2b2b; /* 코드 블록 배경색 (다크 모드) */
-}
-* { box-sizing: border-box; transition: background var(--transition), color var(--transition), border var(--transition); }
-body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-nav { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.2rem; z-index: 10; }
-.logo { font-weight: 600; font-size: 1.05rem; }
-.actions { display: flex; gap: 10px; align-items: center; }
-.actions button { border-radius: 20px; font-size: 0.9rem; padding: 0.4rem 1rem; cursor: pointer; }
-.login { background: var(--button-bg); color: var(--button-text); border: none; }
-.signup { background: transparent; border: 1px solid var(--border); color: var(--text); }
-.darkmode-toggle { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
-main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smooth; display: flex; flex-direction: column; align-items: center; }
-#title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-top: 12rem; transition: opacity 0.5s ease; }
-.suggestions {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.8rem;
-  width: 100%;
-  max-width: 700px;
-  margin-top: 3rem;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.suggestion-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease; }
-.suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-.messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
-.message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; font-size: 1rem; }
-/* 🌟 사용자 메시지: 볼드체 제거 */
-.message.user { 
-  background: var(--button-bg); 
-  color: var(--button-text); 
-  align-self: flex-end; 
-  font-weight: normal; /* 볼드체 제거 */
-}
-/* 봇 메시지 */
-.message.bot { 
-  background: var(--input-bg); 
-  border: 1px solid var(--border); 
-  align-self: flex-start; 
-  font-size: 1rem; 
+
+  --bg: #ffffff;
+
+  --text: #111;
+
+  --input-bg: #f7f7f8;
+
+  --border: #dcdcdc;
+
+  --border-strong: #b0b0b0;
+
+  --button-bg: #000;
+
+  --button-text: #fff;
+
+  --menu-bg: rgba(255,255,255,0.95);
+
+  --menu-text: #444;
+
+  --transition: 0.3s ease;
+
 }
 
-/* 🌟 마크다운 스타일 추가 🌟 */
-.message.bot ul,
-.message.bot ol {
-  padding-left: 20px;
-  margin: 0.5rem 0;
+body.dark {
+
+  --bg: #0d0d0d;
+
+  --text: #e4e4e4;
+
+  --input-bg: #1a1a1a;
+
+  --border: #2a2a2a;
+
+  --border-strong: #555;
+
+  --button-bg: #fff;
+
+  --button-text: #000;
+
+  --menu-bg: rgba(30,30,30,0.9);
+
+  --menu-text: #ccc;
+
 }
-.message.bot li {
-  margin-bottom: 0.2rem;
+
+* { box-sizing: border-box; transition: background var(--transition), color var(--transition), border var(--transition); }
+
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+nav { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 1.2rem; z-index: 10; }
+
+.logo { font-weight: 600; font-size: 1.05rem; }
+
+.actions { display: flex; gap: 10px; align-items: center; }
+
+.actions button { border-radius: 20px; font-size: 0.9rem; padding: 0.4rem 1rem; cursor: pointer; }
+
+.login { background: var(--button-bg); color: var(--button-text); border: none; }
+
+.signup { background: transparent; border: 1px solid var(--border); color: var(--text); }
+
+.darkmode-toggle { background: transparent; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); }
+
+main { flex: 1; padding: 60px 1rem 120px; overflow-y: auto; scroll-behavior: smooth; display: flex; flex-direction: column; align-items: center; }
+
+#title { font-size: 1.8rem; font-weight: 600; text-align: center; margin-top: 12rem; transition: opacity 0.5s ease; }
+
+.suggestions {
+
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 0.8rem;
+
+  width: 100%;
+
+  max-width: 700px;
+
+  margin-top: 3rem;
+
+  transition: opacity 0.6s ease, transform 0.6s ease;
+
 }
-.message.bot p {
-  margin: 0.5rem 0;
-}
-.message.bot strong {
-  font-weight: 700;
-}
-.message.bot em {
-  font-style: italic;
-}
-.message.bot blockquote {
-  border-left: 4px solid var(--border-strong);
-  padding-left: 10px;
-  color: var(--menu-text);
-  margin: 0.5rem 0;
-}
-/* 🌟 인라인 코드 스타일 유지 */
-.message.bot code:not(pre code) {
-  background: var(--border);
-  padding: 2px 4px;
-  border-radius: 4px;
-  font-size: 0.95em;
-  font-family: monospace;
-}
-/* 🌟 코드 블록 (pre) 스타일 및 복사 버튼 🌟 */
-.message.bot pre {
-  background: var(--code-bg);
-  padding: 0; /* padding을 0으로 설정하고 header와 code에서 패딩 처리 */
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 1rem 0; /* 메시지 버블 내 여백 */
-  position: relative;
-}
-.code-header {
-  background: var(--border);
-  color: var(--text);
-  padding: 0.3rem 0.8rem;
-  font-size: 0.85em;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-.code-header .copy-btn {
-  background: var(--button-bg);
-  color: var(--button-text);
-  border: none;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85em;
-  transition: opacity 0.2s;
-}
-.code-header .copy-btn:hover { opacity: 0.8; }
-.code-header .copy-btn.copied {
-  background: #4CAF50; /* 복사 완료 색상 */
-  color: #fff;
-}
-.message.bot pre code {
-  display: block;
-  padding: 1rem;
-  overflow-x: auto;
-  font-family: monospace;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  /* 구문 강조 모방 */
-  color: var(--text);
-}
+
+.suggestion-card { background: var(--input-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1rem; cursor: pointer; text-align: left; transition: all 0.2s ease; }
+
+.suggestion-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+.messages { display: flex; flex-direction: column; gap: 0.8rem; width: 100%; max-width: 700px; margin-top: 2rem; }
+
+.message { max-width: 80%; padding: 0.7rem 1rem; border-radius: 16px; word-break: break-word; white-space: pre-wrap; position: relative; animation: fadeIn 0.3s ease forwards; font-size: 1rem; }
+
+.message.user { background: var(--button-bg); color: var(--button-text); align-self: flex-end; font-weight: bold; }
+
+.message.bot { background: var(--input-bg); border: 1px solid var(--border); align-self: flex-start; font-size: 1rem; }
+
+.message.bot code { background: #eee; padding: 2px 4px; border-radius: 4px; display: block; white-space: pre-wrap; font-family: monospace; }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 🌟 입력창 스타일 (원래대로 유지) 🌟 */
-.input-bar { 
-  position: fixed; 
-  bottom: 0; 
-  left: 0; 
-  width: 100%; 
-  background: linear-gradient(to top, var(--bg) 90%, transparent); 
-  display: flex; 
-  justify-content: center; 
-  padding: 0.6rem 1rem 1rem; 
-  z-index: 20; 
-}
-.input-wrapper { 
-  display: flex; 
-  align-items: flex-end; 
-  width: 100%; 
-  max-width: 700px; 
-  background: var(--input-bg); 
-  border-radius: 22px; 
-  border: 1.5px solid var(--border-strong); 
-  padding: 0.4rem 0.6rem; 
-  gap: 0.4rem; 
-}
-textarea { 
-  flex: 1; 
-  border: none; 
-  background: transparent; 
-  color: var(--text); 
-  font-size: 1rem; 
-  resize: none; 
-  overflow-y: auto; 
-  min-height: 1.4rem; 
-  max-height: 200px; 
-  line-height: 1.4rem; 
-  padding: 6px 0; 
-  outline: none; 
-  white-space: pre-wrap; 
-}
-textarea:disabled { opacity: 0.6; cursor: not-allowed; } /* 비활성화 시 스타일 추가 */
+.input-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, var(--bg) 90%, transparent); display: flex; justify-content: center; padding: 0.6rem 1rem 1rem; z-index: 20; }
 
-.btn { 
-  border: none; 
-  border-radius: 50%; 
-  width: 36px; 
-  height: 36px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  cursor: pointer; 
-  background: var(--button-bg); 
-  color: var(--button-text); 
-}
-/* 🌟 응답 중지 버튼 스타일 추가 */
-.btn#stopBtn {
-  background: #f00; /* 중지 버튼은 빨간색 */
-  color: #fff;
-  font-size: 0.9rem;
-  width: auto; /* 너비 자동 설정 */
-  height: 36px;
-  border-radius: 20px;
-  padding: 0 1rem;
-}
-/* 🌟 */
+.input-wrapper { display: flex; align-items: flex-end; width: 100%; max-width: 700px; background: var(--input-bg); border-radius: 22px; border: 1.5px solid var(--border-strong); padding: 0.4rem 0.6rem; gap: 0.4rem; }
+
+textarea { flex: 1; border: none; background: transparent; color: var(--text); font-size: 1rem; resize: none; overflow-y: auto; min-height: 1.4rem; max-height: 200px; line-height: 1.4rem; padding: 6px 0; outline: none; white-space: pre-wrap; }
+
+.btn { border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: var(--button-bg); color: var(--button-text); }
 
 .loading-bar { width: 100%; height: 4px; background: var(--border); overflow: hidden; border-radius: 4px; margin-top: 6px; position: relative; }
+
 .loading-bar::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: var(--button-bg); animation: barMove 1s linear infinite; }
+
 @keyframes barMove { 0% { left: -40%; } 100% { left: 100%; } }
 
+
+
 /* 모바일 대응 */
+
 @media(max-width:700px){
-  .suggestions { grid-template-columns: repeat(2, 1fr); }
-  .message { font-size: 1.1rem; }
+
+  .suggestions { grid-template-columns: repeat(2, 1fr); }
+
+  .message { font-size: 1.1rem; }
+
 }
+
 </style>
+
 </head>
+
 <body>
+
 <nav>
-  <div class="logo">Minsu GPT</div>
-  <div class="actions">
-    <button class="login">로그인</button>
-    <button class="signup">무료로 회원 가입</button>
-    <button class="darkmode-toggle" id="darkBtn">🌙</button>
-  </div>
+
+  <div class="logo">Minsu GPT</div>
+
+  <div class="actions">
+
+    <button class="login">로그인</button>
+
+    <button class="signup">무료로 회원 가입</button>
+
+    <button class="darkmode-toggle" id="darkBtn">🌙</button>
+
+  </div>
+
 </nav>
+
 <main id="main">
-  <h1 id="title">어디서부터 시작할까요?</h1>
-  <div class="suggestions">
-    <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
-    <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
-    <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
-    <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
-  </div>
-  <div class="messages" id="messages"></div>
+
+  <h1 id="title">어디서부터 시작할까요?</h1>
+
+  <div class="suggestions">
+
+    <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">✍️ 창의적인 글쓰기 아이디어를 제안해줘</div>
+
+    <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">🎮 파이썬으로 간단한 게임 만드는 법 알려줘</div>
+
+    <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">⏰ 효과적인 시간 관리 방법 추천해줘</div>
+
+    <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">🔬 재미있는 과학 사실 알려줘</div>
+
+  </div>
+
+  <div class="messages" id="messages"></div>
+
 </main>
+
 <div class="input-bar">
-  <div class="input-wrapper">
-    <button class="btn" id="plusBtn">＋</button>
-    <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
-    <button class="btn" id="sendBtn">➤</button>
-  </div>
+
+  <div class="input-wrapper">
+
+    <button class="btn" id="plusBtn">＋</button>
+
+    <textarea id="userInput" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+
+    <button class="btn" id="sendBtn">➤</button>
+
+  </div>
+
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 
 <script>
+
 const darkBtn = document.getElementById("darkBtn");
+
 const messages = document.getElementById("messages");
+
 const textarea = document.getElementById("userInput");
+
 const sendBtn = document.getElementById("sendBtn");
-const inputWrapper = sendBtn.parentElement; // input-wrapper를 찾습니다.
+
 const cards = document.querySelectorAll(".suggestion-card");
+
 const body = document.body;
+
 let loadingMsg = null;
 
-let isResponding = false; // 🌟 상태 관리 변수
-let abortController = null; // 🌟 요청 중지 컨트롤러
+
 
 // 🌟🌟🌟🌟🌟 당신의 PythonAnywhere 백엔드 주소입니다! 🌟🌟🌟🌟🌟
+
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
+
 // 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟
 
+
+
 // 다크모드 토글
+
 darkBtn.addEventListener("click", () => {
-  body.classList.toggle("dark");
-  darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
+
+  body.classList.toggle("dark");
+
+  darkBtn.textContent = body.classList.contains("dark") ? "☀️" : "🌙";
+
 });
+
+
 
 // 카드 클릭
+
 cards.forEach(card => {
-  card.addEventListener("click", () => {
-    if (isResponding) return; // 응답 중이면 무시
-    textarea.value = card.dataset.prompt;
-    sendMessage();
-  });
+
+  card.addEventListener("click", () => {
+
+    textarea.value = card.dataset.prompt;
+
+    sendMessage();
+
+  });
+
 });
 
-// 🌟 addMessage 함수 수정 (볼드체 제거를 위해 font-weight: normal을 CSS에 적용)
-function addMessage(role, text) { 
-  const msg = document.createElement("div");
-  msg.className = `message ${role}`;
-  msg.textContent = text;
-  messages.appendChild(msg);
-  messages.scrollTop = messages.scrollHeight;
+
+
+function addMessage(role, text, isCode=false) {
+
+  const msg = document.createElement("div");
+
+  msg.className = `message ${role}`;
+
+  if(isCode){
+
+    const codeBlock = document.createElement("code");
+
+    codeBlock.textContent = text;
+
+    msg.appendChild(codeBlock);
+
+  } else {
+
+    msg.textContent = text;
+
+  }
+
+  messages.appendChild(msg);
+
+  messages.scrollTop = messages.scrollHeight;
+
 }
+
+
+
+// 타이핑 효과
+
+async function typeText(container, text, delay=20){
+
+  container.textContent = "";
+
+  for(let char of text){
+
+    container.textContent += char;
+
+    messages.scrollTop = messages.scrollHeight;
+
+    await new Promise(r=>setTimeout(r, delay));
+
+  }
+
+}
+
+
 
 function addLoadingBubble(){
-  const msg = document.createElement("div");
-  msg.className = "message bot bot-loading";
-  msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
-  messages.appendChild(msg);
-  messages.scrollTop = messages.scrollHeight;
-  loadingMsg = msg;
-}
 
-// 🌟 코드 복사 기능 추가
-function attachCopyFunctionality(element) {
-  element.querySelectorAll('pre code').forEach(codeBlock => {
-    const pre = codeBlock.closest('pre');
-    
-    // 1. 헤더 생성
-    const header = document.createElement('div');
-    header.className = 'code-header';
+  const msg = document.createElement("div");
 
-    // 2. 복사 버튼 생성
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy-btn';
-    copyBtn.textContent = '복사';
+  msg.className = "message bot bot-loading";
 
-    // 3. 복사 이벤트 리스너 추가
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(codeBlock.textContent).then(() => {
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = '복사 완료!';
-        copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = originalText;
-          copyBtn.classList.remove('copied');
-        }, 2000);
-      }).catch(err => {
-        console.error('복사 실패:', err);
-        alert('복사에 실패했습니다.');
-      });
-    });
+  msg.innerHTML = "<div>생각 중...</div><div class='loading-bar'></div>";
 
-    header.appendChild(copyBtn);
-    pre.prepend(header); // pre 요소의 맨 앞에 헤더를 삽입
-  });
+  messages.appendChild(msg);
+
+  messages.scrollTop = messages.scrollHeight;
+
+  loadingMsg = msg;
+
 }
 
 
-// 🌟 replaceLoadingBubble 함수 수정 (marked.js 및 복사 기능 적용)
+
 function replaceLoadingBubble(text){
-  if(loadingMsg){
-    loadingMsg.classList.remove("bot-loading");
-    
-    // marked.js를 사용하여 마크다운을 HTML로 변환
-    const htmlContent = marked.parse(text);
 
-    loadingMsg.innerHTML = htmlContent;
-    
-    // 복사 기능 추가 호출
-    attachCopyFunctionality(loadingMsg);
+  if(loadingMsg){
 
-    loadingMsg = null;
-    messages.scrollTop = messages.scrollHeight;
-  }
+    loadingMsg.classList.remove("bot-loading");
+
+    loadingMsg.textContent = "";
+
+    messages.scrollTop = messages.scrollHeight;
+
+    // 코드 블록 처리
+
+    if(text.startsWith("```") && text.endsWith("```")){
+
+      const codeText = text.slice(3,-3);
+
+      const codeEl = document.createElement("code");
+
+      codeEl.textContent = codeText;
+
+      loadingMsg.appendChild(codeEl);
+
+    } else {
+
+      typeText(loadingMsg, text, 15);
+
+    }
+
+    loadingMsg = null;
+
+  }
+
 }
 
-
-// 🌟 UI 상태를 업데이트하는 함수
-function updateUI(loading) {
-  isResponding = loading;
-  textarea.disabled = loading;
-  
-  if (loading) {
-    // 응답 중이면 전송 버튼을 제거하고 중지 버튼을 추가
-    sendBtn.style.display = 'none';
-
-    const stopBtn = document.createElement('button');
-    stopBtn.className = 'btn';
-    stopBtn.id = 'stopBtn';
-    stopBtn.textContent = '❌ 응답 중지';
-    
-    stopBtn.addEventListener('click', stopResponse);
-    inputWrapper.appendChild(stopBtn);
-  } else {
-    // 응답이 끝나면 중지 버튼을 제거하고 전송 버튼을 표시
-    const stopBtn = document.getElementById('stopBtn');
-    if (stopBtn) {
-      inputWrapper.removeChild(stopBtn);
-    }
-    sendBtn.style.display = 'flex';
-    abortController = null;
-  }
-}
-
-// 🌟 응답 중지 함수
-function stopResponse() {
-  if (abortController) {
-    abortController.abort();
-    replaceLoadingBubble("⚠️ 응답이 사용자 요청에 의해 중지되었습니다.");
-    updateUI(false);
-  }
-}
 
 
 // 메시지 전송
+
 async function sendMessage(){
-  if (isResponding) return; // 응답 중이면 전송하지 않음
 
-  const text = textarea.value.trim();
-  if(!text) return;
-  
-  textarea.value="";
-  addMessage("user", text);
-  addLoadingBubble();
-  updateUI(true); // 🌟 로딩 상태로 변경 및 UI 업데이트
-  
-  abortController = new AbortController();
-  const signal = abortController.signal;
+  const text = textarea.value.trim();
 
-  try{
-    const res = await fetch(BACKEND_URL, {
-      method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({message:text}),
-      signal: signal // 🌟 중지 신호 추가
-    });
+  if(!text) return;
 
-    if (res.status === 200) {
-      const data = await res.json();
-      replaceLoadingBubble(data.reply);
-    } else {
-      throw new Error(`서버 오류: ${res.status}`);
-    }
-    
-  } catch(e){
-    if (e.name !== 'AbortError') { // 사용자가 중지한 경우가 아니라면 오류 처리
-      replaceLoadingBubble("⚠️ 오류가 발생했습니다: " + e.message);
-    }
-  } finally {
-    // 응답 완료 후 로딩 상태 해제 및 UI 업데이트
-    if (isResponding) {
-      updateUI(false); 
-    }
-  }
+  textarea.value="";
+
+  addMessage("user", text, false);
+
+  addLoadingBubble();
+
+  try{
+
+    const res = await fetch(BACKEND_URL, { // 👈 수정된 부분: 절대 경로인 BACKEND_URL 사용
+
+      method:"POST",
+
+      headers: {"Content-Type":"application/json"},
+
+      body: JSON.stringify({message:text})
+
+    });
+
+    const data = await res.json();
+
+    replaceLoadingBubble(data.reply);
+
+  } catch(e){
+
+    replaceLoadingBubble("⚠️ 오류가 발생했습니다.");
+
+  }
+
 }
 
+
+
 sendBtn.addEventListener("click", sendMessage);
+
 textarea.addEventListener("keydown", e=>{
-  if(e.key==="Enter" && !e.shiftKey){
-    e.preventDefault();
-    sendMessage();
-  }
+
+  if(e.key==="Enter" && !e.shiftKey){
+
+    e.preventDefault();
+
+    sendMessage();
+
+  }
+
 });
 
+
+
 textarea.addEventListener("input", ()=>{
-  textarea.style.height="auto";
-  textarea.style.height = textarea.scrollHeight + "px";
+
+  textarea.style.height="auto";
+
+  textarea.style.height = textarea.scrollHeight + "px";
+
 });
+
 </script>
+
 </body>
+
 </html>
