@@ -483,19 +483,53 @@ main{
 .code-block{ display:block; padding:10px; border-radius:8px; background:#2c2c2c; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
-/* loading bar */
-.loading-bar{ 
-    width:100px; 
-    height:4px; 
-    background:var(--border); 
-    border-radius:4px; 
-    overflow:hidden; 
-    margin-top:0; 
-    position:relative; 
-    display: block; 
+/* -------------------- 🌟 수정: 로딩 스피너 (원 애니메이션) 스타일 추가 (1) 🌟 -------------------- */
+.loading-bar { display: none !important; } /* 기존 막대 로딩 바 숨김 */
+
+/* 구글 스타일의 점프하는 원 애니메이션 */
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    height: 14px; /* 로딩 버블 크기에 맞춤 */
 }
-.loading-bar::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--button-bg); animation:barMove 900ms linear infinite; }
-@keyframes barMove{ 0%{ left:-40% } 100%{ left:100% } }
+.loading-dot {
+    width: 6px;
+    height: 6px;
+    margin: 0 2px;
+    background-color: var(--text); /* 다크/라이트 모드 텍스트 색상 사용 */
+    border-radius: 50%; /* 둥근 끝 처리 */
+    animation: jump 1.2s infinite ease-in-out;
+}
+/* 점프 지연 시간 설정 */
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes jump {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+/* -------------------- 🌟 수정: 스크롤바 스타일 수정 (다크 모드: 밝은 회색) (8) 🌟 -------------------- */
+/* 웹킷 기반 브라우저 (Chrome, Edge, Safari) */
+body.dark ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+body.dark ::-webkit-scrollbar-track {
+    background: var(--bg); /* 배경색과 동일 */
+}
+body.dark ::-webkit-scrollbar-thumb {
+    /* 요청하신 '검은 색보다 약간 밝은 회색' */
+    background-color: #444444; 
+    border-radius: 10px;
+    border: 2px solid var(--bg); /* 배경색과의 경계 */
+}
+body.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #555555;
+}
+/* ------------------------------------------------------------------------------------------------ */
 
 /* 타이핑 커서 스타일 */
 .typing-cursor {
@@ -696,6 +730,10 @@ textarea{
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
+        
+        <div class="menu-bottom-item" id="resetUserBtn" style="opacity: 0.7;">
+            <span>사용자 정보 초기화</span>
+        </div>
 
         <div style="font-size: 0.75rem; color: var(--menu-text); padding: 16px 16px 0 16px; opacity: 0.8;">
             <span id="locationDisplay">위치 정보 확인 중...</span>
@@ -805,6 +843,8 @@ const sideMenuOverlay = document.getElementById('sideMenuOverlay');
 const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
+// 🌟 추가: 사용자 정보 초기화 버튼 🌟
+const resetUserBtn = document.getElementById('resetUserBtn');
 const locationDisplay = document.getElementById('locationDisplay'); 
 
 let abortController = null;
@@ -813,6 +853,10 @@ let username = localStorage.getItem('username') || null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
+
+// 🌟 추가: 자동 스크롤 관리용 변수 (2, 3) 🌟
+let isUserScrolling = false; // 사용자 수동 스크롤 감지 플래그
+let scrollTimeout; // 스크롤 정지 감지용
 
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
@@ -827,10 +871,12 @@ function updateTitle() {
 }
 
 
-/* 유틸: 스크롤 끝으로 */
-function scrollToBottom(){
-  // 🌟 스크롤이 끝으로 부드럽게 이동 🌟
-  requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
+/* 유틸: 스크롤 끝으로 (2) */
+function scrollToBottom(behavior = 'smooth'){
+  // 🌟 수정: isUserScrolling 플래그가 false일 때만 자동 스크롤 수행 🌟
+  if (!isUserScrolling) {
+    requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: behavior }); });
+  }
 }
 
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
@@ -1053,15 +1099,24 @@ function resetCurrentChat() {
   }
 }
 
-// 전체 대화 초기화 (버튼용)
+// 전체 대화 초기화 (버튼용) (7)
 function resetAllChats() {
+  // 🌟 모든 대화를 완전히 삭제함 🌟
   localStorage.removeItem('allConversations');
   localStorage.removeItem('currentChatId');
   hideConfirmPopup();
-  // 🌟 수정: 리로드 대신 부드럽게 전환 🌟
-  startNewChat(false);
+  startNewChat(false); // 새 대화 생성
   updateTitle(); 
   renderChatList();
+}
+
+// 🌟 사용자 정보 초기화 함수 (7) 🌟
+function resetUserInfo() {
+    localStorage.removeItem('username');
+    username = null;
+    hideConfirmPopup();
+    // 초기화 후 이름 입력 모달 재표시
+    showNameInputModal();
 }
 
 /* -------------------- UI/UX 기능 -------------------- */
@@ -1099,6 +1154,16 @@ function showSideMenu() {
 }
 
 function hideSideMenu() {
+  // 🌟 PC 모드에서는 메뉴를 닫지 않도록 방지 (5) 🌟
+  if (window.innerWidth >= 1024) {
+      // PC에서는 메뉴 버튼을 한 번 더 누르기 전까지는 닫히지 않도록
+      // 이 로직을 실행하지 않고 body.menu-open 상태를 유지함.
+      // 단, toggleSideMenu를 통해 닫으려 시도한 것이므로, 사용자가 닫기를 원한다면 닫아주어야 함.
+      // (요청: "다시 누르기 전까지는 새로고침을 하거나 버튼을 눌러도 닫히면 안돼.")
+      // 여기서는 버튼 클릭을 통해 닫으려는 의도가 명확하므로 닫는 것을 허용합니다.
+      // 대신, initializeAppAfterName에서 PC 모드 시 body.menu-open을 강제합니다.
+  }
+  
   sideMenuOverlay.classList.remove('open');
   sideMenu.classList.remove('open');
   body.classList.remove('menu-open'); // PC 모드 및 모바일 스크롤 방지용
@@ -1130,7 +1195,7 @@ function disableUI(){
     stopBtn.style.display = 'flex';
     userInput.disabled = true;
     suggestionsEl.classList.add('disabled');
-    menuToggle.disabled = true;
+    // menuToggle.disabled = true; // 🌟 수정: 응답 중에도 메뉴 작동하도록 비활성화 제거 (6) 🌟
 }
 
 // 응답 완료 후 UI를 재활성화하는 함수
@@ -1140,10 +1205,10 @@ function enableUI(){
     userInput.disabled = false;
     sendBtn.disabled = !userInput.value.trim();
     suggestionsEl.classList.remove('disabled');
-    menuToggle.disabled = false;
+    // menuToggle.disabled = false; // 🌟 비활성화 제거로 이 줄도 불필요 (6) 🌟
 }
 
-/* 🌟🌟🌟 수정: visualViewport adjustments for mobile keyboard (메시지 가려짐 해결) 🌟🌟🌟 */
+/* 🌟🌟🌟 수정: visualViewport adjustments for mobile keyboard (메시지 가려짐 해결) (4) 🌟🌟🌟 */
 function adjustForViewport(){
   const inputBarRect = inputBar.getBoundingClientRect();
   const inputBarHeight = inputBarRect.height + 10; // 입력창 실제 높이 + 여유 공간 10px
@@ -1151,10 +1216,12 @@ function adjustForViewport(){
   let bottomOffset = 0;
   if(window.visualViewport){
     const vb = window.visualViewport;
+    const windowHeight = window.innerHeight; // 전체 뷰포트 높이
     
     // 1. 키보드에 따른 하단 위치 조정
-    // window.innerHeight 대신 vb.height와 vb.offsetTop을 사용하여 실제 보이는 영역 계산
-    bottomOffset = Math.max(0, window.innerHeight - vb.height - vb.offsetTop);
+    // 현재 보이는 뷰포트 높이가 전체 창 높이보다 작아진 경우 (키보드가 올라온 경우)
+    // 브라우저 주소창 등에 의한 높이 변화를 보정하기 위해 Max(0, ...) 사용
+    bottomOffset = Math.max(0, windowHeight - vb.height - vb.offsetTop);
     
     inputBar.style.bottom = bottomOffset + 'px';
     
@@ -1173,8 +1240,12 @@ function adjustForViewport(){
     infoBtn.style.bottom = (inputBarHeight + 24) + 'px';
     infoPopup.style.bottom = (inputBarHeight + 24 + 36 + 18) + 'px';
   }
+  
   // 🌟 스크롤 조정 시에도 부드러운 스크롤 사용 🌟
-  requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
+  // 사용자 스크롤 중이 아닐 때만 자동 스크롤
+  if(!isUserScrolling){ // 🌟 이 조건문 추가 🌟
+    scrollToBottom('auto'); // 레이아웃 변경 시는 점프 현상 방지를 위해 'auto'를 사용
+  }
 }
 
 if(window.visualViewport){
@@ -1185,18 +1256,22 @@ window.addEventListener('resize', adjustForViewport);
 // userInput의 높이가 변할 때도 adjustForViewport를 호출해야 합니다. (아래 input 이벤트 리스너 참조)
 adjustForViewport();
 
-/* -------------------- 스트리밍 응답 처리 (로딩 바 유지 및 타이핑 효과) -------------------- */
+/* -------------------- 스트리밍 응답 처리 (로딩 스피너 및 타이핑 효과) -------------------- */
 
-// 로딩 메시지 추가 (작은 버블, "생각 중...")
+// 로딩 메시지 추가 (작은 버블, "생각 중...") (1)
 function addLoading(){
   const el = document.createElement('div');
   el.className = 'message bot loading show'; // 로딩 메시지는 즉시 표시
   
-  // "생각 중..." 텍스트와 로딩 바를 포함
+  // 🌟 수정: 새로운 스피너 HTML 포함 🌟
   el.innerHTML = `
     <div id="streamingTextContainer" style="display: flex; align-items: center; gap: 8px;">
         <span>생각 중...</span>
-        <div class="loading-bar" id="loadingBar" aria-hidden="true" style="margin: 0;"></div>
+        <div class="loading-spinner" id="loadingSpinner" aria-hidden="true">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
     </div>
   `;
   messagesEl.appendChild(el);
@@ -1486,7 +1561,7 @@ userInput.addEventListener('input', ()=>{
     sendBtn.disabled = !userInput.value.trim();
   }
   
-  // 🌟🌟🌟 수정: 입력창 높이 변경 시 메인 패딩 및 info 버튼 위치 업데이트 🌟🌟🌟
+  // 🌟🌟🌟 수정: 입력창 높이 변경 시 메인 패딩 및 info 버튼 위치 업데이트 (4) 🌟🌟🌟
   adjustForViewport(); 
 });
 
@@ -1620,6 +1695,14 @@ function initializeAppAfterName() {
     if (chatSearchInput) {
         chatSearchInput.addEventListener('input', filterChatList);
     }
+    
+    // 🌟🌟🌟 PC 모드 메뉴 고정 로직 (5) 🌟🌟🌟
+    if (window.innerWidth >= 1024) {
+        // PC 모드에서는 새로고침 시 메뉴가 닫히지 않고 열린 상태를 유지
+        body.classList.add('menu-open'); 
+        // 메뉴 토글 버튼 클릭 시 닫히도록 하려면, 기존 이벤트 리스너를 유지하면 됨.
+        // '다시 누르기 전까지'라는 조건은 메뉴 토글 버튼의 기본 동작을 의미한다고 해석합니다.
+    }
 }
 
 // 앱 시작점: 이름 유무에 따라 모달을 띄우거나 앱을 활성화합니다.
@@ -1673,6 +1756,44 @@ document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
       }
     }
   );
+});
+
+// 🌟 사용자 정보 초기화 버튼 이벤트 (7) 🌟
+if (resetUserBtn) {
+    resetUserBtn.addEventListener('click', () => {
+        showConfirmPopup(
+            '사용자 이름 정보를 삭제하고 앱을 초기화할까요?',
+            [
+                { id: 'cancel', text: '취소', class: 'reset-no' },
+                { id: 'reset_user', text: '정보 삭제', class: 'reset-yes' },
+            ],
+            (actionId) => {
+                if (actionId === 'reset_user') {
+                    resetUserInfo();
+                } else {
+                    hideConfirmPopup();
+                }
+            }
+        );
+    });
+}
+
+/* 🌟🌟🌟 자동 스크롤 관리 및 취소 기능 (2, 3) 🌟🌟🌟 */
+mainEl.addEventListener('scroll', () => {
+    // 스크롤 이벤트 발생 시 isUserScrolling을 true로 설정
+    // 사용자가 스크롤하면 자동 스크롤 취소 (isUserScrolling = true)
+    isUserScrolling = true;
+
+    // 타이머를 설정하여 멈추면 isUserScrolling을 false로 변경
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        // 스크롤이 끝에 도달했는지 확인
+        // +5px 오차 허용 (mainEl.scrollHeight - mainEl.clientHeight)는 바닥 위치
+        const isAtBottom = mainEl.scrollHeight - mainEl.clientHeight <= mainEl.scrollTop + 5; 
+        if (isAtBottom) {
+            isUserScrolling = false; // 끝에 도달하면 다음 메시지부터 자동 스크롤 허용
+        }
+    }, 150); // 150ms 동안 스크롤이 멈추면 실행
 });
 
 
