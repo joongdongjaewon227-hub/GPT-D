@@ -396,7 +396,7 @@ main{
 
 /* messages */
 .messages{ width:100%; max-width:720px; margin-top:18px; display:flex; flex-direction:column; gap:10px; }
-.message{ max-width:80%; padding:10px 12px; border-radius:14px; white-space:pre-wrap; word-break:break-word; font-weight:normal; font-size:0.95rem; }
+.message{ max-width:80%; padding:10px 12px; border-radius:14px; white-space:pre-wrap; word-break:break-word; font-weight:normal; font-size:0.95rem; position: relative; }
 .message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
 .message.bot{ align-self:flex-start; background:var(--input-bg); border:1px solid var(--border); color:var(--text); }
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
@@ -408,7 +408,17 @@ main{
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
 /* loading bar */
-.loading-bar{ width:100%; height:3px; background:var(--border); border-radius:4px; overflow:hidden; margin-top:6px; position:relative; }
+.loading-bar{ 
+    width:100%; 
+    height:3px; 
+    background:var(--border); 
+    border-radius:4px; 
+    overflow:hidden; 
+    margin-top:6px; 
+    position:relative; 
+    /* 로딩 바를 항상 메시지 콘텐츠 아래에 표시 */
+    display: block; 
+}
 .loading-bar::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--button-bg); animation:barMove 900ms linear infinite; }
 @keyframes barMove{ 0%{ left:-40% } 100%{ left:100% } }
 
@@ -655,7 +665,7 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
 </div>
 <script>
 /* ------------- 설정 ------------- */
-// 백엔드 URL을 정확히 일치시켜야 합니다.
+// ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
 const INPUT_BAR_HEIGHT_BASE = 200;
 /* --------------------------------- */
@@ -990,14 +1000,18 @@ function enableUI(){
     menuToggle.disabled = false;
 }
 
-/* -------------------- 스트리밍 응답 처리 (핵심 수정 부분) -------------------- */
+/* -------------------- 스트리밍 응답 처리 (로딩 바 유지) -------------------- */
 
 // 로딩 메시지 추가 (스트리밍 텍스트 컨테이너 포함)
 function addLoading(){
   const el = document.createElement('div');
   el.className = 'message bot';
-  // 스트리밍 텍스트를 받을 컨테이너 추가
-  el.innerHTML = `<div id="streamingTextContainer"></div><div class="loading-bar" aria-hidden="true"></div>`;
+  
+  // 텍스트 컨테이너와 로딩 바를 함께 삽입
+  el.innerHTML = `
+    <div id="streamingTextContainer"></div>
+    <div class="loading-bar" id="loadingBar" aria-hidden="true"></div>
+  `;
   messagesEl.appendChild(el);
   loadingMsg = el;
   scrollToBottom();
@@ -1074,7 +1088,7 @@ async function sendMessage(){
         if(streamClosed) break;
     }
     
-    // 3. 최종 처리: 로딩 메시지 제거 후 마크다운을 포함한 최종 렌더링
+    // 3. 최종 처리: 스트림이 완전히 종료된 후 로딩 메시지 전체 제거
     loadingMsg.remove(); 
     // 전송된 전체 응답을 마크다운 파싱하여 최종 렌더링
     renderMessage('bot', fullResponse); 
@@ -1085,10 +1099,10 @@ async function sendMessage(){
   }catch(err){
     const errorMsg = (err && err.name === 'AbortError') ? '응답이 취소되었습니다.' : (err && err.message) ? err.message : '오류가 발생했습니다.';
     
-    // 취소되었거나 오류가 발생했을 때 로딩 메시지를 제거하고 오류 메시지 출력
     if (loadingMsg) {
-        loadingMsg.remove();
-        // 부분 응답에 취소/오류 메시지를 덧붙여 최종 대화 기록에 저장 및 렌더링
+        // 오류/취소 발생 시에도 로딩 메시지 전체 제거
+        loadingMsg.remove(); 
+        
         const finalContent = fullResponse + (err.name === 'AbortError' ? " [응답 중단됨]" : "\n\n" + errorMsg);
         renderMessage('bot', finalContent);
         
@@ -1106,8 +1120,6 @@ async function sendMessage(){
     loadingMsg = null;
   }
 }
-
-// 기존 replaceLoading 함수는 제거합니다. (스트리밍 로직에 통합됨)
 
 /* -------------- renderMessage -------------- */
 function renderMessage(role, text) {
