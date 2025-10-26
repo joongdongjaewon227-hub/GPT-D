@@ -356,7 +356,7 @@ body.light .chat-item.active{
 }
 /* main area */
 main{
-  padding:64px 12px 200px; /* 🌟🌟🌟 수정: 하단 패딩을 200px로 고정 🌟🌟🌟 */
+  padding:64px 12px 200px; /* 🌟 하단 패딩을 200px로 고정 🌟 */
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   display:flex;
@@ -398,15 +398,17 @@ main{
 .messages{ width:100%; max-width:720px; margin-top:18px; display:flex; flex-direction:column; gap:10px; }
 .message{ max-width:80%; padding:10px 12px; border-radius:14px; white-space:pre-wrap; word-break:break-word; font-weight:normal; font-size:0.95rem; position: relative; }
 .message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
-.message.bot{ align-self:flex-start; background:var(--input-bg); border:1px solid var(--border); color:var(--text); }
+/* 🌟 수정: 얇은 버블 테두리 적용 🌟 */
+.message.bot{ align-self:flex-start; background:var(--input-bg); border:0.5px solid var(--border); color:var(--text); }
 
-/* 🌟 로딩 중 메시지 버블 크기 축소 🌟 */
+/* 🌟 로딩 중 메시지 버블 크기 축소 (더 얇게) 🌟 */
 .message.loading {
     max-width: fit-content; /* 내용물 크기에 맞게 조절 */
-    padding: 8px 12px; /* 패딩 축소 */
+    padding: 6px 10px; /* 패딩 축소 */
     font-size: 0.85rem; /* 폰트 크기 축소 */
     color: var(--menu-text); /* 텍스트 색상 변경 */
     opacity: 0.8;
+    border: 0.5px solid var(--border); /* 얇은 테두리 유지 */
 }
 
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
@@ -420,7 +422,7 @@ main{
 /* loading bar */
 .loading-bar{ 
     width:100px; /* 로딩 막대 길이 고정 */
-    height:3px; 
+    height:4px; /* 🌟 수정: 로딩 막대 높이 살짝 증가 🌟 */
     background:var(--border); 
     border-radius:4px; 
     overflow:hidden; 
@@ -449,7 +451,8 @@ main{
 /* input area */
 .input-bar{ 
   position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); 
-  border-top: 1px solid var(--border); /* 입력창 상단 경계선 */
+  /* 🌟 수정: 상단 경계선 제거 🌟 */
+  border-top: none; 
 }
 .input-wrapper{ 
   max-width:720px; 
@@ -469,7 +472,7 @@ textarea{
   width:100%; 
   resize:none; 
   min-height:30px; 
-  max-height:168px; /* 🌟 수정: 최대 높이를 200px - 패딩 - 기타 요소 높이로 계산 🌟 */
+  max-height:168px; /* 최대 높이 유지 */
   overflow:auto; 
   border:none; 
   outline:none; 
@@ -1550,4 +1553,4 @@ messagesEl.addEventListener('click', ()=> userInput.focus());
 sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
-  </html>
+</html>
