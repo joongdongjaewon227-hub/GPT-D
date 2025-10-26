@@ -466,10 +466,10 @@ main{
 }
 
 /* 로딩 중 메시지 버블 크기 최소화 (대폭 수정) */
-/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (텍스트 표시 및 크기 조절) 🌟🌟🌟 */
+/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (텍스트 표시 및 크기 조절) - 패딩 확대 🌟🌟🌟 */
 .message.loading {
     max-width: fit-content; 
-    padding: 8px 12px; /* 패딩을 여유있게 */
+    padding: 10px 15px; /* 요청에 따라 패딩 확대 (버블 크기 증가) */
     font-size: var(--small-font); /* 텍스트 크기 허용 */
     color: var(--text); /* 텍스트 색상 허용 */
     opacity: 1; 
@@ -578,9 +578,7 @@ textarea{
 .stop-btn{ width:44px; height:44px; border-radius:50%; background:#c53030; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
 .stop-btn::before{ content:''; width:14px; height:14px; background:white; }
 
-/* info button */
-.info-btn{ position:fixed; right:14px; bottom:140px; /* JS가 이 값을 조정합니다 */ width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
-.info-popup{ position:fixed; right:14px; bottom:194px; /* JS가 이 값을 조정합니다 */ width:240px; background:var(--menu-bg-primary); color:var(--menu-text); border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); display:none; z-index:46; font-size:0.9rem; }
+/* 🌟 정보 버튼(info-btn/info-popup) 관련 CSS 제거됨 🌟 */
 
 /* reset popup overlay (ConfirmPopup) */
 #confirmPopup{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.32s ease; z-index:999; }
@@ -761,15 +759,12 @@ textarea{
         <div class="model-dropdown" id="modelDropdown">
           <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
           <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
-        </div>
+          <div class="model-option" data-model="2.5 Fast">2.5 Fast</div> </div>
       </div>
       <button class="btn" id="sendBtn" disabled>&#9654;</button> <button class="stop-btn" id="stopBtn"></button>
     </div>
   </div>
 </div>
-
-<div class="info-btn" id="infoBtn" style="opacity: 0.1; pointer-events: none;">i</div>
-<div class="info-popup" id="infoPopup">주의: AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div>
 
 <div id="confirmPopup" aria-hidden="true">
   <div class="reset-card" id="confirmCard">
@@ -805,8 +800,8 @@ const sendBtn = document.getElementById('sendBtn');
 const stopBtn = document.getElementById('stopBtn');
 const modeToggleCheckbox = document.getElementById('modeToggleCheckbox'); 
 const suggestionsEl = document.getElementById('suggestions');
-const infoBtn = document.getElementById('infoBtn');
-const infoPopup = document.getElementById('infoPopup');
+// const infoBtn = document.getElementById('infoBtn'); // 제거됨
+// const infoPopup = document.getElementById('infoPopup'); // 제거됨
 const inputBar = document.getElementById('inputBar');
 // 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
@@ -824,6 +819,7 @@ const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
 const locationDisplay = document.getElementById('locationDisplay'); 
+const settingsBtn = document.getElementById('settingsBtn'); // 추가
 
 let abortController = null;
 let loadingMsg = null;
@@ -831,6 +827,9 @@ let username = localStorage.getItem('username') || null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
+// 🌟 추가: 메뉴 및 모델 상태 저장 🌟
+let isMenuOpen = localStorage.getItem('isMenuOpen') === 'true'; 
+let selectedModel = localStorage.getItem('selectedModel') || '2.5 Flash';
 
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
@@ -1094,8 +1093,8 @@ function activateAppUI() {
     mainEl.style.pointerEvents = 'auto';
     inputBar.style.opacity = '1';
     inputBar.style.pointerEvents = 'auto';
-    infoBtn.style.opacity = '1';
-    infoBtn.style.pointerEvents = 'auto';
+    // infoBtn.style.opacity = '1'; // infoBtn 제거됨
+    // infoBtn.style.pointerEvents = 'auto'; // infoBtn 제거됨
     menuToggle.disabled = false;
     modeToggleCheckbox.disabled = false;
     
@@ -1118,12 +1117,14 @@ function showSideMenu() {
   sideMenu.classList.add('open');
   body.classList.add('menu-open'); // PC 모드 및 모바일 스크롤 방지용
   renderChatList();
+  localStorage.setItem('isMenuOpen', 'true'); // 메뉴 상태 저장
 }
 
 function hideSideMenu() {
   sideMenuOverlay.classList.remove('open');
   sideMenu.classList.remove('open');
   body.classList.remove('menu-open'); // PC 모드 및 모바일 스크롤 방지용
+  localStorage.setItem('isMenuOpen', 'false'); // 메뉴 상태 저장
 }
 
 // 팝업 표시 함수
@@ -1184,16 +1185,16 @@ function adjustForViewport(){
     // 패딩 = 입력창 높이 + 키보드 높이로 인한 추가 공간 (bottomOffset) + 추가 여유 공간 (예: 10px)
     mainEl.style.paddingBottom = (inputBarHeight + bottomOffset + 10) + 'px'; 
 
-    // 3. info 버튼 위치 조정
-    infoBtn.style.bottom = (inputBarHeight + bottomOffset + 24) + 'px';
-    infoPopup.style.bottom = (inputBarHeight + bottomOffset + 24 + 36 + 18) + 'px';
+    // 3. info 버튼 위치 조정 (제거되었으므로 관련 코드 주석 처리)
+    // infoBtn.style.bottom = (inputBarHeight + bottomOffset + 24) + 'px';
+    // infoPopup.style.bottom = (inputBarHeight + bottomOffset + 24 + 36 + 18) + 'px';
     
   } else {
     // visualViewport가 없을 때 (PC 또는 일부 브라우저)
     inputBar.style.bottom = '0px';
     mainEl.style.paddingBottom = (inputBarHeight + 10) + 'px'; 
-    infoBtn.style.bottom = (inputBarHeight + 24) + 'px';
-    infoPopup.style.bottom = (inputBarHeight + 24 + 36 + 18) + 'px';
+    // infoBtn.style.bottom = (inputBarHeight + 24) + 'px'; // infoBtn 제거됨
+    // infoPopup.style.bottom = (inputBarHeight + 24 + 36 + 18) + 'px'; // infoPopup 제거됨
   }
   // 🌟 스크롤 조정 시에도 부드러운 스크롤 사용 🌟
   requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
@@ -1295,7 +1296,10 @@ async function sendMessage(){
   let streamClosed = false;
   
   try{
-    const payload = { message: text, history: chatHistory };
+    // 🌟 모델 선택에 따라 히스토리를 다르게 전송 (2.5 Fast는 히스토리 없이 전송) 🌟
+    const currentHistory = selectedModel === '2.5 Fast' ? [] : chatHistory;
+    
+    const payload = { message: text, history: currentHistory }; 
     
     // 1. 요청 시작
     const res = await fetch(BACKEND_URL, {
@@ -1488,6 +1492,8 @@ modelDropdown.addEventListener('click', (e)=>{
   const option = e.target.closest('.model-option');
   if(!option) return;
   const model = option.dataset.model;
+  selectedModel = model; // 전역 변수 업데이트
+  localStorage.setItem('selectedModel', selectedModel); // 로컬 저장소에 저장
   selectedModelEl.textContent = model;
   document.querySelectorAll('.model-option').forEach(o => o.classList.remove('active'));
   option.classList.add('active');
@@ -1522,10 +1528,10 @@ suggestionsEl.addEventListener('click', (ev)=>{
   sendMessage();
 });
 
-/* info popup */
-infoBtn.addEventListener('click', ()=>{
-  infoPopup.style.display = infoPopup.style.display === 'block' ? 'none' : 'block';
-});
+/* info popup (제거됨) */
+// infoBtn.addEventListener('click', ()=>{
+//   infoPopup.style.display = infoPopup.style.display === 'block' ? 'none' : 'block';
+// });
 
 /* mode toggle logic (use checkbox) */
 function updateMode() {
@@ -1637,6 +1643,20 @@ function initializeAppAfterName() {
     const isLightMode = savedMode === 'light';
     modeToggleCheckbox.checked = isLightMode;
     updateMode(); // 초기 상태 설정
+    
+    // 🌟 모델 선택 상태 복원 및 UI 업데이트 🌟
+    selectedModelEl.textContent = selectedModel;
+    document.querySelectorAll('.model-option').forEach(o => {
+        o.classList.remove('active');
+        if (o.dataset.model === selectedModel) {
+            o.classList.add('active');
+        }
+    });
+    
+    // 🌟 메뉴 열림 상태 복원 🌟
+    if (isMenuOpen) {
+        showSideMenu(); 
+    }
 
     // 🌟 추가: 채팅 검색 이벤트 리스너 🌟
     if (chatSearchInput) {
@@ -1669,8 +1689,9 @@ document.getElementById('newChatMenuBtn').addEventListener('click', () => {
   // 🌟 메뉴 닫기 로직 제거 🌟
   startNewChat(false);
 });
-document.getElementById('settingsBtn').addEventListener('click', () => {
-    alert('설정 및 도움말 기능은 개발 중입니다.');
+// 🌟 수정: 설정 버튼 클릭 시 정보 alert 표시 🌟
+settingsBtn.addEventListener('click', () => {
+    alert('주의: AI의 답변은 참고용입니다.\n중요한 정보는 반드시 다시 확인하세요.\n\n제작자: 신재원');
     // 🌟 메뉴 닫기 로직 제거 🌟
 });
 document.getElementById('upgradeBtn').addEventListener('click', () => {
