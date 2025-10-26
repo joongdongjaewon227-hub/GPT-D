@@ -466,22 +466,23 @@ main{
 }
 
 /* 로딩 중 메시지 버블 크기 최소화 (대폭 수정) */
-/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (대폭 축소 및 스피너 전용) 🌟🌟🌟 */
+/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (텍스트와 스피너를 포함하도록 수정) 🌟🌟🌟 */
 .message.loading {
     max-width: fit-content; 
-    padding: 4px; /* 패딩을 아주 작게 */
-    font-size: 0; /* 텍스트 크기 0으로 설정하여 숨김 */
-    color: transparent; /* 텍스트 색상도 투명하게 */
-    opacity: 1; /* 스피너를 더 잘 보이게 */
+    padding: 8px 12px; /* 패딩을 약간 키움 */
+    font-size: 0.95rem; /* 폰트 크기 복구 */
+    color: var(--text); /* 색상 복구 */
+    opacity: 1; 
     border: 0.5px solid var(--border); 
     /* 버블 안에 스피너 중앙 정렬을 위해 추가 */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px; /* 고정 크기 버블 */
-    height: 24px; /* 고정 크기 버블 */
-    min-width: 24px;
-    min-height: 24px;
+    width: auto; /* 고정 크기 제거 */
+    height: auto; /* 고정 크기 제거 */
+    min-width: 0;
+    min-height: 0;
+    gap: 8px; /* 텍스트와 스피너 간격 추가 */
 }
 
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
@@ -494,14 +495,15 @@ main{
 
 /* ------------------------ 새 로딩 스피너 (구글 스타일) ------------------------ */
 .new-google-spinner {
-    width: 14px; /* 스피너 크기 */
-    height: 14px;
-    border: 2px solid var(--accent-blue); /* 테두리 두께와 색상 */
+    width: 20px; /* 🌟 수정: 스피너 크기 키움 🌟 */
+    height: 20px; /* 🌟 수정: 스피너 크기 키움 🌟 */
+    border: 3px solid var(--accent-blue); /* 🌟 수정: 테두리 두께 키움 🌟 */
     border-top-color: transparent; /* 윗부분을 투명하게 만들어 개방된 원 모양 */
     border-radius: 50%;
     /* Material Design에 가까운 가속/감속 애니메이션 */
     animation: spinnerRotate 0.75s cubic-bezier(0.4, 0.0, 0.2, 1) infinite; 
     margin: 0;
+    flex-shrink: 0; /* 텍스트가 길어져도 스피너가 줄어들지 않도록 */
 }
 
 @keyframes spinnerRotate {
@@ -806,6 +808,7 @@ const modeToggleCheckbox = document.getElementById('modeToggleCheckbox');
 const suggestionsEl = document.getElementById('suggestions');
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
+const inputBar = document.getElementById('inputBar');
 // 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
 
@@ -1212,8 +1215,9 @@ function addLoading(){
   const el = document.createElement('div');
   el.className = 'message bot loading show'; // 로딩 메시지는 즉시 표시
   
-  // "생각 중..." 텍스트와 로딩 바를 포함 -> 구글 스타일 스피너로 변경
+  // 🌟🌟🌟 수정: "생각 중..." 텍스트와 스피너를 포함하도록 변경 🌟🌟🌟
   el.innerHTML = `
+    <span class="loading-text">생각 중...</span>
     <div class="new-google-spinner" id="loadingSpinner" aria-hidden="true"></div>
   `;
   messagesEl.appendChild(el);
@@ -1397,7 +1401,7 @@ function renderMessage(role, text, doMarkdown = true) {
             .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
             .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\r?\n|\r/g, '<br>'); // 💡 수정된 부분: 모든 줄바꿈 유형을 <br>로 변환
+            .replace(/\n/g, '<br>');
           contentEl.insertAdjacentHTML('beforeend', html);
         } else {
           const code = parts[i];
