@@ -14,37 +14,60 @@
   --border-strong:#555555; /* 강조 경계선 */
   --button-bg:#f0f0f0; /* 사용자 메시지/일반 버튼 배경 (밝은 색) */
   --button-text:#111111; /* 사용자 메시지/일반 버튼 텍스트 (어두운 색) */
-  --menu-bg:rgba(28,28,28,0.95);
-  --menu-text:#ccc;
-  --menu-text-active: #fff;
-  --accent-1: linear-gradient(45deg,#0099ff,#66ccff); /* 강조색은 유지 */
+  
+  /* 메뉴 관련 색상 (단색 배경으로 변경) */
+  --menu-bg-primary: #1c1c1c; /* 메뉴 기본 배경 (다크 모드 - 단색) */
+  --menu-text: #ccc;
+  --menu-text-active: #fff; 
+  /* 활성 채팅 항목 스타일 (Gemini 스타일의 진한 푸른색) */
+  --menu-active-bg: #2b4570; /* 진한 푸른색 배경 */
+  --menu-active-text: #ffffff; /* 흰색 텍스트 */
+  --menu-active-border: #4a6fa5; /* 미세한 테두리 */
+  
+  --accent-blue: #007aff; /* 주요 강조색 */
+
   --transition:0.25s ease;
   --small-font: 0.92rem;
   --base-font: 1.05rem;
+  /* 토글 및 글로우 색상 (다크 모드) */
+  --toggle-off-bg: #444444;
+  --toggle-on-bg: var(--accent-blue);
+  --glow-color: rgba(0, 153, 255, 0.5); 
 }
 /* 라이트 모드 회색 계열 조정 */
 body.light {
   --bg: #ffffff;
   --text: #111111;
-  --input-bg: #f5f5f5; /* 밝은 회색 배경 */
+  --input-bg: #f5f5f5; 
   --border: #dddddd;
   --border-strong: #aaaaaa;
   --button-bg: #111111;
   --button-text: #ffffff;
-  --menu-bg: rgba(255,255,255,0.95);
+  
+  /* 메뉴 관련 색상 (단색 배경으로 변경) */
+  --menu-bg-primary: #ffffff; 
   --menu-text: #444444;
   --menu-text-active: #000000;
+  /* 활성 채팅 항목 스타일 (Gemini 스타일의 진한 푸른색) */
+  --menu-active-bg: #e1e9f7; /* 라이트 모드 푸른색 배경 */
+  --menu-active-text: #007aff; 
+  --menu-active-border: #c4d7f7;
+  
+  /* 토글 및 글로우 색상 (라이트 모드) */
+  --toggle-off-bg: #cccccc;
+  --toggle-on-bg: var(--accent-blue); 
+  --glow-color: rgba(0, 110, 255, 0.3); 
 }
 
 /* 모바일 탭 하이라이트 제거 및 박스 사이즈 설정 */
-*{ -webkit-tap-highlight-color: transparent; box-sizing: border-box; transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition); }
+*{ -webkit-tap-highlight-color: transparent; box-sizing: border-box; transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition); }
 html,body{ height:100%; margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; background:var(--bg); color:var(--text); font-size:var(--small-font); overflow: hidden; }
 
 /* PC 버전 텍스트 크기 확대 */
 @media(min-width: 701px){
   html,body{ font-size: var(--base-font); }
   .logo{ font-size: calc(var(--base-font) + 0.06rem); }
-  .mode-toggle, .suggestion-card, .model-select-btn, .model-option, .reset-card p, .reset-actions button{ font-size: var(--small-font); }
+  .mode-toggle-label, .suggestion-card, .model-select-btn, .model-option, .reset-card p, .reset-actions button{ font-size: var(--small-font); }
   .message{ font-size: 1.05rem; }
   .message .large { font-size: 1.4rem; }
 }
@@ -55,7 +78,7 @@ nav{ position:fixed; top:0; left:0; right:0; height:56px; display:flex; align-it
 .logo{ font-weight:600; font-size:0.98rem; white-space:nowrap; flex-grow: 1; }
 .actions{ display:flex; gap:8px; align-items:center; margin-left: auto; }
 
-/* 메뉴 토글 버튼 (회색 계열 유지) */
+/* 메뉴 토글 버튼 */
 .menu-toggle{ 
     width:36px; 
     height:36px; 
@@ -77,33 +100,53 @@ body.light .menu-toggle:hover {
     background: #eeeeee;
 }
 
-/* 다크 모드 토글 버튼 (전송 버튼처럼 원형으로 깔끔하게 재수정) */
-.nav .mode-toggle { 
-    width: 40px; 
-    height: 40px;
-    border: none; /* 테두리 제거 */
-    border-radius: 50%; /* 깔끔한 원형 */
-    background: var(--button-bg); /* 꽉 찬 버튼 배경색 */
-    color: var(--button-text); /* 꽉 찬 버튼 텍스트색 */
-    cursor: pointer; 
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition: background-color 0.2s, transform 0.1s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2); 
-    /* 이모지 색상에 따라 배경색을 조정하여 더 깔끔하게 보이게 합니다. */
+/* 다크 모드 토글 버튼 (iOS 스위치 스타일) */
+.mode-toggle-label {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 30px;
+    cursor: pointer;
 }
-.nav .mode-toggle:hover {
-    filter: brightness(0.9);
-    transform: scale(1.05); 
+.mode-toggle-label input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
-body.light .nav .mode-toggle:hover {
-    filter: brightness(1.1);
+.mode-toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--toggle-off-bg);
+    border-radius: 30px;
+    transition: background-color 0.4s;
+    box-shadow: inset 0 0 1px rgba(0,0,0,0.1);
 }
+.mode-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.4s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+/* 체크 상태 (ON) */
+.mode-toggle-label input:checked + .mode-toggle-slider {
+    background-color: var(--toggle-on-bg);
+}
+.mode-toggle-label input:checked + .mode-toggle-slider:before {
+    transform: translateX(20px);
+}
+/* ------------------------------------------------------------------- */
 
-/* 추가: 사이드 메뉴 */
+
+/* 추가: 사이드 메뉴 (Gemini 모바일 스타일 적용, 단색 배경) */
 .side-menu-overlay{ 
   position:fixed; 
   inset:0; 
@@ -118,123 +161,199 @@ body.light .nav .mode-toggle:hover {
   top:0; 
   left:0; 
   bottom:0; 
-  width:260px; 
-  max-width: 80%; 
-  background:var(--bg); 
+  width:85%; 
+  max-width: 320px; 
+  background:var(--menu-bg-primary); 
+  /* 블러 효과 제거 */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 4px 0 25px rgba(0,0,0,0.5);
   z-index:50; 
   transform:translateX(-100%); 
   transition:transform 0.3s ease;
   display:flex; 
   flex-direction:column; 
   border-right:1px solid var(--border); 
-  box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+  padding: 0; 
 }
 .side-menu-overlay.open{ opacity:1; pointer-events:auto; }
 .side-menu.open{ transform:translateX(0); }
-.menu-header{ 
-  padding:16px; 
-  font-size:1.15rem;
-  font-weight:700;
-  border-bottom:1px solid var(--border); 
-  background:var(--input-bg);
+
+/* 메뉴 내부 컨테이너 */
+.menu-header {
+  padding: 16px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
 }
-.chat-list-container{ flex-grow:1; overflow-y:auto; padding:8px 8px; }
+
+.chat-list-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 8px 0; 
+}
+
+/* 메뉴 하단 부분: 설정, 업그레이드 */
+.menu-bottom {
+  padding: 8px 0 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 하단 항목 스타일 */
+.menu-bottom-item {
+    padding: 12px 16px;
+    color: var(--menu-text);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+.menu-bottom-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+body.light .menu-bottom-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* 하단 업그레이드 버튼/링크 스타일 */
+.menu-upgrade-btn {
+    padding: 10px 16px;
+    margin: 8px 16px; 
+    background: var(--menu-active-bg);
+    color: var(--menu-active-text);
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+body.light .menu-upgrade-btn {
+    background: var(--menu-active-bg);
+    color: var(--accent-blue);
+    border: 1px solid var(--menu-active-border);
+}
+
+/* 채팅 항목 스타일 수정 */
 .chat-item{ 
-  padding:12px 16px;
-  cursor:pointer; 
-  font-size:0.9rem; 
-  color:var(--menu-text); 
-  white-space:nowrap; 
-  overflow:hidden; 
-  text-overflow:ellipsis; 
-  margin: 4px 0;
-  border-radius: 10px;
+  padding: 12px 16px; 
+  cursor: pointer; 
+  font-size: 0.95rem; 
+  color: var(--menu-text); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  margin: 4px 16px; 
+  border-radius: 16px; 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; 
+  position: relative;
 }
 .chat-item:hover{ 
-  background:rgba(128,128,128,0.15);
+  background: rgba(255, 255, 255, 0.08); 
 }
+body.light .chat-item:hover{ 
+  background: rgba(0, 0, 0, 0.05); 
+}
+
+/* 활성 채팅 항목 */
 .chat-item.active{ 
-  /* 활성 대화는 강조색 유지 */
-  background:rgba(0,153,255,0.18);
-  color:var(--menu-text-active); 
+  background:var(--menu-active-bg);
+  color:var(--menu-active-text); 
   font-weight:600;
+  border: 1px solid var(--menu-active-border);
 }
-body.light .chat-item.active {
-    background: rgba(0,153,255,0.1);
+body.light .chat-item.active{
+    background: var(--menu-active-bg);
+    color: var(--menu-active-text);
 }
+
 .chat-item-text {
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 10px;
+    padding-right: 10px; /* 아이콘과 텍스트 간격 */
+    pointer-events: auto; /* 텍스트 클릭으로 채팅 이동 */
 }
 
-/* 채팅 삭제 버튼 스타일 */
-.chat-delete-btn {
+/* 개별 삭제 버튼 스타일 (휴지통) */
+.delete-chat-btn {
+    opacity: 0; /* 평소에는 숨김 */
+    font-size: 1.1rem;
+    color: var(--menu-text);
     background: transparent;
     border: none;
-    color: var(--menu-text);
-    font-size: 0.8rem;
     cursor: pointer;
-    opacity: 0.7;
-    padding: 4px;
-    border-radius: 50%;
+    padding: 0;
+    flex-shrink: 0; /* 크기 유지 */
     width: 24px;
     height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-}
-.chat-delete-btn:hover {
-    background: rgba(255, 0, 0, 0.2);
-    opacity: 1;
-    color: #e53e3e;
-}
-.chat-item.active .chat-delete-btn {
-    color: var(--menu-text-active);
+    transition: opacity 0.2s, color 0.2s;
+    z-index: 10;
 }
 
-.menu-actions{ padding:16px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.chat-item:hover .delete-chat-btn {
+    opacity: 0.8; /* 호버 시 표시 */
+}
+.chat-item:hover.active .delete-chat-btn {
+    color: var(--menu-active-text); /* 활성 상태에서는 흰색 */
+}
+
+.delete-chat-btn:hover {
+    opacity: 1;
+    color: #c53030; /* 삭제 색상 강조 */
+}
+.chat-item.active .delete-chat-btn:hover {
+    color: #ff7777; /* 활성 상태에서 더 밝은 삭제 색상 */
+}
+
+/* 메뉴 내부 버튼 스타일 (새 대화) */
+.menu-actions {
+    padding: 8px 16px; 
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--border); 
+}
 .menu-action-btn{ 
   width:100%; 
   padding:12px 10px;
-  border-radius:12px;
+  border-radius:16px; 
   border:none; 
   cursor:pointer; 
   font-size:0.95rem; 
   display:flex; 
   align-items:center; 
-  justify-content:center; 
-  gap:8px; 
   transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
-  color: var(--text); /* 텍스트 색상 통일 */
-  background: var(--input-bg); /* 배경색을 회색 계열로 통일 */
+  color: var(--text); 
+  background: var(--input-bg); 
   border: 1px solid var(--border);
 }
-.menu-action-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    background: var(--border); 
+
+/* 새 대화 버튼은 푸른색 강조 */
+.menu-action-btn.menu-action-new {
+    background: var(--accent-blue);
+    color: white;
+    border: 1px solid var(--accent-blue);
+    font-weight: 600;
 }
+.menu-action-btn.menu-action-new:hover {
+    background: #005bb5;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 122, 255, 0.3);
+}
+
 .menu-action-btn:active {
     transform: translateY(0);
     box-shadow: none;
 }
-/* 초기화 버튼만 경고색으로 구분 */
-.menu-action-reset{ 
-  background:#e53e3e; 
-  color:#fff; 
-  border-color: #e53e3e; 
-} 
-.menu-action-reset:hover {
-    background: #c53030;
-    border-color: #c53030;
-}
-
 /* main area */
 main{
   padding:64px 12px 200px; 
@@ -254,7 +373,22 @@ main{
     transform: translateY(-5%);
 }
 
-#title{ margin-top:0; font-size:1.4rem; font-weight:700; text-align:center; background:var(--accent-1); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+#title{ 
+  margin-top:0; 
+  font-size:1.4rem; 
+  font-weight:700; 
+  text-align:center; 
+  
+  /* 그라데이션 정의: 진한 파랑 -> 밝은 하늘색 */
+  background: linear-gradient(to right, #007aff, #66ccff); 
+  
+  /* 텍스트에만 배경을 적용하는 핵심 속성 */
+  -webkit-background-clip:text; 
+  -webkit-text-fill-color:transparent; 
+  background-clip: text; 
+  text-fill-color: transparent; 
+}
+
 .suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:12px; }
 .suggestion-card{ background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:10px; cursor:pointer; font-size:0.92rem; }
 .suggestion-card:active{ transform:translateY(1px); }
@@ -280,7 +414,20 @@ main{
 
 /* input area */
 .input-bar{ position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); }
-.input-wrapper{ max-width:720px; margin:0 auto; display:flex; flex-direction:column; gap:12px; background:var(--input-bg); border-radius:32px; border:1px solid var(--border-strong); padding:14px 18px; min-height:80px; }
+.input-wrapper{ 
+  max-width:720px; 
+  margin:0 auto; 
+  display:flex; 
+  flex-direction:column; 
+  gap:12px; 
+  background:var(--input-bg); 
+  border-radius:32px; 
+  border:1px solid var(--border-strong); 
+  padding:14px 18px; 
+  min-height:80px; 
+  /* 글로우 효과 강화 */
+  box-shadow: 0 0 20px var(--glow-color);
+}
 .textarea-area{ width:100%; }
 textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:auto; border:none; outline:none; background:transparent; color:var(--text); font-family:inherit; font-size:1.05rem; line-height:1.5rem; padding:4px 0; }
 .bottom-row{ display:flex; align-items:center; gap:12px; }
@@ -290,7 +437,7 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
 .model-selector{ position:relative; }
 .model-select-btn{ background:transparent; border:none; color:var(--text); font-size:0.95rem; cursor:pointer; padding:8px 14px; border-radius:20px; display:flex; align-items:center; gap:6px; white-space:nowrap; }
 .model-select-btn:hover{ background:rgba(128,128,128,0.1); }
-.model-dropdown{ position:absolute; bottom:calc(100% + 8px); right:0; background:var(--menu-bg); border:1px solid var(--border); border-radius:12px; padding:6px; min-width:160px; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
+.model-dropdown{ position:absolute; bottom:calc(100% + 8px); right:0; background:var(--menu-bg-primary); border:1px solid var(--border); border-radius:12px; padding:6px; min-width:160px; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:50; }
 .model-dropdown.show{ display:block; }
 .model-option{ padding:10px 14px; border-radius:8px; cursor:pointer; font-size:0.95rem; color:var(--menu-text); }
 .model-option:hover{ background:rgba(128,128,128,0.15); }
@@ -302,7 +449,7 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
 
 /* info button */
 .info-btn{ position:fixed; right:14px; bottom:216px; width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
-.info-popup{ position:fixed; right:14px; bottom:270px; width:240px; background:var(--menu-bg); color:var(--menu-text); border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); display:none; z-index:46; font-size:0.9rem; }
+.info-popup{ position:fixed; right:14px; bottom:270px; width:240px; background:var(--menu-bg-primary); color:var(--menu-text); border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); display:none; z-index:46; font-size:0.9rem; }
 
 /* reset popup overlay (ConfirmPopup) */
 #confirmPopup{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.32s ease; z-index:999; }
@@ -313,12 +460,91 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
 .reset-actions button{ padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-size:0.95rem; }
 .reset-yes{ background:#c53030; color:#fff; }
 .reset-no{ background:var(--button-bg); color:var(--button-text); }
-.reset-new{ background:var(--input-bg); color:var(--text); border: 1px solid var(--border); } /* 새 대화 버튼도 회색으로 통일 */
+.reset-new{ background:var(--input-bg); color:var(--text); border: 1px solid var(--border); } 
+
+/* -------------------- 이름 입력 모달 스타일 -------------------- */
+#nameInputModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+#nameInputModal.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+.name-card {
+    width: 90%;
+    max-width: 400px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    animation: scaleIn 0.3s ease-out;
+}
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.name-card h2 {
+    margin: 0 0 16px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.name-card p {
+    margin: 0 0 20px;
+    font-size: 0.95rem;
+    color: var(--menu-text);
+}
+.name-card input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+}
+.name-card input[type="text"]:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+.name-card button {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.name-card button:hover {
+    background: #005bb5;
+}
+.name-card button:disabled {
+    background: #555555;
+    cursor: not-allowed;
+}
 
 /* small screens */
 @media(max-width:700px){
   .suggestions{ grid-template-columns:repeat(2,1fr); gap:8px; }
-  #title{ margin-top:0; font-size:1.15rem; }
+  #title{ font-size:1.15rem; }
   .logo{ font-size:0.9rem; }
   .message{ font-size:0.9rem; }
 }
@@ -327,32 +553,55 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
 <body class="dark">
 <div class="side-menu-overlay" id="sideMenuOverlay">
   <div class="side-menu" id="sideMenu">
-    <div class="menu-header">대화 목록</div>
+    <div class="menu-header">
+        <div class="chat-item" style="margin: 0 0 8px 0; border-radius: 12px; padding: 10px 16px; background: var(--input-bg); color: var(--menu-text);">
+            <span class="chat-item-text">채팅 검색</span>
+        </div>
+        
+        <button class="menu-action-btn menu-action-new" id="newChatMenuBtn" style="border-radius: 16px; justify-content: flex-start; padding-left: 16px; margin-bottom: 8px;">
+          새 채팅
+        </button>
+        
+        <div style="font-size: 0.8rem; color: var(--menu-text); padding: 8px 16px;">최근</div>
+    </div>
+
     <div class="chat-list-container" id="chatListContainer">
-      </div>
-    <div class="menu-actions">
-      <button class="menu-action-btn menu-action-new" id="newChatMenuBtn">
-        <span>+</span> 새 대화
-      </button>
-      <button class="menu-action-btn menu-action-reset" id="resetAllMenuBtn">
-        대화 전체 초기화
-      </button>
+    </div>
+    
+    <div class="menu-bottom">
+        
+        <div class="menu-bottom-item" id="settingsBtn">
+            <span>설정 및 도움말</span>
+        </div>
+        
+        <div class="menu-upgrade-btn" id="upgradeBtn">
+            <span>업그레이드</span>
+        </div>
+        
+        <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
+            <span>대화 전체 초기화</span>
+        </div>
+
+        <div style="font-size: 0.75rem; color: var(--menu-text); padding: 16px 16px 0 16px; opacity: 0.8;">
+            <span id="locationDisplay">위치 정보 확인 중...</span>
+            <span style="display:block; margin-top: 4px; font-size: 0.7rem; opacity: 0.7;">브라우저 Geolocation API 사용 | 위치 업데이트</span>
+        </div>
     </div>
   </div>
 </div>
 
 <nav>
   <div class="nav-left">
-    <button id="menuToggle" class="menu-toggle">☰</button>
-    <div class="logo">Minsu GPT</div>
+    <button id="menuToggle" class="menu-toggle" disabled>&#x2261;</button> <div class="logo">Minsu GPT</div>
   </div>
   <div class="actions">
-    <button id="modeToggle" class="mode-toggle" title="테마 전환">🌙</button>
+    <label class="mode-toggle-label" id="modeToggleLabel" title="테마 전환">
+        <input type="checkbox" id="modeToggleCheckbox" disabled> <span class="mode-toggle-slider"></span>
+    </label>
   </div>
 </nav>
 
-<main id="main" class="initial-state">
-  <h1 id="title">안녕하세요!</h1>
+<main id="main" class="initial-state" style="opacity: 0.1; pointer-events: none;"> <h1 id="title">안녕하세요!</h1>
 
   <div class="suggestions" id="suggestions">
     <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">창의적인 글쓰기 아이디어를 제안해줘</div>
@@ -364,8 +613,7 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
   <div class="messages" id="messages"></div>
 </main>
 
-<div class="input-bar" id="inputBar">
-  <div class="input-wrapper">
+<div class="input-bar" id="inputBar" style="opacity: 0.1; pointer-events: none;"> <div class="input-wrapper">
     <div class="textarea-area">
       <textarea id="userInput" placeholder="Minsu GPT에게 물어보기" rows="1" aria-label="메시지 입력"></textarea>
     </div>
@@ -375,21 +623,19 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
       <div class="model-selector">
         <button class="model-select-btn" id="modelSelectBtn">
           <span id="selectedModel">2.5 Flash</span>
-          <span>▼</span>
-        </button>
+          <span>&#9660;</span> </button>
         <div class="model-dropdown" id="modelDropdown">
           <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
           <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
         </div>
       </div>
-      <button class="btn" id="sendBtn" disabled>➤</button>
-      <button class="stop-btn" id="stopBtn"></button>
+      <button class="btn" id="sendBtn" disabled>&#9654;</button> <button class="stop-btn" id="stopBtn"></button>
     </div>
   </div>
 </div>
 
-<div class="info-btn" id="infoBtn">i</div>
-<div class="info-popup" id="infoPopup">⚠️ AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div>
+<div class="info-btn" id="infoBtn" style="opacity: 0.1; pointer-events: none;">i</div>
+<div class="info-popup" id="infoPopup">주의: AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div>
 
 <div id="confirmPopup" aria-hidden="true">
   <div class="reset-card" id="confirmCard">
@@ -399,9 +645,18 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
   </div>
 </div>
 
+<div id="nameInputModal" class="visible">
+    <div class="name-card">
+        <h2>환영합니다!</h2>
+        <p>Minsu GPT를 시작하려면 이름을 입력해주세요.</p>
+        <input type="text" id="nameInputField" placeholder="닉네임 또는 이름" maxlength="15">
+        <button id="nameSubmitBtn" disabled>시작하기</button>
+    </div>
+</div>
 <script>
 /* ------------- 설정 ------------- */
-const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
+// 백엔드 URL을 정확히 일치시켜야 합니다.
+const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
 const INPUT_BAR_HEIGHT_BASE = 200;
 /* --------------------------------- */
 
@@ -411,7 +666,7 @@ const messagesEl = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
 const sendBtn = document.getElementById('sendBtn');
 const stopBtn = document.getElementById('stopBtn');
-const modeToggle = document.getElementById('modeToggle');
+const modeToggleCheckbox = document.getElementById('modeToggleCheckbox'); 
 const suggestionsEl = document.getElementById('suggestions');
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
@@ -431,26 +686,27 @@ const sideMenuOverlay = document.getElementById('sideMenuOverlay');
 const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
+const locationDisplay = document.getElementById('locationDisplay'); 
 
 let abortController = null;
 let loadingMsg = null;
 let username = localStorage.getItem('username') || null;
-
-/* 전역 대화 관리 상태 */
-let allConversations = {}; 
+let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
 
 /* 이름 입력 및 제목 업데이트 */
-if(!username){
-  const ask = prompt('이름을 입력해주세요');
-  if(ask && ask.trim()){
-    username = ask.trim();
-    localStorage.setItem('username', username);
-  }
-}
 const titleEl = document.getElementById('title');
-if(username) titleEl.textContent = `안녕하세요! ${username}님`;
+function updateTitle() {
+    if (username) {
+        // 이름이 있으면 "안녕하세요! [이름]님"으로 업데이트
+        titleEl.textContent = `안녕하세요! ${username}님`;
+    } else {
+        // 이름이 없으면 기본 문구 유지
+        titleEl.textContent = `안녕하세요!`;
+    }
+}
+
 
 /* 유틸: 스크롤 끝으로 */
 function scrollToBottom(){
@@ -494,8 +750,12 @@ function loadAllConversations() {
     console.error('Error loading conversations:', e);
   }
 
-  if (!currentChatId || !allConversations[currentChatId] || Object.keys(allConversations).length === 0) {
+  if (Object.keys(allConversations).length === 0) {
     startNewChat(false); 
+  } else if (!currentChatId || !allConversations[currentChatId]) {
+    // 유효하지 않은 currentChatId인 경우 가장 최근 대화로 설정
+    const latestChatId = Object.keys(allConversations).sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
+    activateChat(latestChatId, false);
   } else {
     activateChat(currentChatId, false);
   }
@@ -512,6 +772,7 @@ function saveHistory() {
         allConversations[currentChatId].title = firstLine.substring(0, 30) + (firstLine.length > 30 ? '...' : '');
     }
     
+    allConversations[currentChatId].timestamp = Date.now(); // 시간 업데이트
     saveAllConversations();
     renderChatList();
   }
@@ -553,6 +814,7 @@ function activateChat(chatId, closeMenu = true) {
   document.title = currentChatTitle + ' | Minsu GPT';
   loadHistory();
   saveAllConversations();
+  renderChatList(); // 활성 상태 업데이트를 위해 다시 렌더링
 
   if (closeMenu) hideSideMenu();
 }
@@ -565,19 +827,21 @@ function deleteChat(chatId) {
         if (chatId === currentChatId) {
             const remainingChats = Object.keys(allConversations);
             if (remainingChats.length > 0) {
-                activateChat(remainingChats[0]);
+                // 가장 최근 대화로 이동
+                const latestChatId = remainingChats.sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
+                activateChat(latestChatId);
             } else {
-                startNewChat(false);
+                startNewChat(false); // 남은 대화가 없으면 새 대화 시작
             }
         } else {
             saveAllConversations();
-            renderChatList();
+            renderChatList(); // 현재 대화가 아닌 경우 목록만 업데이트
         }
     }
 }
 
 
-// 대화 목록 렌더링
+// 대화 목록 렌더링 (삭제 버튼 추가)
 function renderChatList() {
   chatListContainer.innerHTML = '';
   const sortedChats = Object.entries(allConversations)
@@ -597,15 +861,22 @@ function renderChatList() {
       textSpan.textContent = chat.title || '새 대화'; 
       item.appendChild(textSpan);
 
-      // 삭제 버튼 추가
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'chat-delete-btn';
-      deleteBtn.innerHTML = '❌'; 
-      deleteBtn.title = '이 대화 삭제';
-      deleteBtn.addEventListener('click', (e) => {
+      // 1. 텍스트 클릭 시 대화 활성화 (삭제 버튼과 충돌 방지)
+      textSpan.addEventListener('click', (e) => {
           e.stopPropagation();
+          activateChat(chat.id);
+      });
+
+      // 2. 삭제 버튼 추가
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-chat-btn';
+      deleteBtn.innerHTML = '&#128465;'; // 휴지통 심볼 (이모지 대체)
+      deleteBtn.title = '대화 삭제';
+      deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // 부모 항목의 클릭 이벤트 방지
+          
           showConfirmPopup(
-              `'${chat.title || '새 대화'}' 대화를 삭제할까요?`,
+              `"${chat.title || '새 대화'}"을(를) 삭제하시겠습니까?`,
               [
                   { id: 'cancel', text: '취소', class: 'reset-no' },
                   { id: 'delete', text: '삭제', class: 'reset-yes' },
@@ -620,9 +891,6 @@ function renderChatList() {
       });
       item.appendChild(deleteBtn);
 
-      item.addEventListener('click', () => {
-          activateChat(chat.id);
-      });
       chatListContainer.appendChild(item);
   });
 }
@@ -646,6 +914,21 @@ function resetAllChats() {
 }
 
 /* -------------------- UI/UX 기능 -------------------- */
+
+// 앱 활성화 (이름 입력 후)
+function activateAppUI() {
+    mainEl.style.opacity = '1';
+    mainEl.style.pointerEvents = 'auto';
+    inputBar.style.opacity = '1';
+    inputBar.style.pointerEvents = 'auto';
+    infoBtn.style.opacity = '1';
+    infoBtn.style.pointerEvents = 'auto';
+    menuToggle.disabled = false;
+    modeToggleCheckbox.disabled = false;
+    
+    // 키보드 포커스
+    userInput.focus();
+}
 
 // 메뉴 토글
 function toggleSideMenu() {
@@ -690,7 +973,8 @@ function hideConfirmPopup(){ confirmPopup.classList.remove('visible'); }
 
 // 응답 중 UI를 비활성화하는 함수
 function disableUI(){
-    sendBtn.disabled = true;
+    sendBtn.style.display = 'none';
+    stopBtn.style.display = 'flex';
     userInput.disabled = true;
     suggestionsEl.classList.add('disabled');
     menuToggle.disabled = true;
@@ -698,13 +982,28 @@ function disableUI(){
 
 // 응답 완료 후 UI를 재활성화하는 함수
 function enableUI(){
+    sendBtn.style.display = 'flex';
+    stopBtn.style.display = 'none';
     userInput.disabled = false;
     sendBtn.disabled = !userInput.value.trim();
     suggestionsEl.classList.remove('disabled');
     menuToggle.disabled = false;
 }
 
-/* Send message with history; uses AbortController for cancel */
+/* -------------------- 스트리밍 응답 처리 (핵심 수정 부분) -------------------- */
+
+// 로딩 메시지 추가 (스트리밍 텍스트 컨테이너 포함)
+function addLoading(){
+  const el = document.createElement('div');
+  el.className = 'message bot';
+  // 스트리밍 텍스트를 받을 컨테이너 추가
+  el.innerHTML = `<div id="streamingTextContainer"></div><div class="loading-bar" aria-hidden="true"></div>`;
+  messagesEl.appendChild(el);
+  loadingMsg = el;
+  scrollToBottom();
+}
+
+/* Send message with history - Streaming Fetch 사용 */
 async function sendMessage(){
   const text = userInput.value.trim();
   if(!text) return;
@@ -717,42 +1016,100 @@ async function sendMessage(){
   chatHistory.push({role:'user', content:text});
   saveHistory();
 
-  addLoading();
-  sendBtn.style.display = 'none';
-  stopBtn.style.display = 'flex';
+  addLoading(); 
   abortController = new AbortController();
-
+  let fullResponse = '';
+  let streamClosed = false;
+  
   try{
-    // ***** 핵심: chatHistory(이전 대화 기록)를 함께 전송하여 문맥 유지 *****
     const payload = { message: text, history: chatHistory };
+    
+    // 스트리밍 fetch 요청
     const res = await fetch(BACKEND_URL, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload),
       signal: abortController.signal
     });
+    
     if(!res.ok){
-      throw new Error('network');
+      throw new Error(`네트워크 오류: ${res.status} ${res.statusText}`);
     }
-    const data = await res.json();
-    const replyText = data.reply ?? '';
-    await replaceLoading(replyText);
-    chatHistory.push({role:'bot', content:replyText});
+    
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = '';
+    
+    // 스트리밍 텍스트가 표시될 컨테이너
+    const textContainer = loadingMsg.querySelector('#streamingTextContainer');
+    
+    while(true){
+        const { value, done } = await reader.read();
+        if (done) {
+            streamClosed = true;
+            break; 
+        }
+
+        buffer += decoder.decode(value, {stream: true});
+        // 백엔드에서 줄바꿈(\n)으로 청크를 구분하여 보냈다고 가정
+        let lines = buffer.split('\n');
+        
+        buffer = lines.pop(); // 불완전한 마지막 줄은 버퍼에 보관
+        
+        for(const line of lines){
+            const trimmedLine = line.trim();
+            if(trimmedLine === '[DONE]'){
+                streamClosed = true;
+                break;
+            } else if (trimmedLine.includes('⚠️ 오류 발생:')) {
+                throw new Error(trimmedLine);
+            }
+            
+            // 텍스트를 메시지 컨테이너에 직접 추가
+            textContainer.textContent += line; 
+            fullResponse += line;
+            scrollToBottom();
+        }
+        
+        if(streamClosed) break;
+    }
+    
+    // 3. 최종 처리: 로딩 메시지 제거 후 마크다운을 포함한 최종 렌더링
+    loadingMsg.remove(); 
+    // 전송된 전체 응답을 마크다운 파싱하여 최종 렌더링
+    renderMessage('bot', fullResponse); 
+    
+    chatHistory.push({role:'bot', content:fullResponse});
     saveHistory();
+    
   }catch(err){
-    const errorMsg = (err && err.name === 'AbortError') ? '응답이 취소되었습니다.' : '오류가 발생했습니다.';
-    await replaceLoading(errorMsg);
-    chatHistory.push({role:'bot', content:errorMsg});
-    saveHistory();
+    const errorMsg = (err && err.name === 'AbortError') ? '응답이 취소되었습니다.' : (err && err.message) ? err.message : '오류가 발생했습니다.';
+    
+    // 취소되었거나 오류가 발생했을 때 로딩 메시지를 제거하고 오류 메시지 출력
+    if (loadingMsg) {
+        loadingMsg.remove();
+        // 부분 응답에 취소/오류 메시지를 덧붙여 최종 대화 기록에 저장 및 렌더링
+        const finalContent = fullResponse + (err.name === 'AbortError' ? " [응답 중단됨]" : "\n\n" + errorMsg);
+        renderMessage('bot', finalContent);
+        
+        chatHistory.push({role:'bot', content:finalContent});
+        saveHistory();
+    } else {
+        renderMessage('bot', errorMsg);
+        chatHistory.push({role:'bot', content:errorMsg});
+        saveHistory();
+    }
+    
   }finally{
-    sendBtn.style.display = 'flex';
-    stopBtn.style.display = 'none';
-    abortController = null;
     enableUI();
+    abortController = null;
+    loadingMsg = null;
   }
 }
 
-/* -------------- renderMessage (기존 유지) -------------- */
+// 기존 replaceLoading 함수는 제거합니다. (스트리밍 로직에 통합됨)
+
+/* -------------- renderMessage -------------- */
 function renderMessage(role, text) {
   const wrap = document.createElement('div');
   wrap.className = 'message ' + (role === 'user' ? 'user' : 'bot');
@@ -803,47 +1160,14 @@ function escapeHtml(str){
 }
 /* ----------------------------------------------------- */
 
-/* Loading bubble */
-function addLoading(){
-  const el = document.createElement('div');
-  el.className = 'message bot';
-  el.innerHTML = `<div>생각 중...</div><div class="loading-bar" aria-hidden="true"></div>`;
-  messagesEl.appendChild(el);
-  loadingMsg = el;
-  scrollToBottom();
-}
-
-/* replace loading with typing animation */
-async function replaceLoading(text){
-  if(!loadingMsg) return;
-  loadingMsg.innerHTML = '';
-  const isCodeFence = /^```[\s\S]*```$/.test(text);
-
-  const shouldSimulateTyping = text.length > 50 && !isCodeFence;
-
-  if (shouldSimulateTyping) {
-    const container = document.createElement('div');
-    loadingMsg.appendChild(container);
-    for(const ch of text){
-      container.textContent += ch;
-      scrollToBottom();
-      await new Promise(r=>setTimeout(r, 16));
-      if(!document.body.contains(loadingMsg)) return;
-    }
-    const composed = container.textContent;
-    loadingMsg.remove();
-    renderMessage('bot', composed);
-  } else {
-    loadingMsg.remove();
-    renderMessage('bot', text);
-  }
-
-  loadingMsg = null;
-}
-
 /* stop button -> abort */
 stopBtn.addEventListener('click', ()=>{
-  if(abortController) abortController.abort();
+  if(abortController) {
+    const controller = abortController;
+    abortController = null; 
+    controller.abort(); // catch 블록에서 최종 처리를 담당합니다.
+    enableUI();
+  }
 });
 
 /* Enter to send (Shift+Enter for newline) */
@@ -854,7 +1178,7 @@ userInput.addEventListener('keydown', e=>{
   }
 });
 
-/* model selector interactions (기존 유지) */
+/* model selector interactions */
 const modelSelectBtn = document.getElementById('modelSelectBtn');
 const modelDropdown = document.getElementById('modelDropdown');
 const selectedModelEl = document.getElementById('selectedModel');
@@ -905,25 +1229,23 @@ infoBtn.addEventListener('click', ()=>{
   infoPopup.style.display = infoPopup.style.display === 'block' ? 'none' : 'block';
 });
 
-/* mode toggle: 이모지 변경 로직 추가 */
-function updateModeToggleEmoji(isLight) {
-    modeToggle.textContent = isLight ? '☀️' : '🌙';
+/* mode toggle logic (use checkbox) */
+function updateMode() {
+    const isLight = modeToggleCheckbox.checked;
+    if (isLight) {
+        body.classList.add('light');
+        body.classList.remove('dark');
+        localStorage.setItem('mode', 'light');
+    } else {
+        body.classList.add('dark');
+        body.classList.remove('light');
+        localStorage.setItem('mode', 'dark');
+    }
 }
 
-modeToggle.addEventListener('click', ()=>{
-  let isLight = body.classList.contains('light');
-  if(isLight){
-    body.classList.remove('light');
-    localStorage.setItem('mode','dark');
-    updateModeToggleEmoji(false);
-  } else {
-    body.classList.add('light');
-    localStorage.setItem('mode','light');
-    updateModeToggleEmoji(true);
-  }
-});
+modeToggleCheckbox.addEventListener('change', updateMode);
 
-/* visualViewport adjustments for mobile keyboard (기존 유지) */
+/* visualViewport adjustments for mobile keyboard */
 function adjustForViewport(){
   if(window.visualViewport){
     const vb = window.visualViewport;
@@ -943,44 +1265,135 @@ if(window.visualViewport){
 window.addEventListener('resize', adjustForViewport);
 adjustForViewport();
 
+/* -------------------- 실시간 위치 정보 업데이트 기능 -------------------- */
+
+function updateRealLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude.toFixed(4);
+                const lon = position.coords.longitude.toFixed(4);
+                
+                // 좌표로 위치를 표시. (정확한 주소는 외부 API가 필요하여 좌표를 사용)
+                locationDisplay.innerHTML = `현재 위치 확인됨: <strong>${lat}°N, ${lon}°E</strong>`;
+            },
+            (error) => {
+                let errorMsg = '위치 정보를 가져올 수 없습니다.';
+                if (error.code === error.PERMISSION_DENIED) {
+                    errorMsg = '위치 접근 <strong>권한이 거부</strong>되었습니다.';
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    errorMsg = '위치 정보를 사용할 수 없습니다.';
+                } else if (error.code === error.TIMEOUT) {
+                    errorMsg = '위치 정보 확인에 시간이 초과되었습니다.';
+                }
+                locationDisplay.innerHTML = errorMsg;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            }
+        );
+    } else {
+        locationDisplay.innerHTML = '이 브라우저는 <strong>위치 정보(Geolocation)</strong>를 지원하지 않습니다.';
+    }
+}
+
+/* -------------------- 이름 입력 모달 기능 -------------------- */
+
+const nameInputModal = document.getElementById('nameInputModal');
+const nameInputField = document.getElementById('nameInputField');
+const nameSubmitBtn = document.getElementById('nameSubmitBtn');
+
+function showNameInputModal() {
+    nameInputModal.classList.add('visible');
+    nameInputField.focus();
+}
+
+function hideNameInputModal() {
+    nameInputModal.classList.remove('visible');
+}
+
+function handleNameInput() {
+    const name = nameInputField.value.trim();
+    nameSubmitBtn.disabled = name.length < 1;
+}
+
+function submitName() {
+    const name = nameInputField.value.trim();
+    if (name) {
+        username = name;
+        localStorage.setItem('username', username);
+        hideNameInputModal();
+        initializeAppAfterName();
+    }
+}
+
+// 이름 입력 필드 이벤트 리스너
+nameInputField.addEventListener('input', handleNameInput);
+nameSubmitBtn.addEventListener('click', submitName);
+
+// Enter 키로 제출 가능
+nameInputField.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !nameSubmitBtn.disabled) {
+        e.preventDefault();
+        submitName();
+    }
+});
+
+
 /* -------------------- 초기 로딩 및 이벤트 리스너 설정 -------------------- */
 
-// 앱 초기화: 대화 로드 및 초기 팝업 처리
+// 이름 입력 후 실행되어야 할 초기화 로직
+function initializeAppAfterName() {
+    activateAppUI(); 
+    updateTitle();
+    loadAllConversations();
+    adjustForViewport();
+    updateRealLocation();
+    
+    // initial mode from storage and set checkbox
+    const savedMode = localStorage.getItem('mode');
+    const isLightMode = savedMode === 'light';
+    modeToggleCheckbox.checked = isLightMode;
+    updateMode(); // 초기 상태 설정
+
+    // detect reload for confirm popup
+    const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+    const navType = navEntries && navEntries[0] ? navEntries[0].type : (performance.navigation ? performance.navigation.type : 0);
+    const isReload = (navType === 'reload' || navType === 1);
+    const hasHistory = chatHistory.length > 0;
+
+    if(isReload && hasHistory){
+        showConfirmPopup(
+          '이전 대화로 계속 진행할까요?',
+          [
+            { id: 'continue', text: '계속', class: 'reset-no' },
+            { id: 'new', text: '새 대화', class: 'reset-new' },
+            { id: 'reset', text: '초기화', class: 'reset-yes' },
+          ],
+          (actionId) => {
+            if (actionId === 'new') {
+              startNewChat(true);
+            } else if (actionId === 'reset') {
+              resetCurrentChat();
+            } else {
+              hideConfirmPopup();
+            }
+          }
+        );
+    }
+}
+
+// 앱 시작점: 이름 유무에 따라 모달을 띄우거나 앱을 활성화합니다.
 function initializeApp() {
-  loadAllConversations();
-  adjustForViewport();
-
-  // initial mode from storage and update emoji
-  const savedMode = localStorage.getItem('mode');
-  const isLightMode = savedMode === 'light';
-  if(isLightMode) body.classList.add('light'); else body.classList.remove('dark');
-  updateModeToggleEmoji(isLightMode);
-
-  // detect reload
-  const navEntries = performance.getEntriesByType && performance.getEntriesByType('navigation');
-  const navType = navEntries && navEntries[0] ? navEntries[0].type : (performance.navigation ? performance.navigation.type : 0);
-  const isReload = (navType === 'reload' || navType === 1);
-  const hasHistory = chatHistory.length > 0;
-
-  if(isReload && hasHistory){
-    showConfirmPopup(
-      '이전 대화로 계속 진행할까요?',
-      [
-        { id: 'continue', text: '계속', class: 'reset-no' },
-        { id: 'new', text: '새 대화', class: 'reset-new' },
-        { id: 'reset', text: '초기화', class: 'reset-yes' },
-      ],
-      (actionId) => {
-        if (actionId === 'new') {
-          startNewChat(true);
-        } else if (actionId === 'reset') {
-          resetCurrentChat();
-        } else {
-          hideConfirmPopup();
-        }
-      }
-    );
-  }
+    if (!username) {
+        showNameInputModal();
+    } else {
+        // 이름이 이미 있으면 바로 앱 활성화
+        hideNameInputModal();
+        initializeAppAfterName();
+    }
 }
 
 // 메뉴 버튼 이벤트
@@ -990,10 +1403,22 @@ sideMenuOverlay.addEventListener('click', (e) => {
     hideSideMenu();
   }
 });
-newChatMenuBtn.addEventListener('click', () => {
+
+// 하단 메뉴 항목 클릭 이벤트
+document.getElementById('newChatMenuBtn').addEventListener('click', () => {
   startNewChat(true);
 });
-resetAllMenuBtn.addEventListener('click', () => {
+document.getElementById('settingsBtn').addEventListener('click', () => {
+    alert('설정 및 도움말 기능은 개발 중입니다.');
+    hideSideMenu();
+});
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+    alert('업그레이드 페이지로 이동합니다.');
+    hideSideMenu();
+});
+
+// 전체 초기화는 하단 메뉴 항목으로 이동
+document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
   showConfirmPopup(
     '모든 대화 기록을 완전히 삭제하고 초기화할까요?',
     [
@@ -1010,6 +1435,7 @@ resetAllMenuBtn.addEventListener('click', () => {
   );
 });
 
+
 /* load history and initial state */
 initializeApp();
 
@@ -1018,11 +1444,6 @@ messagesEl.addEventListener('click', ()=> userInput.focus());
 
 /* initial send button behavior */
 sendBtn.addEventListener('click', sendMessage);
-
-/* safe console notice for CORS/backend issues (기존 유지) */
-window.addEventListener('error', (e) => {
-  console.error('Error detected:', e.message);
-});
 </script>
 </body>
 </html>
