@@ -1121,12 +1121,16 @@ function showSideMenu() {
   sideMenu.classList.add('open');
   body.classList.add('menu-open'); // PC 모드 및 모바일 스크롤 방지용
   renderChatList();
+  // 🌟 수정된 부분: 메뉴 상태를 sessionStorage에 저장 🌟
+  sessionStorage.setItem('isMenuOpen', 'true');
 }
 
 function hideSideMenu() {
   sideMenuOverlay.classList.remove('open');
   sideMenu.classList.remove('open');
   body.classList.remove('menu-open'); // PC 모드 및 모바일 스크롤 방지용
+  // 🌟 수정된 부분: 메뉴 상태 저장 해제 🌟
+  sessionStorage.removeItem('isMenuOpen');
 }
 
 // 팝업 표시 함수
@@ -1520,7 +1524,7 @@ userInput.addEventListener('keydown', e=>{
         if(isSendable) sendMessage();
       } else {
         // Enter: 줄바꿈 (기본 동작 허용)
-        // e.preventDefault(); 불필요
+        // e.preventDefault();
       }
     }
   }
@@ -1692,6 +1696,16 @@ function initializeAppAfterName() {
     const isLightMode = savedMode === 'light';
     modeToggleCheckbox.checked = isLightMode;
     updateMode(); // 초기 상태 설정
+
+    // 🌟 수정된 부분: 메뉴 상태 복원 🌟
+    const isMenuOpenOnRefresh = sessionStorage.getItem('isMenuOpen') === 'true';
+    if (isMenuOpenOnRefresh) {
+        // showSideMenu()를 호출하지 않고 클래스만 적용하여 무한 저장을 방지
+        sideMenuOverlay.classList.add('open');
+        sideMenu.classList.add('open');
+        body.classList.add('menu-open');
+        renderChatList(); // 메뉴 복원 후 목록을 렌더링
+    }
 
     // 🌟 추가: 채팅 검색 이벤트 리스너 🌟
     if (chatSearchInput) {
