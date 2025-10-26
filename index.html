@@ -4,8 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Minsu GPT</title>
-<link href="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css)" rel="stylesheet" />
-<link href="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css)" rel="stylesheet" />
 <style>
 /* ------------------------ 회색 계열 테마 설정 ------------------------ */
 :root{
@@ -41,7 +39,7 @@
 body.light {
   --bg: #ffffff;
   --text: #111111;
-  --input-bg: #f5f5f5; 
+  --input-bg: #ffffff; /* 🌟 수정: --bg와 동일하게 설정 (요청 반영) 🌟 */
   --border: #dddddd;
   --border-strong: #aaaaaa;
   --button-bg: #111111;
@@ -414,16 +412,16 @@ main{
   min-height: 100vh; /* 최소 높이 설정 */
   justify-content: flex-start;
   transform: none;
-  transition: padding-top var(--transition), padding-bottom var(--transition), transform var(--transition); /* transform 추가 */
+  /* 🌟 수정: transform transition 제거 (UI 이동 방지) 🌟 */
+  transition: padding-top var(--transition), padding-bottom var(--transition);
 }
 
 /* 🌟 수정: 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 + 애니메이션 추가 🌟 */
+/* 🌟 수정: transform 관련 속성 제거 (UI 이동 방지 요청 반영) 🌟 */
 .initial-state {
     justify-content: center !important;
-    transform: translateY(-5%);
-    /* transition: justify-content var(--transition), transform var(--transition); */
-    /* justify-content는 transition을 적용하지 않고, transform만 적용합니다 */
-    transition: transform var(--transition); 
+    transform: none; /* 요청에 따라 애니메이션 제거 */
+    transition: none; /* 애니메이션 제거 */
 }
 
 #title{ 
@@ -492,19 +490,8 @@ main{
 
 /* code block */
 .code-wrap{ position:relative; margin-top:8px; }
-/* .code-block 클래스 대신 Prism.js의 클래스를 사용하도록 변경 */
-/* 기존 .code-block CSS는 Prism.js 오버라이드를 위해 제거/수정됨 */
-
-/* Prism.js 오버라이드 (코드 블록 색상/줄바꿈 유지) */
-.message .code-wrap pre[class*="language-"] {
-    margin: 0;
-    padding: 10px;
-    border-radius: 8px;
-    white-space: pre-wrap; /* 줄바꿈 허용 */
-    word-break: break-word; /* 긴 단어 강제 줄바꿈 */
-}
-
-.copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; z-index: 10; }
+.code-block{ display:block; padding:10px; border-radius:8px; background:#2c2c2c; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
+.copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
 /* ------------------------ 새 로딩 스피너 (구글 스타일) ------------------------ */
 .new-google-spinner {
@@ -688,20 +675,6 @@ textarea{
     cursor: not-allowed;
 }
 
-/* -------------------- 안내 사항 -------------------- */
-.guidance-notice {
-    text-align: center;
-    margin-top: 10px;
-    padding: 0 16px; 
-    font-size: 0.85rem; 
-    color: var(--menu-text); 
-    opacity: 0.7;
-}
-.guidance-notice p {
-    margin: 0;
-}
-
-
 /* small screens */
 @media(max-width:700px){
   .suggestions{ grid-template-columns:repeat(2,1fr); gap:8px; }
@@ -777,8 +750,7 @@ textarea{
   <div class="messages" id="messages"></div>
 </main>
 
-<div class="input-bar" id="inputBar" style="opacity: 0.1; pointer-events: none;"> 
-  <div class="input-wrapper">
+<div class="input-bar" id="inputBar" style="opacity: 0.1; pointer-events: none;"> <div class="input-wrapper">
     <div class="textarea-area">
       <textarea id="userInput" placeholder="Minsu GPT에게 물어보기" rows="1" aria-label="메시지 입력"></textarea>
     </div>
@@ -796,9 +768,6 @@ textarea{
       </div>
       <button class="btn" id="sendBtn" disabled>&#9654;</button> <button class="stop-btn" id="stopBtn"></button>
     </div>
-  </div>
-  <div class="guidance-notice" id="guidanceNotice">
-    <p>Minsu GPT의 답변은 개인의 의견이며, 정확하지 않을 수 있습니다. 중요한 정보는 반드시 전문가 또는 신뢰할 수 있는 출처를 통해 확인하세요.</p>
   </div>
 </div>
 
@@ -821,21 +790,10 @@ textarea{
         <button id="nameSubmitBtn" disabled>시작하기</button>
     </div>
 </div>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js)"></script>
-<script>
-    // Prism.js Autoloader 경로 설정 (CORS 문제 방지)
-    Prism.plugins.autoloader.languages_path = '[https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/](https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/)';
-</script>
 <script>
 /* ------------- 설정 ------------- */
 // ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
-const BACKEND_URL = '[https://jaewons0227.pythonanywhere.com/ask](https://jaewons0227.pythonanywhere.com/ask)'; 
+const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
 const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-height: 80px)
 const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
@@ -898,28 +856,14 @@ function scrollToBottom(){
 
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
 function toggleInitialState(isInitial){
-    const transitionDuration = 350; // CSS var(--transition) 0.35s
-    
+    // 🌟 수정: 애니메이션 로직 및 transform 조작을 제거하고 중앙 정렬 클래스만 관리하여 
+    // 채팅 시작 시에도 부드럽게 화면 상단으로 전환되도록 합니다. 🌟
     if(isInitial){
-      // 대화가 없을 때: 중앙 정렬 유지 및 transform 설정
+      // 대화가 없을 때: 중앙 정렬 유지
       mainEl.classList.add('initial-state');
-      mainEl.style.transform = ''; // CSS에 설정된 transform: translateY(-5%)를 사용
     } else {
-      // 대화가 생겼을 때: 중앙 정렬 해제 및 부드러운 이동
-      
-      if(mainEl.classList.contains('initial-state')) {
-          // 1. transform을 초기화하여 부드럽게 'transform: none'으로 이동하도록 유도
-          // (CSS의 .initial-state에 transition이 적용되어 있음)
-          mainEl.style.transform = 'none'; 
-          
-          // 2. CSS transition 시간만큼 기다립니다. (글씨와 카드가 부드럽게 이동)
-          setTimeout(() => {
-              // 3. 정렬 해제 (이동이 끝난 후 정렬 변경 -> 점프 방지)
-              mainEl.classList.remove('initial-state');
-              // 4. transform 속성을 완전히 제거하여 추후 레이아웃에 지장이 없게 함
-              mainEl.style.transform = ''; 
-          }, transitionDuration + 50); // 400ms 후 실행 (여유시간 포함)
-      }
+      // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용)
+      mainEl.classList.remove('initial-state');
     }
 }
 
@@ -1275,10 +1219,11 @@ function addLoading(){
 
 // 🌟 타이핑 효과 함수 (메시지 등장 애니메이션 적용) 🌟
 function renderTypingEffect(role, fullText, finalCallback) {
-    // 🌟 수정: 새 버블을 만들고 메시지 등장 애니메이션 시작 🌟
-    const wrap = createMessageWrapper(role);
+    // 텍스트만 표시할 임시 메시지 버블 생성 (마크다운 파싱을 늦춥니다)
+    const wrap = renderMessage(role, '', false); 
     const textContainer = wrap.querySelector('.message-content');
     
+    // 메시지 등장 애니메이션 시작 (투명도/위치 변경)
     wrap.classList.add('show');
     
     // 타이핑 커서 추가
@@ -1287,12 +1232,13 @@ function renderTypingEffect(role, fullText, finalCallback) {
     const cursorEl = textContainer.querySelector('.typing-cursor');
 
     let index = 0;
-    const typingInterval = 15;
+    const typingInterval = 15; // 15ms마다 글자 추가 (타이핑 속도)
     
     const textToType = fullText;
     
     function type() {
         if (index < textToType.length) {
+            // 한 글자씩 추가
             typingTextEl.textContent += textToType[index];
             index++;
             scrollToBottom();
@@ -1300,12 +1246,13 @@ function renderTypingEffect(role, fullText, finalCallback) {
             setTimeout(type, typingInterval); 
         } else {
             // 타이핑 완료
-            cursorEl.remove(); 
+            cursorEl.remove(); // 커서 제거
             
-            // 🌟 수정: 기존 버블에 최종 마크다운 렌더링을 적용하여 부드럽게 전환 🌟
-            // (버블을 제거하고 새로 만드는 대신 내용만 교체)
-            applyMarkdownAndHighlight(wrap, fullText); 
-            
+            // 🌟 최종 마크다운 렌더링 🌟
+            wrap.remove(); // 임시 버블 제거
+            const finalWrap = renderMessage(role, fullText); 
+            finalWrap.classList.add('show'); // 최종 메시지도 애니메이션 적용
+
             if (finalCallback) {
                 finalCallback();
             }
@@ -1426,118 +1373,87 @@ async function sendMessage(){
 }
 
 /* -------------- renderMessage (줄바꿈 수정) -------------- */
+function renderMessage(role, text, doMarkdown = true) {
+  const wrap = document.createElement('div');
+  wrap.className = 'message ' + (role === 'user' ? 'user' : 'bot');
+  
+  // 마크다운 파싱 전용 컨테이너
+  const contentEl = document.createElement('div');
+  contentEl.className = 'message-content';
+  wrap.appendChild(contentEl);
+
+  text = (text === null || text === undefined) ? '' : String(text);
+  
+  // 모든 메시지는 기본적으로 텍스트 콘텐츠를 설정 (줄바꿈을 위해)
+  contentEl.textContent = text; 
+
+  if (doMarkdown) {
+      // 🌟 마크다운 파싱 로직 (줄바꿈 처리 수정) 🌟
+      const codeFenceRegex = /```([\s\S]*?)```/g;
+      const parts = text.split(codeFenceRegex);
+      
+      contentEl.innerHTML = ''; // 텍스트 콘텐츠 초기화, 마크다운으로 다시 구성
+
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+          // 일반 텍스트 부분
+          let html = parts[i]
+            // 줄바꿈은 pre-wrap이 처리하도록 \n -> <br> 치환을 제거했습니다.
+            .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
+            .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
+            .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          
+          // \n이 html에 남아있도록 하고, <pre> 대신 <div>에 삽입하여 pre-wrap에 맡깁니다.
+          const textNode = document.createElement('div');
+          textNode.style.whiteSpace = 'pre-wrap'; // 명시적으로 한 번 더 설정 (message 클래스에 이미 있지만 안전 장치)
+          // 마크다운이 적용된 문자열을 삽입
+          textNode.innerHTML = html; 
+          contentEl.appendChild(textNode);
+
+        } else {
+          // 코드 블록 부분 (기존 로직 유지)
+          const code = parts[i];
+          const codeWrap = document.createElement('div');
+          codeWrap.className = 'code-wrap';
+          codeWrap.innerHTML = `
+            <pre class="code-block">${escapeHtml(code)}</pre>
+            <button class="copy-btn">복사</button>
+          `;
+          const btn = codeWrap.querySelector('.copy-btn');
+          btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(code).then(() => {
+              btn.textContent = '복사됨';
+              setTimeout(() => btn.textContent = '복사', 1000);
+            }).catch(()=>{});
+          });
+          contentEl.appendChild(codeWrap);
+        }
+      }
+      
+      // 마크다운 파싱으로 인해 불필요하게 생긴 빈 div/text node 제거
+      let firstChild = contentEl.firstChild;
+      while(firstChild && firstChild.nodeType === 3 && firstChild.textContent.trim() === ''){
+          contentEl.removeChild(firstChild);
+          firstChild = contentEl.firstChild;
+      }
+      
+  } else {
+      // 타이핑 효과를 위해 빈 contentEl만 반환합니다.
+      // (contentEl.textContent = text; 가 이미 실행되어 있어 임시로 텍스트가 표시됨)
+  }
+
+
+  messagesEl.appendChild(wrap);
+  scrollToBottom();
+  return wrap; 
+}
 
 /* 간단한 escape: 코드 내용만 escape 처리 */
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, function(m){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
   });
-}
-
-// 🌟 추가: 메시지 wrapper 생성 (복원된 renderMessage의 역할) 🌟
-function createMessageWrapper(role) {
-    const wrap = document.createElement('div');
-    wrap.className = 'message ' + (role === 'user' ? 'user' : 'bot');
-    
-    // 마크다운 파싱 전용 컨테이너
-    const contentEl = document.createElement('div');
-    contentEl.className = 'message-content';
-    wrap.appendChild(contentEl);
-
-    messagesEl.appendChild(wrap);
-    scrollToBottom();
-    return wrap; 
-}
-
-// 🌟 추가: 마크다운/하이라이팅 적용 함수 🌟
-function applyMarkdownAndHighlight(wrap, text) {
-    const contentEl = wrap.querySelector('.message-content');
-    text = (text === null || text === undefined) ? '' : String(text);
-    
-    // 🌟 마크다운 파싱 로직 (코드 블록의 언어 감지 추가) 🌟
-    // 정규식: ```[언어옵션]\n[코드]\n``` 패턴 매칭
-    const codeFenceRegex = /```\s*(\w+)?\s*\n([\s\S]*?)```/g; 
-    let match;
-    let lastIndex = 0;
-    
-    contentEl.innerHTML = ''; // 기존 내용 초기화
-
-    while ((match = codeFenceRegex.exec(text)) !== null) {
-        // match: [전체매칭, 언어옵션(선택적), 코드내용]
-        const [fullMatch, lang, code] = match;
-        
-        // 1. 일반 텍스트 부분 처리 (코드 블록 이전)
-        const beforeText = text.substring(lastIndex, match.index);
-        if (beforeText) {
-            let html = beforeText
-                .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
-                .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
-                .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-            
-            const textNode = document.createElement('div');
-            textNode.style.whiteSpace = 'pre-wrap';
-            textNode.innerHTML = html; 
-            contentEl.appendChild(textNode);
-        }
-
-        // 2. 코드 블록 부분 처리 (언어 감지 및 Prism 클래스 적용)
-        const language = (lang || 'markup').toLowerCase(); 
-        const escapedCode = escapeHtml(code);
-        
-        const codeWrap = document.createElement('div');
-        codeWrap.className = 'code-wrap';
-        codeWrap.innerHTML = `
-            <pre class="language-${language}"><code class="language-${language}">${escapedCode}</code></pre>
-            <button class="copy-btn">복사</button>
-        `;
-        
-        // 복사 버튼 이벤트
-        const btn = codeWrap.querySelector('.copy-btn');
-        btn.addEventListener('click', () => {
-            navigator.clipboard.writeText(code).then(() => {
-                btn.textContent = '복사됨';
-                setTimeout(() => btn.textContent = '복사', 1000);
-            }).catch(()=>{});
-        });
-        contentEl.appendChild(codeWrap);
-
-        // Prism 하이라이팅 적용
-        // Prism.highlightElement는 비동기 처리 없이 DOM 요소를 즉시 하이라이팅 합니다.
-        Prism.highlightElement(codeWrap.querySelector('code'));
-        
-        lastIndex = match.index + fullMatch.length;
-    }
-
-    // 3. 남은 일반 텍스트 부분 처리 (코드 블록 이후)
-    const afterText = text.substring(lastIndex);
-    if (afterText) {
-        let html = afterText
-            .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
-            .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
-            .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        
-        const textNode = document.createElement('div');
-        textNode.style.whiteSpace = 'pre-wrap'; 
-        textNode.innerHTML = html; 
-        contentEl.appendChild(textNode);
-    }
-    
-    // 마크다운 파싱으로 인해 불필요하게 생긴 빈 div/text node 제거
-    let firstChild = contentEl.firstChild;
-    while(firstChild && firstChild.nodeType === 3 && firstChild.textContent.trim() === ''){
-        contentEl.removeChild(firstChild);
-        firstChild = contentEl.firstChild;
-    }
-    scrollToBottom();
-}
-
-// 🌟 수정된 renderMessage: wrapper를 생성하고 바로 마크다운을 적용 🌟
-function renderMessage(role, text) {
-    const wrap = createMessageWrapper(role);
-    applyMarkdownAndHighlight(wrap, text);
-    return wrap; 
 }
 /* ----------------------------------------------------- */
 
