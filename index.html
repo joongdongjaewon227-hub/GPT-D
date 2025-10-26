@@ -465,15 +465,35 @@ main{
     transform: translateY(0);
 }
 
-/* 로딩 중 메시지 버블 크기 최소화 */
+/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 (스피너) 🌟🌟🌟 */
 .message.loading {
     max-width: fit-content; 
-    padding: 3px 8px; 
-    font-size: 0.8rem; 
+    padding: 5px 12px; /* 아주 약간 더 크게 조정 */
+    font-size: 0.9rem; /* 폰트도 약간 키움 */
     color: var(--menu-text); 
-    opacity: 0.8;
+    opacity: 0.9; /* 불투명도 약간 높임 */
     border: 0.5px solid var(--border); 
 }
+
+/* 🌟🌟🌟 추가: 원형 스피너 스타일 (Gemini 스타일) 🌟🌟🌟 */
+.spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3); /* 다크 모드 배경색 */
+    border-top: 3px solid var(--text); /* 다크 모드 스피너 색상 */
+    border-radius: 50%;
+    width: 14px;
+    height: 14px;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+body.light .spinner {
+    border: 3px solid rgba(0, 0, 0, 0.15); /* 라이트 모드 배경색 */
+    border-top: 3px solid var(--text); /* 라이트 모드 스피너 색상 */
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
 .message strong { font-weight:700; }
@@ -483,19 +503,8 @@ main{
 .code-block{ display:block; padding:10px; border-radius:8px; background:#2c2c2c; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
-/* loading bar */
-.loading-bar{ 
-    width:100px; 
-    height:4px; 
-    background:var(--border); 
-    border-radius:4px; 
-    overflow:hidden; 
-    margin-top:0; 
-    position:relative; 
-    display: block; 
-}
-.loading-bar::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--button-bg); animation:barMove 900ms linear infinite; }
-@keyframes barMove{ 0%{ left:-40% } 100%{ left:100% } }
+/* loading bar (기존 로딩바 관련 CSS 제거됨) */
+
 
 /* 타이핑 커서 스타일 */
 .typing-cursor {
@@ -696,6 +705,10 @@ textarea{
             <span>업그레이드</span>
         </div>
         
+        <div class="menu-bottom-item" id="resetUsernameBtn">
+            <span>사용자 정보 초기화</span> 
+        </div>
+
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
@@ -808,6 +821,7 @@ const sideMenuOverlay = document.getElementById('sideMenuOverlay');
 const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
+const resetUsernameBtn = document.getElementById('resetUsernameBtn'); // 🌟 추가: 사용자 정보 초기화 버튼 🌟
 const locationDisplay = document.getElementById('locationDisplay'); 
 
 let abortController = null;
@@ -1056,17 +1070,50 @@ function resetCurrentChat() {
   }
 }
 
-// 전체 대화 초기화 (버튼용)
+// 🌟🌟🌟 수정: 전체 대화 초기화 (버튼용) 🌟🌟🌟
 function resetAllChats() {
+  // 메모리 데이터 초기화
+  allConversations = {};
+  currentChatId = null;
+  // localStorage 데이터 삭제
   localStorage.removeItem('allConversations');
   localStorage.removeItem('currentChatId');
+
   hideConfirmPopup();
-  // 🌟 수정: 리로드 대신 부드럽게 전환 🌟
+  
+  // 새 대화 시작 (false: 리로드 없이 부드러운 전환)
   startNewChat(false);
   updateTitle(); 
   renderChatList();
 }
 
+// 🌟🌟🌟 추가: 사용자 정보 초기화 (버튼용) 🌟🌟🌟
+function resetUsername() {
+    localStorage.removeItem('username');
+    username = null;
+    updateTitle();
+    hideSideMenu();
+    
+    // 확인 팝업 후 이름 입력 모달 다시 표시
+    showConfirmPopup(
+        '사용자 정보(닉네임)가 초기화되었습니다. 다시 시작해주세요.',
+        [{ id: 'ok', text: '확인', class: 'reset-no' }],
+        () => {
+            hideConfirmPopup();
+            // nameInputModal을 보이게 하고 앱을 비활성화
+            showNameInputModal();
+            // 앱 UI를 비활성화 상태로 되돌립니다. (이름 입력 전 상태)
+            mainEl.style.opacity = '0.1';
+            mainEl.style.pointerEvents = 'none';
+            inputBar.style.opacity = '0.1';
+            inputBar.style.pointerEvents = 'none';
+            infoBtn.style.opacity = '0.1';
+            infoBtn.style.pointerEvents = 'none';
+            menuToggle.disabled = true;
+            modeToggleCheckbox.disabled = true;
+        }
+    );
+}
 /* -------------------- UI/UX 기능 -------------------- */
 
 // 앱 활성화 (이름 입력 후)
@@ -1192,22 +1239,23 @@ adjustForViewport();
 
 /* -------------------- 스트리밍 응답 처리 (로딩 바 유지 및 타이핑 효과) -------------------- */
 
-// 로딩 메시지 추가 (작은 버블, "생각 중...")
+// 🌟🌟🌟 수정: 로딩 메시지 추가 (스피너 사용) 🌟🌟🌟
 function addLoading(){
   const el = document.createElement('div');
   el.className = 'message bot loading show'; // 로딩 메시지는 즉시 표시
   
-  // "생각 중..." 텍스트와 로딩 바를 포함
+  // "생각 중..." 텍스트와 원형 스피너를 포함
   el.innerHTML = `
     <div id="streamingTextContainer" style="display: flex; align-items: center; gap: 8px;">
         <span>생각 중...</span>
-        <div class="loading-bar" id="loadingBar" aria-hidden="true" style="margin: 0;"></div>
+        <div class="spinner" id="loadingSpinner"></div>
     </div>
   `;
   messagesEl.appendChild(el);
   loadingMsg = el;
   scrollToBottom();
 }
+
 
 // 🌟 타이핑 효과 함수 (메시지 등장 애니메이션 적용) 🌟
 function renderTypingEffect(role, fullText, finalCallback) {
@@ -1686,6 +1734,24 @@ document.getElementById('settingsBtn').addEventListener('click', () => {
 document.getElementById('upgradeBtn').addEventListener('click', () => {
     alert('업그레이드 페이지로 이동합니다.');
     hideSideMenu();
+});
+
+// 🌟🌟🌟 추가: 사용자 정보 초기화 버튼 이벤트 🌟🌟🌟
+document.getElementById('resetUsernameBtn').addEventListener('click', () => {
+    showConfirmPopup(
+        '사용자 정보(닉네임)를 초기화하고 다시 설정하시겠습니까? (대화 기록은 유지됩니다.)',
+        [
+            { id: 'cancel', text: '취소', class: 'reset-no' },
+            { id: 'reset', text: '초기화', class: 'reset-yes' },
+        ],
+        (actionId) => {
+            if (actionId === 'reset') {
+                resetUsername();
+            } else {
+                hideConfirmPopup();
+            }
+        }
+    );
 });
 
 // 전체 초기화는 하단 메뉴 항목으로 이동
