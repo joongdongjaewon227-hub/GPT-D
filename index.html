@@ -356,7 +356,7 @@ body.light .chat-item.active{
 }
 /* main area */
 main{
-  padding:64px 12px 200px; 
+  padding:64px 12px 200px; /* 🌟🌟🌟 수정: 하단 패딩을 200px로 고정 🌟🌟🌟 */
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   display:flex;
@@ -399,6 +399,16 @@ main{
 .message{ max-width:80%; padding:10px 12px; border-radius:14px; white-space:pre-wrap; word-break:break-word; font-weight:normal; font-size:0.95rem; position: relative; }
 .message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
 .message.bot{ align-self:flex-start; background:var(--input-bg); border:1px solid var(--border); color:var(--text); }
+
+/* 🌟 로딩 중 메시지 버블 크기 축소 🌟 */
+.message.loading {
+    max-width: fit-content; /* 내용물 크기에 맞게 조절 */
+    padding: 8px 12px; /* 패딩 축소 */
+    font-size: 0.85rem; /* 폰트 크기 축소 */
+    color: var(--menu-text); /* 텍스트 색상 변경 */
+    opacity: 0.8;
+}
+
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
 .message strong { font-weight:700; }
 
@@ -409,21 +419,38 @@ main{
 
 /* loading bar */
 .loading-bar{ 
-    width:100%; 
+    width:100px; /* 로딩 막대 길이 고정 */
     height:3px; 
     background:var(--border); 
     border-radius:4px; 
     overflow:hidden; 
     margin-top:6px; 
     position:relative; 
-    /* 로딩 바를 항상 메시지 콘텐츠 아래에 표시 */
     display: block; 
 }
 .loading-bar::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--button-bg); animation:barMove 900ms linear infinite; }
 @keyframes barMove{ 0%{ left:-40% } 100%{ left:100% } }
 
+/* 🌟 타이핑 커서 스타일 🌟 */
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em; /* 폰트 크기에 맞게 조정 */
+    margin-left: 2px;
+    background-color: var(--text); 
+    animation: blink 0.7s infinite;
+    vertical-align: text-bottom;
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
 /* input area */
-.input-bar{ position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); }
+.input-bar{ 
+  position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); 
+  border-top: 1px solid var(--border); /* 입력창 상단 경계선 */
+}
 .input-wrapper{ 
   max-width:720px; 
   margin:0 auto; 
@@ -435,11 +462,24 @@ main{
   border:1px solid var(--border-strong); 
   padding:14px 18px; 
   min-height:80px; 
-  /* 글로우 효과 강화 */
   box-shadow: 0 0 20px var(--glow-color);
 }
 .textarea-area{ width:100%; }
-textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:auto; border:none; outline:none; background:transparent; color:var(--text); font-family:inherit; font-size:1.05rem; line-height:1.5rem; padding:4px 0; }
+textarea{ 
+  width:100%; 
+  resize:none; 
+  min-height:30px; 
+  max-height:168px; /* 🌟 수정: 최대 높이를 200px - 패딩 - 기타 요소 높이로 계산 🌟 */
+  overflow:auto; 
+  border:none; 
+  outline:none; 
+  background:transparent; 
+  color:var(--text); 
+  font-family:inherit; 
+  font-size:1.05rem; 
+  line-height:1.5rem; 
+  padding:4px 0; 
+}
 .bottom-row{ display:flex; align-items:center; gap:12px; }
 .icon-btn{ width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.5rem; opacity:0.8; flex-shrink:0; }
 .icon-btn:hover{ opacity:1; background:rgba(128,128,128,0.1); }
@@ -667,7 +707,7 @@ textarea{ width:100%; resize:none; min-height:30px; max-height:200px; overflow:a
 /* ------------- 설정 ------------- */
 // ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
-const INPUT_BAR_HEIGHT_BASE = 200;
+const INPUT_AREA_HEIGHT = 200; // CSS의 main 패딩과 일치해야 함.
 /* --------------------------------- */
 
 const body = document.body;
@@ -1000,22 +1040,89 @@ function enableUI(){
     menuToggle.disabled = false;
 }
 
-/* -------------------- 스트리밍 응답 처리 (로딩 바 유지) -------------------- */
+/* visualViewport adjustments for mobile keyboard */
+function adjustForViewport(){
+  if(window.visualViewport){
+    const vb = window.visualViewport;
+    const bottomOffset = Math.max(0, window.innerHeight - vb.height - vb.offsetTop);
+    inputBar.style.bottom = bottomOffset + 'px';
+    // 🌟 200은 CSS의 main 패딩값과 동일하게 유지 🌟
+    mainEl.style.paddingBottom = (INPUT_AREA_HEIGHT + bottomOffset) + 'px'; 
+    scrollToBottom();
+  } else {
+    inputBar.style.bottom = '0px';
+    mainEl.style.paddingBottom = INPUT_AREA_HEIGHT + 'px'; // CSS와 동일하게 고정
+  }
+}
+if(window.visualViewport){
+  visualViewport.addEventListener('resize', adjustForViewport);
+  visualViewport.addEventListener('scroll', adjustForViewport);
+}
+window.addEventListener('resize', adjustForViewport);
+adjustForViewport();
 
-// 로딩 메시지 추가 (스트리밍 텍스트 컨테이너 포함)
+/* -------------------- 스트리밍 응답 처리 (로딩 바 유지 및 타이핑 효과) -------------------- */
+
+// 로딩 메시지 추가 (작은 버블, "생각 중...")
 function addLoading(){
   const el = document.createElement('div');
-  el.className = 'message bot';
+  el.className = 'message bot loading'; // loading 클래스 추가
   
-  // 텍스트 컨테이너와 로딩 바를 함께 삽입
+  // 🌟 "생각 중..." 텍스트와 로딩 바를 포함 🌟
   el.innerHTML = `
-    <div id="streamingTextContainer"></div>
-    <div class="loading-bar" id="loadingBar" aria-hidden="true"></div>
+    <div id="streamingTextContainer" style="display: flex; align-items: center; gap: 8px;">
+        <span>생각 중...</span>
+        <div class="loading-bar" id="loadingBar" aria-hidden="true" style="margin: 0;"></div>
+    </div>
   `;
   messagesEl.appendChild(el);
   loadingMsg = el;
   scrollToBottom();
 }
+
+// 🌟 타이핑 효과 함수 🌟
+function renderTypingEffect(role, fullText, finalCallback) {
+    // 텍스트만 표시할 임시 메시지 버블 생성 (마크다운 파싱을 늦춥니다)
+    const wrap = renderMessage(role, '', false); 
+    const textContainer = wrap.querySelector('.message-content');
+    
+    // 타이핑 커서 추가
+    textContainer.innerHTML = '<span class="typing-text"></span><span class="typing-cursor"></span>';
+    const typingTextEl = textContainer.querySelector('.typing-text');
+    const cursorEl = textContainer.querySelector('.typing-cursor');
+
+    let index = 0;
+    const typingInterval = 15; // 15ms마다 글자 추가 (타이핑 속도)
+    
+    // 마크다운 문법을 문자 그대로 출력하며 타이핑
+    const textToType = fullText;
+    
+    function type() {
+        if (index < textToType.length) {
+            // 한 글자씩 추가
+            typingTextEl.textContent += textToType[index];
+            index++;
+            scrollToBottom();
+            
+            // 타이핑이 중단되지 않도록 requestAnimationFrame 대신 setTimeout 사용
+            setTimeout(type, typingInterval); 
+        } else {
+            // 타이핑 완료
+            cursorEl.remove(); // 커서 제거
+            
+            // 🌟 최종 마크다운 렌더링 🌟
+            wrap.remove(); // 임시 버블 제거
+            renderMessage(role, fullText); // 정식 마크다운 렌더링
+            
+            if (finalCallback) {
+                finalCallback();
+            }
+        }
+    }
+    
+    type();
+}
+// ------------------------------------------------------------------
 
 /* Send message with history - Streaming Fetch 사용 */
 async function sendMessage(){
@@ -1038,14 +1145,14 @@ async function sendMessage(){
   try{
     const payload = { message: text, history: chatHistory };
     
-    // 스트리밍 fetch 요청
+    // 1. 요청 시작
     const res = await fetch(BACKEND_URL, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload),
       signal: abortController.signal
     });
-    
+
     if(!res.ok){
       throw new Error(`네트워크 오류: ${res.status} ${res.statusText}`);
     }
@@ -1054,9 +1161,7 @@ async function sendMessage(){
     const decoder = new TextDecoder("utf-8");
     let buffer = '';
     
-    // 스트리밍 텍스트가 표시될 컨테이너
-    const textContainer = loadingMsg.querySelector('#streamingTextContainer');
-    
+    // 2. 스트리밍 청크 수집 (로딩 상태 유지)
     while(true){
         const { value, done } = await reader.read();
         if (done) {
@@ -1065,10 +1170,9 @@ async function sendMessage(){
         }
 
         buffer += decoder.decode(value, {stream: true});
-        // 백엔드에서 줄바꿈(\n)으로 청크를 구분하여 보냈다고 가정
         let lines = buffer.split('\n');
         
-        buffer = lines.pop(); // 불완전한 마지막 줄은 버퍼에 보관
+        buffer = lines.pop(); 
         
         for(const line of lines){
             const trimmedLine = line.trim();
@@ -1079,89 +1183,98 @@ async function sendMessage(){
                 throw new Error(trimmedLine);
             }
             
-            // 텍스트를 메시지 컨테이너에 직접 추가
-            textContainer.textContent += line; 
+            // 텍스트를 수집만 합니다. (로딩 버블은 그대로 유지)
             fullResponse += line;
-            scrollToBottom();
         }
         
         if(streamClosed) break;
     }
     
-    // 3. 최종 처리: 스트림이 완전히 종료된 후 로딩 메시지 전체 제거
+    // 3. 최종 처리: 로딩 메시지 제거 후 타이핑 효과 시작
     loadingMsg.remove(); 
-    // 전송된 전체 응답을 마크다운 파싱하여 최종 렌더링
-    renderMessage('bot', fullResponse); 
     
-    chatHistory.push({role:'bot', content:fullResponse});
-    saveHistory();
+    renderTypingEffect('bot', fullResponse, () => {
+        // 타이핑 효과가 끝난 후 대화 기록에 추가
+        chatHistory.push({role:'bot', content:fullResponse});
+        saveHistory();
+        enableUI();
+    });
     
   }catch(err){
+    // 오류 발생 시
     const errorMsg = (err && err.name === 'AbortError') ? '응답이 취소되었습니다.' : (err && err.message) ? err.message : '오류가 발생했습니다.';
     
     if (loadingMsg) {
-        // 오류/취소 발생 시에도 로딩 메시지 전체 제거
         loadingMsg.remove(); 
         
         const finalContent = fullResponse + (err.name === 'AbortError' ? " [응답 중단됨]" : "\n\n" + errorMsg);
+        
+        // 오류 메시지는 타이핑 효과 없이 즉시 렌더링
         renderMessage('bot', finalContent);
         
         chatHistory.push({role:'bot', content:finalContent});
         saveHistory();
-    } else {
-        renderMessage('bot', errorMsg);
-        chatHistory.push({role:'bot', content:errorMsg});
-        saveHistory();
     }
-    
-  }finally{
     enableUI();
+  }finally{
     abortController = null;
     loadingMsg = null;
+    // enableUI는 타이핑 효과 완료 후 또는 오류 발생 시 호출됩니다.
   }
 }
 
-/* -------------- renderMessage -------------- */
-function renderMessage(role, text) {
+/* -------------- renderMessage (타이핑 효과를 위해 수정) -------------- */
+function renderMessage(role, text, doMarkdown = true) {
   const wrap = document.createElement('div');
   wrap.className = 'message ' + (role === 'user' ? 'user' : 'bot');
+  
+  // 마크다운 파싱 전용 컨테이너
+  const contentEl = document.createElement('div');
+  contentEl.className = 'message-content';
+  wrap.appendChild(contentEl);
 
   text = (text === null || text === undefined) ? '' : String(text);
 
-  const codeFenceRegex = /```([\s\S]*?)```/g;
-  const parts = text.split(codeFenceRegex);
+  if (doMarkdown) {
+      // 🌟 마크다운 파싱 로직 (기존 로직) 🌟
+      const codeFenceRegex = /```([\s\S]*?)```/g;
+      const parts = text.split(codeFenceRegex);
 
-  for (let i = 0; i < parts.length; i++) {
-    if (i % 2 === 0) {
-      let html = parts[i]
-        .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
-        .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
-        .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
-      wrap.insertAdjacentHTML('beforeend', html);
-    } else {
-      const code = parts[i];
-      const codeWrap = document.createElement('div');
-      codeWrap.className = 'code-wrap';
-      codeWrap.innerHTML = `
-        <pre class="code-block">${escapeHtml(code)}</pre>
-        <button class="copy-btn">복사</button>
-      `;
-      const btn = codeWrap.querySelector('.copy-btn');
-      btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(code).then(() => {
-          btn.textContent = '복사됨';
-          setTimeout(() => btn.textContent = '복사', 1000);
-        }).catch(()=>{});
-      });
-      wrap.appendChild(codeWrap);
-    }
+      for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+          let html = parts[i]
+            .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
+            .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
+            .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+          contentEl.insertAdjacentHTML('beforeend', html);
+        } else {
+          const code = parts[i];
+          const codeWrap = document.createElement('div');
+          codeWrap.className = 'code-wrap';
+          codeWrap.innerHTML = `
+            <pre class="code-block">${escapeHtml(code)}</pre>
+            <button class="copy-btn">복사</button>
+          `;
+          const btn = codeWrap.querySelector('.copy-btn');
+          btn.addEventListener('click', () => {
+            navigator.clipboard.writeText(code).then(() => {
+              btn.textContent = '복사됨';
+              setTimeout(() => btn.textContent = '복사', 1000);
+            }).catch(()=>{});
+          });
+          contentEl.appendChild(codeWrap);
+        }
+      }
+  } else {
+      // 타이핑 효과를 위해 빈 contentEl만 반환합니다.
   }
+
 
   messagesEl.appendChild(wrap);
   scrollToBottom();
-  return wrap;
+  return wrap; 
 }
 
 /* 간단한 escape: 코드 내용만 escape 처리 */
@@ -1217,8 +1330,7 @@ document.addEventListener('click', ()=>{
 /* input autosize and send button enable/disable */
 userInput.addEventListener('input', ()=>{
   userInput.style.height = 'auto';
-  userInput.style.height = Math.min(userInput.scrollHeight, 200) + 'px';
-
+  userInput.style.height = Math.min(userInput.scrollHeight, 168) + 'px'; // Max 168px
   if(!userInput.disabled) {
     sendBtn.disabled = !userInput.value.trim();
   }
@@ -1256,26 +1368,6 @@ function updateMode() {
 }
 
 modeToggleCheckbox.addEventListener('change', updateMode);
-
-/* visualViewport adjustments for mobile keyboard */
-function adjustForViewport(){
-  if(window.visualViewport){
-    const vb = window.visualViewport;
-    const bottomOffset = Math.max(0, window.innerHeight - vb.height - vb.offsetTop);
-    inputBar.style.bottom = bottomOffset + 'px';
-    mainEl.style.paddingBottom = (INPUT_BAR_HEIGHT_BASE + bottomOffset) + 'px';
-    scrollToBottom();
-  } else {
-    inputBar.style.bottom = '0px';
-    mainEl.style.paddingBottom = INPUT_BAR_HEIGHT_BASE + 'px';
-  }
-}
-if(window.visualViewport){
-  visualViewport.addEventListener('resize', adjustForViewport);
-  visualViewport.addEventListener('scroll', adjustForViewport);
-}
-window.addEventListener('resize', adjustForViewport);
-adjustForViewport();
 
 /* -------------------- 실시간 위치 정보 업데이트 기능 -------------------- */
 
@@ -1458,4 +1550,4 @@ messagesEl.addEventListener('click', ()=> userInput.focus());
 sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
-</html>
+  </html>
