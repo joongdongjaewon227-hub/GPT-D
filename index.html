@@ -561,6 +561,8 @@ textarea{
   font-size:1.05rem; 
   line-height:1.5rem; 
   padding:4px 0; 
+  /* 🌟 추가: textarea 내에서 줄바꿈이 시각적으로 보이도록 pre-wrap 설정 🌟 */
+  white-space: pre-wrap; 
 }
 .bottom-row{ display:flex; align-items:center; gap:12px; }
 .icon-btn{ width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.5rem; opacity:0.8; flex-shrink:0; }
@@ -1337,7 +1339,7 @@ async function sendMessage(){
             }
             
             // 텍스트를 수집만 합니다. (로딩 버블은 그대로 유지)
-            fullResponse += line;
+            fullResponse += line + '\n'; // 🌟 스트리밍 청크 사이에 개행 문자를 다시 추가하여 줄바꿈을 복원 🌟
         }
         
         if(streamClosed) break;
@@ -1346,6 +1348,9 @@ async function sendMessage(){
     // 3. 최종 처리: 로딩 메시지 제거 후 타이핑 효과 시작
     if (loadingMsg) loadingMsg.remove();
     
+    // 🌟 마지막 버퍼 내용까지 포함 🌟
+    fullResponse += buffer;
+
     renderTypingEffect('bot', fullResponse, () => {
         // 타이핑 효과가 끝난 후 대화 기록에 추가
         chatHistory.push({role:'bot', content:fullResponse});
@@ -1377,7 +1382,7 @@ async function sendMessage(){
   }
 }
 
-/* -------------- renderMessage (타이핑 효과를 위해 수정) -------------- */
+/* -------------- renderMessage (줄바꿈 수정) -------------- */
 function renderMessage(role, text, doMarkdown = true) {
   const wrap = document.createElement('div');
   wrap.className = 'message ' + (role === 'user' ? 'user' : 'bot');
@@ -1388,22 +1393,36 @@ function renderMessage(role, text, doMarkdown = true) {
   wrap.appendChild(contentEl);
 
   text = (text === null || text === undefined) ? '' : String(text);
+  
+  // 모든 메시지는 기본적으로 텍스트 콘텐츠를 설정 (줄바꿈을 위해)
+  contentEl.textContent = text; 
 
   if (doMarkdown) {
-      // 🌟 마크다운 파싱 로직 (기존 로직) 🌟
+      // 🌟 마크다운 파싱 로직 (줄바꿈 처리 수정) 🌟
       const codeFenceRegex = /```([\s\S]*?)```/g;
       const parts = text.split(codeFenceRegex);
+      
+      contentEl.innerHTML = ''; // 텍스트 콘텐츠 초기화, 마크다운으로 다시 구성
 
       for (let i = 0; i < parts.length; i++) {
         if (i % 2 === 0) {
+          // 일반 텍스트 부분
           let html = parts[i]
+            // 줄바꿈은 pre-wrap이 처리하도록 \n -> <br> 치환을 제거했습니다.
             .replace(/^###\s*(.+)$/gm, '<div class="large">$1</div>')
             .replace(/^##\s*(.+)$/gm, '<div class="large">$1</div>')
             .replace(/^#\s*(.+)$/gm, '<div class="large">$1</div>')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
-          contentEl.insertAdjacentHTML('beforeend', html);
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          
+          // \n이 html에 남아있도록 하고, <pre> 대신 <div>에 삽입하여 pre-wrap에 맡깁니다.
+          const textNode = document.createElement('div');
+          textNode.style.whiteSpace = 'pre-wrap'; // 명시적으로 한 번 더 설정 (message 클래스에 이미 있지만 안전 장치)
+          // 마크다운이 적용된 문자열을 삽입
+          textNode.innerHTML = html; 
+          contentEl.appendChild(textNode);
+
         } else {
+          // 코드 블록 부분 (기존 로직 유지)
           const code = parts[i];
           const codeWrap = document.createElement('div');
           codeWrap.className = 'code-wrap';
@@ -1421,8 +1440,17 @@ function renderMessage(role, text, doMarkdown = true) {
           contentEl.appendChild(codeWrap);
         }
       }
+      
+      // 마크다운 파싱으로 인해 불필요하게 생긴 빈 div/text node 제거
+      let firstChild = contentEl.firstChild;
+      while(firstChild && firstChild.nodeType === 3 && firstChild.textContent.trim() === ''){
+          contentEl.removeChild(firstChild);
+          firstChild = contentEl.firstChild;
+      }
+      
   } else {
       // 타이핑 효과를 위해 빈 contentEl만 반환합니다.
+      // (contentEl.textContent = text; 가 이미 실행되어 있어 임시로 텍스트가 표시됨)
   }
 
 
@@ -1467,13 +1495,38 @@ stopBtn.addEventListener('click', ()=>{
   }
 });
 
-/* Enter to send (Shift+Enter for newline) */
+/* 🌟🌟🌟 수정: Enter 및 Shift+Enter 줄바꿈 로직 (PC/모바일 구분) 🌟🌟🌟 */
 userInput.addEventListener('keydown', e=>{
-  if(e.key === 'Enter' && !e.shiftKey){
-    e.preventDefault();
-    if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
+  // trim() 결과를 기준으로 활성화된 버튼을 확인해야 함.
+  const isSendable = !userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled;
+  
+  if (e.key === 'Enter') {
+    // PC (화면 너비 > 700px)
+    if (window.innerWidth > 700) {
+      if (e.shiftKey) {
+        // Shift + Enter: 줄바꿈 (기본 동작 허용)
+        // e.preventDefault(); 불필요
+      } else {
+        // Enter: 메시지 전송
+        e.preventDefault();
+        if(isSendable) sendMessage();
+      }
+    } 
+    // 모바일 (화면 너비 <= 700px)
+    else {
+      if (e.shiftKey) {
+        // Shift + Enter: 메시지 전송 (모바일에서 Shift는 거의 사용되지 않지만, Enter와의 일관성을 위해 전송으로 지정)
+        e.preventDefault();
+        if(isSendable) sendMessage();
+      } else {
+        // Enter: 줄바꿈 (기본 동작 허용)
+        // e.preventDefault(); 불필요
+      }
+    }
   }
 });
+/* -------------------------------------------------------------------- */
+
 
 /* model selector interactions */
 const modelSelectBtn = document.getElementById('modelSelectBtn');
@@ -1501,6 +1554,7 @@ document.addEventListener('click', ()=>{
 
 /* input autosize and send button enable/disable */
 userInput.addEventListener('input', ()=>{
+  // 🌟 줄바꿈에 따른 높이 자동 조절 🌟
   userInput.style.height = 'auto';
   userInput.style.height = Math.min(userInput.scrollHeight, 168) + 'px'; // Max 168px
   if(!userInput.disabled) {
