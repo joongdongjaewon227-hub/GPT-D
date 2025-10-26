@@ -706,6 +706,10 @@ textarea{
             <span>업그레이드</span>
         </div>
         
+        <div class="menu-bottom-item" id="resetNameMenuBtn" style="opacity: 0.9;">
+            <span>사용자 정보(이름) 초기화</span>
+        </div>
+        
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
@@ -904,9 +908,9 @@ function loadAllConversations() {
   } else if (!currentChatId || !allConversations[currentChatId]) {
     // 유효하지 않은 currentChatId인 경우 가장 최근 대화로 설정
     const latestChatId = Object.keys(allConversations).sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
-    activateChat(latestChatId, false);
+    activateChat(latestChatId); // 🌟 메뉴 상태 유지 🌟
   } else {
-    activateChat(currentChatId, false);
+    activateChat(currentChatId); // 🌟 메뉴 상태 유지 🌟
   }
 }
 
@@ -952,14 +956,15 @@ function startNewChat(shouldReload = true) {
 
   if (shouldReload) {
     // 🌟 수정: 새 대화는 리로드 대신 부드럽게 전환 🌟
-    activateChat(newId, true);
+    activateChat(newId); // 🌟 메뉴 상태 유지 🌟
   } else {
-    activateChat(newId, false);
+    activateChat(newId); // 🌟 메뉴 상태 유지 🌟
   }
 }
 
 // 특정 대화 활성화
-function activateChat(chatId, closeMenu = true) {
+// 🌟 수정: closeMenu 인자를 제거하고, 메뉴 상태를 유지합니다. 🌟
+function activateChat(chatId) {
   if (!allConversations[chatId]) return;
 
   currentChatId = chatId;
@@ -972,8 +977,6 @@ function activateChat(chatId, closeMenu = true) {
   
   // 🌟 채팅 전환 시 검색어 초기화 🌟
   if(chatSearchInput) chatSearchInput.value = '';
-
-  if (closeMenu) hideSideMenu();
 }
 
 // 개별 대화 삭제
@@ -1066,13 +1069,18 @@ function resetCurrentChat() {
   }
 }
 
-// 전체 대화 초기화 (버튼용)
+// 전체 대화 초기화 (버튼용) - 모든 대화 삭제 후 새 대화 생성
 function resetAllChats() {
   localStorage.removeItem('allConversations');
   localStorage.removeItem('currentChatId');
+  
+  // 🌟 수정: allConversations 객체를 빈 상태로 초기화하여 메모리 정리 🌟
+  allConversations = {}; 
+
   hideConfirmPopup();
-  // 🌟 수정: 리로드 대신 부드럽게 전환 🌟
+  // 🌟 새 대화 시작 (reload는 false로 유지하여 부드럽게 전환) 🌟
   startNewChat(false);
+  
   updateTitle(); 
   renderChatList();
 }
@@ -1574,6 +1582,8 @@ const nameInputField = document.getElementById('nameInputField');
 const nameSubmitBtn = document.getElementById('nameSubmitBtn');
 
 function showNameInputModal() {
+    // 🌟 이름 입력 필드를 비우고 모달 표시 🌟
+    nameInputField.value = ''; 
     nameInputModal.classList.add('visible');
     nameInputField.focus();
 }
@@ -1654,17 +1664,39 @@ sideMenuOverlay.addEventListener('click', (e) => {
 
 // 하단 메뉴 항목 클릭 이벤트
 document.getElementById('newChatMenuBtn').addEventListener('click', () => {
-  // 🌟 수정: 리로드 대신 부드러운 전환 🌟
+  // 🌟 메뉴 닫기 로직 제거 🌟
   startNewChat(false);
-  hideSideMenu();
 });
 document.getElementById('settingsBtn').addEventListener('click', () => {
     alert('설정 및 도움말 기능은 개발 중입니다.');
-    hideSideMenu();
+    // 🌟 메뉴 닫기 로직 제거 🌟
 });
 document.getElementById('upgradeBtn').addEventListener('click', () => {
     alert('업그레이드 페이지로 이동합니다.');
-    hideSideMenu();
+    // 🌟 메뉴 닫기 로직 제거 🌟
+});
+
+// 🌟 추가: 사용자 이름 초기화 버튼 이벤트 🌟
+document.getElementById('resetNameMenuBtn').addEventListener('click', () => {
+  showConfirmPopup(
+    `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
+    [
+      { id: 'cancel', text: '취소', class: 'reset-no' },
+      { id: 'reset_name', text: '초기화', class: 'reset-yes' },
+    ],
+    (actionId) => {
+      if (actionId === 'reset_name') {
+        localStorage.removeItem('username');
+        username = null;
+        hideConfirmPopup();
+        hideSideMenu();
+        // 초기화 후 이름 입력 모달 재실행
+        showNameInputModal(); 
+      } else {
+        hideConfirmPopup();
+      }
+    }
+  );
 });
 
 // 전체 초기화는 하단 메뉴 항목으로 이동
