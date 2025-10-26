@@ -465,35 +465,24 @@ main{
     transform: translateY(0);
 }
 
-/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 (스피너) 🌟🌟🌟 */
+/* 로딩 중 메시지 버블 크기 최소화 (대폭 수정) */
+/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (대폭 축소 및 스피너 전용) 🌟🌟🌟 */
 .message.loading {
     max-width: fit-content; 
-    padding: 5px 12px; /* 아주 약간 더 크게 조정 */
-    font-size: 0.9rem; /* 폰트도 약간 키움 */
-    color: var(--menu-text); 
-    opacity: 0.9; /* 불투명도 약간 높임 */
+    padding: 4px; /* 패딩을 아주 작게 */
+    font-size: 0; /* 텍스트 크기 0으로 설정하여 숨김 */
+    color: transparent; /* 텍스트 색상도 투명하게 */
+    opacity: 1; /* 스피너를 더 잘 보이게 */
     border: 0.5px solid var(--border); 
+    /* 버블 안에 스피너 중앙 정렬을 위해 추가 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; /* 고정 크기 버블 */
+    height: 24px; /* 고정 크기 버블 */
+    min-width: 24px;
+    min-height: 24px;
 }
-
-/* 🌟🌟🌟 추가: 원형 스피너 스타일 (Gemini 스타일) 🌟🌟🌟 */
-.spinner {
-    border: 3px solid rgba(255, 255, 255, 0.3); /* 다크 모드 배경색 */
-    border-top: 3px solid var(--text); /* 다크 모드 스피너 색상 */
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    animation: spin 0.8s linear infinite;
-    flex-shrink: 0;
-}
-body.light .spinner {
-    border: 3px solid rgba(0, 0, 0, 0.15); /* 라이트 모드 배경색 */
-    border-top: 3px solid var(--text); /* 라이트 모드 스피너 색상 */
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
 .message strong { font-weight:700; }
@@ -503,8 +492,23 @@ body.light .spinner {
 .code-block{ display:block; padding:10px; border-radius:8px; background:#2c2c2c; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
-/* loading bar (기존 로딩바 관련 CSS 제거됨) */
+/* ------------------------ 새 로딩 스피너 (구글 스타일) ------------------------ */
+.new-google-spinner {
+    width: 14px; /* 스피너 크기 */
+    height: 14px;
+    border: 2px solid var(--accent-blue); /* 테두리 두께와 색상 */
+    border-top-color: transparent; /* 윗부분을 투명하게 만들어 개방된 원 모양 */
+    border-radius: 50%;
+    /* Material Design에 가까운 가속/감속 애니메이션 */
+    animation: spinnerRotate 0.75s cubic-bezier(0.4, 0.0, 0.2, 1) infinite; 
+    margin: 0;
+}
 
+@keyframes spinnerRotate {
+    to { transform: rotate(360deg); }
+}
+
+/* 🌟 기존 .loading-bar 관련 CSS는 제거됨 🌟 */
 
 /* 타이핑 커서 스타일 */
 .typing-cursor {
@@ -554,10 +558,7 @@ textarea{
   font-family:inherit; 
   font-size:1.05rem; 
   line-height:1.5rem; 
-  /* 🌟 수정: 왼쪽 패딩을 4px 추가하여 오른쪽으로 이동한 것처럼 보이게 함 🌟 */
-  padding:4px 0 4px 4px; 
-  /* 🌟 추가: 높이 변화에 transition 적용 🌟 */
-  transition: height var(--transition), color var(--transition), background var(--transition);
+  padding:4px 0; 
 }
 .bottom-row{ display:flex; align-items:center; gap:12px; }
 .icon-btn{ width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.5rem; opacity:0.8; flex-shrink:0; }
@@ -705,10 +706,6 @@ textarea{
             <span>업그레이드</span>
         </div>
         
-        <div class="menu-bottom-item" id="resetUsernameBtn">
-            <span>사용자 정보 초기화</span> 
-        </div>
-
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
@@ -821,7 +818,6 @@ const sideMenuOverlay = document.getElementById('sideMenuOverlay');
 const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
-const resetUsernameBtn = document.getElementById('resetUsernameBtn'); // 🌟 추가: 사용자 정보 초기화 버튼 🌟
 const locationDisplay = document.getElementById('locationDisplay'); 
 
 let abortController = null;
@@ -1070,50 +1066,17 @@ function resetCurrentChat() {
   }
 }
 
-// 🌟🌟🌟 수정: 전체 대화 초기화 (버튼용) 🌟🌟🌟
+// 전체 대화 초기화 (버튼용)
 function resetAllChats() {
-  // 메모리 데이터 초기화
-  allConversations = {};
-  currentChatId = null;
-  // localStorage 데이터 삭제
   localStorage.removeItem('allConversations');
   localStorage.removeItem('currentChatId');
-
   hideConfirmPopup();
-  
-  // 새 대화 시작 (false: 리로드 없이 부드러운 전환)
+  // 🌟 수정: 리로드 대신 부드럽게 전환 🌟
   startNewChat(false);
   updateTitle(); 
   renderChatList();
 }
 
-// 🌟🌟🌟 추가: 사용자 정보 초기화 (버튼용) 🌟🌟🌟
-function resetUsername() {
-    localStorage.removeItem('username');
-    username = null;
-    updateTitle();
-    hideSideMenu();
-    
-    // 확인 팝업 후 이름 입력 모달 다시 표시
-    showConfirmPopup(
-        '사용자 정보(닉네임)가 초기화되었습니다. 다시 시작해주세요.',
-        [{ id: 'ok', text: '확인', class: 'reset-no' }],
-        () => {
-            hideConfirmPopup();
-            // nameInputModal을 보이게 하고 앱을 비활성화
-            showNameInputModal();
-            // 앱 UI를 비활성화 상태로 되돌립니다. (이름 입력 전 상태)
-            mainEl.style.opacity = '0.1';
-            mainEl.style.pointerEvents = 'none';
-            inputBar.style.opacity = '0.1';
-            inputBar.style.pointerEvents = 'none';
-            infoBtn.style.opacity = '0.1';
-            infoBtn.style.pointerEvents = 'none';
-            menuToggle.disabled = true;
-            modeToggleCheckbox.disabled = true;
-        }
-    );
-}
 /* -------------------- UI/UX 기능 -------------------- */
 
 // 앱 활성화 (이름 입력 후)
@@ -1146,14 +1109,12 @@ function showSideMenu() {
   sideMenu.classList.add('open');
   body.classList.add('menu-open'); // PC 모드 및 모바일 스크롤 방지용
   renderChatList();
-  localStorage.setItem('menuOpen', 'true'); // 🌟 추가: 메뉴 상태 저장 🌟
 }
 
 function hideSideMenu() {
   sideMenuOverlay.classList.remove('open');
   sideMenu.classList.remove('open');
   body.classList.remove('menu-open'); // PC 모드 및 모바일 스크롤 방지용
-  localStorage.setItem('menuOpen', 'false'); // 🌟 추가: 메뉴 상태 저장 🌟
 }
 
 // 팝업 표시 함수
@@ -1239,23 +1200,19 @@ adjustForViewport();
 
 /* -------------------- 스트리밍 응답 처리 (로딩 바 유지 및 타이핑 효과) -------------------- */
 
-// 🌟🌟🌟 수정: 로딩 메시지 추가 (스피너 사용) 🌟🌟🌟
+// 로딩 메시지 추가 (작은 버블, "생각 중...")
 function addLoading(){
   const el = document.createElement('div');
   el.className = 'message bot loading show'; // 로딩 메시지는 즉시 표시
   
-  // "생각 중..." 텍스트와 원형 스피너를 포함
+  // "생각 중..." 텍스트와 로딩 바를 포함 -> 구글 스타일 스피너로 변경
   el.innerHTML = `
-    <div id="streamingTextContainer" style="display: flex; align-items: center; gap: 8px;">
-        <span>생각 중...</span>
-        <div class="spinner" id="loadingSpinner"></div>
-    </div>
+    <div class="new-google-spinner" id="loadingSpinner" aria-hidden="true"></div>
   `;
   messagesEl.appendChild(el);
   loadingMsg = el;
   scrollToBottom();
 }
-
 
 // 🌟 타이핑 효과 함수 (메시지 등장 애니메이션 적용) 🌟
 function renderTypingEffect(role, fullText, finalCallback) {
@@ -1392,14 +1349,12 @@ async function sendMessage(){
     if (loadingMsg) {
         loadingMsg.remove(); 
         
-        // 🌟 응답 정지 처리 개선: 중단 시 현재까지 받은 텍스트와 함께 '중단됨' 메시지를 즉시 렌더링 🌟
         const finalContent = fullResponse + (err.name === 'AbortError' ? " [응답 중단됨]" : "\n\n" + errorMsg);
         
         // 오류 메시지는 타이핑 효과 없이 즉시 렌더링
         const errorMsgEl = renderMessage('bot', finalContent);
         errorMsgEl.classList.add('show');
         
-        // 중단된 경우에도 현재까지의 내용을 기록에 남김
         chatHistory.push({role:'bot', content:finalContent});
         saveHistory();
     }
@@ -1497,30 +1452,15 @@ stopBtn.addEventListener('click', ()=>{
     const controller = abortController;
     abortController = null; 
     controller.abort(); // catch 블록에서 최종 처리를 담당합니다.
-    // enableUI()는 catch 블록에서 호출됩니다.
+    enableUI();
   }
 });
 
 /* Enter to send (Shift+Enter for newline) */
 userInput.addEventListener('keydown', e=>{
-  // 🌟 모바일에서 엔터로 줄바꿈 허용 (화면 너비 700px 이하) 🌟
-  const isMobile = window.innerWidth <= 700; 
-
-  if(e.key === 'Enter'){
-      if(isMobile) {
-          // 모바일: Enter는 기본 줄바꿈 동작 허용
-          // Shift+Enter는 전송
-          if(e.shiftKey) {
-              e.preventDefault();
-              if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
-          }
-      } else {
-          // PC: Enter는 전송, Shift+Enter는 줄바꿈 (기존 동작)
-          if(!e.shiftKey){
-              e.preventDefault();
-              if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
-          }
-      }
+  if(e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
   }
 });
 
@@ -1676,15 +1616,6 @@ nameInputField.addEventListener('keydown', (e) => {
 function initializeAppAfterName() {
     activateAppUI(); 
     updateTitle();
-    
-    // 🌟 추가: 메뉴 상태 복원 🌟
-    const savedMenuState = localStorage.getItem('menuOpen');
-    if (savedMenuState === 'true') {
-        showSideMenu(); 
-    } else {
-        hideSideMenu();
-    }
-
     loadAllConversations();
     adjustForViewport();
     updateRealLocation();
@@ -1734,24 +1665,6 @@ document.getElementById('settingsBtn').addEventListener('click', () => {
 document.getElementById('upgradeBtn').addEventListener('click', () => {
     alert('업그레이드 페이지로 이동합니다.');
     hideSideMenu();
-});
-
-// 🌟🌟🌟 추가: 사용자 정보 초기화 버튼 이벤트 🌟🌟🌟
-document.getElementById('resetUsernameBtn').addEventListener('click', () => {
-    showConfirmPopup(
-        '사용자 정보(닉네임)를 초기화하고 다시 설정하시겠습니까? (대화 기록은 유지됩니다.)',
-        [
-            { id: 'cancel', text: '취소', class: 'reset-no' },
-            { id: 'reset', text: '초기화', class: 'reset-yes' },
-        ],
-        (actionId) => {
-            if (actionId === 'reset') {
-                resetUsername();
-            } else {
-                hideConfirmPopup();
-            }
-        }
-    );
 });
 
 // 전체 초기화는 하단 메뉴 항목으로 이동
