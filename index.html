@@ -410,19 +410,14 @@ main{
   align-items:center;
   /* 🌟 수정: height:100vh 제거 🌟 */
   min-height: 100vh; /* 최소 높이 설정 */
-  justify-content: flex-start;
+  /* 🌟🌟 수정: 제목/카드 위치 고정을 위해 flex-start 유지 🌟🌟 */
+  justify-content: flex-start; 
   transform: none;
   transition: padding-top var(--transition), padding-bottom var(--transition), transform var(--transition); /* transform 추가 */
 }
 
-/* 🌟 수정: 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 + 애니메이션 추가 🌟 */
-.initial-state {
-    justify-content: center !important;
-    transform: translateY(-5%);
-    /* transition: justify-content var(--transition), transform var(--transition); */
-    /* justify-content는 transition을 적용하지 않고, transform만 적용합니다 */
-    transition: transform var(--transition); 
-}
+/* 🌟🌟 수정: Title/Card 위치 고정을 위해 initial-state 관련 CSS 제거 🌟🌟 */
+/* .initial-state 관련 CSS는 제거되었습니다. */
 
 #title{ 
   margin-top:0; 
@@ -737,7 +732,7 @@ textarea{
   </div>
 </nav>
 
-<main id="main" class="initial-state" style="opacity: 0.1; pointer-events: none;"> 
+<main id="main" style="opacity: 0.1; pointer-events: none;"> 
   <h1 id="title">안녕하세요!</h1>
 
   <div class="suggestions" id="suggestions">
@@ -853,32 +848,9 @@ function scrollToBottom(){
   requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
 }
 
-/* 중앙 정렬 및 스크롤 모드 전환 함수 */
-function toggleInitialState(isInitial){
-    const transitionDuration = 350; // CSS var(--transition) 0.35s
-    
-    if(isInitial){
-      // 대화가 없을 때: 중앙 정렬 유지 및 transform 설정
-      mainEl.classList.add('initial-state');
-      mainEl.style.transform = ''; // CSS에 설정된 transform: translateY(-5%)를 사용
-    } else {
-      // 대화가 생겼을 때: 중앙 정렬 해제 및 부드러운 이동
-      
-      if(mainEl.classList.contains('initial-state')) {
-          // 1. transform을 초기화하여 부드럽게 'transform: none'으로 이동하도록 유도
-          // (CSS의 .initial-state에 transition이 적용되어 있음)
-          mainEl.style.transform = 'none'; 
-          
-          // 2. CSS transition 시간만큼 기다립니다. (글씨와 카드가 부드럽게 이동)
-          setTimeout(() => {
-              // 3. 정렬 해제 (이동이 끝난 후 정렬 변경 -> 점프 방지)
-              mainEl.classList.remove('initial-state');
-              // 4. transform 속성을 완전히 제거하여 추후 레이아웃에 지장이 없게 함
-              mainEl.style.transform = ''; 
-          }, transitionDuration + 50); // 400ms 후 실행 (여유시간 포함)
-      }
-    }
-}
+/* 🌟🌟 수정: 중앙 정렬 및 스크롤 모드 전환 함수 제거 (제목/카드 고정) 🌟🌟 */
+// 기존: function toggleInitialState(isInitial){ ... } 
+// 제거되었습니다.
 
 /* -------------------- 대화 관리 기능 -------------------- */
 
@@ -943,7 +915,8 @@ function loadHistory() {
     el.classList.add('show');
   });
 
-  toggleInitialState(chatHistory.length === 0);
+  // 🌟🌟 수정: 제목/카드 위치 고정을 위해 toggleInitialState 호출 제거 🌟🌟
+  // toggleInitialState(chatHistory.length === 0);
 
   if (chatHistory.length > 0) {
       scrollToBottom();
@@ -1282,7 +1255,7 @@ async function sendMessage(){
   if(!text) return;
 
   disableUI();
-  toggleInitialState(false); // 🌟 애니메이션 적용됨 🌟
+  // 🌟🌟 수정: 제목/카드 위치 고정을 위해 toggleInitialState 호출 제거 🌟🌟
 
   userInput.value = '';
   // 🌟 수정: 메시지 렌더링 시 애니메이션 적용 🌟
