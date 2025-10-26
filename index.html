@@ -188,33 +188,42 @@ body.menu-open {
     overflow: hidden; 
 }
 
-/* 🌟🌟🌟 수정: PC 모드에서 메뉴 고정 (새로고침 문제 해결) 🌟🌟🌟 */
+/* PC 모드: 메뉴가 밀고 들어오도록 수정 (1024px 이상) */
 @media(min-width: 1024px){
     nav, main, .input-bar, .info-btn, .info-popup{
         transition: margin-left var(--transition), width var(--transition), left var(--transition), right var(--transition);
     }
     
     .side-menu-overlay{
-        display: none; /* 오버레이 완전히 제거 */
+        background: none; /* 오버레이 제거 */
+        pointer-events: none;
+        width: 320px; /* 메뉴 너비 고정 */
+        position: absolute; /* fixed 대신 absolute를 사용하여 스크롤에 영향을 주지 않도록 */
+        left: 0;
+        top: 0;
+        bottom: 0;
     }
-    
     .side-menu{
-        position: fixed; 
-        height: 100vh; 
+        position: fixed; /* 🌟 PC에서도 메뉴는 fixed로 고정해야 스크롤에 독립적입니다 🌟 */
+        height: 100vh; /* 뷰포트 높이 고정 */
         width: 320px;
-        transform:translateX(0) !important; /* 🌟 항상 열려 있도록 강제 🌟 */
-        box-shadow: none; 
-        z-index: 29; 
+        transform:translateX(-100%);
+        box-shadow: none; /* 그림자 제거 */
+        z-index: 29; /* nav보다 아래 */
         border-right: 1px solid var(--border);
     }
 
-    /* 🌟 PC 모드에서는 콘텐츠는 항상 밀려 있어야 함 🌟 */
-    nav, main, .input-bar, .info-btn, .info-popup{
-        margin-left: 320px; 
-        transition: margin-left var(--transition), width var(--transition), left var(--transition), right var(--transition);
+    body.menu-open nav, 
+    body.menu-open main, 
+    body.menu-open .input-bar,
+    body.menu-open .info-btn,
+    body.menu-open .info-popup {
+        margin-left: 320px; /* 메뉴 너비만큼 콘텐츠 밀기 */
     }
-    
-    /* body.menu-open 관련 클래스는 모바일 메뉴 토글에만 영향을 줍니다. */
+
+    body.menu-open .side-menu {
+        transform:translateX(0); /* 메뉴 보이기 */
+    }
 }
 
 
@@ -410,7 +419,8 @@ main{
 .initial-state {
     justify-content: center !important;
     transform: translateY(-5%);
-    /* transform만 적용합니다 */
+    /* transition: justify-content var(--transition), transform var(--transition); */
+    /* justify-content는 transition을 적용하지 않고, transform만 적용합니다 */
     transition: transform var(--transition); 
 }
 
@@ -455,10 +465,10 @@ main{
     transform: translateY(0);
 }
 
-/* 🌟 수정: 로딩 중 메시지 버블 크기 최소화 (버블 크기에 맞게 조절) 🌟 */
+/* 로딩 중 메시지 버블 크기 최소화 */
 .message.loading {
     max-width: fit-content; 
-    padding: 2px 6px; /* 패딩을 더 줄임 */
+    padding: 3px 8px; 
     font-size: 0.8rem; 
     color: var(--menu-text); 
     opacity: 0.8;
@@ -473,43 +483,19 @@ main{
 .code-block{ display:block; padding:10px; border-radius:8px; background:#2c2c2c; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
-/* -------------------- 🌟 수정: 구글 스타일의 원 애니메이션 🌟 -------------------- */
-.loading-bar { display: none !important; } /* 기존 막대 로딩 바 숨김 */
-
-.loading-spinner {
-    width: 16px; /* 크기 조정 */
-    height: 16px; /* 크기 조정 */
-    margin: 0 4px;
-    border: 2px solid var(--text);
-    border-top-color: transparent; /* 상단 색상 투명하게 */
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: inline-block; /* 버블 크기에 맞게 */
+/* loading bar */
+.loading-bar{ 
+    width:100px; 
+    height:4px; 
+    background:var(--border); 
+    border-radius:4px; 
+    overflow:hidden; 
+    margin-top:0; 
+    position:relative; 
+    display: block; 
 }
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* -------------------- 🌟 수정: 스크롤바 스타일 수정 (다크 모드: 밝은 회색) 🌟 -------------------- */
-/* 웹킷 기반 브라우저 (Chrome, Edge, Safari) */
-body.dark ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-body.dark ::-webkit-scrollbar-track {
-    background: var(--bg); /* 배경색과 동일 */
-}
-body.dark ::-webkit-scrollbar-thumb {
-    /* 요청하신 '검은 색보다 약간 밝은 회색' */
-    background-color: #444444; 
-    border-radius: 10px;
-    border: 2px solid var(--bg); /* 배경색과의 경계 */
-}
-body.dark ::-webkit-scrollbar-thumb:hover {
-    background-color: #555555;
-}
-/* ------------------------------------------------------------------------------------------------ */
+.loading-bar::after{ content:""; position:absolute; left:-40%; top:0; width:40%; height:100%; background:var(--button-bg); animation:barMove 900ms linear infinite; }
+@keyframes barMove{ 0%{ left:-40% } 100%{ left:100% } }
 
 /* 타이핑 커서 스타일 */
 .typing-cursor {
@@ -559,7 +545,10 @@ textarea{
   font-family:inherit; 
   font-size:1.05rem; 
   line-height:1.5rem; 
-  padding:4px 0; 
+  /* 🌟 수정: 왼쪽 패딩을 4px 추가하여 오른쪽으로 이동한 것처럼 보이게 함 🌟 */
+  padding:4px 0 4px 4px; 
+  /* 🌟 추가: 높이 변화에 transition 적용 🌟 */
+  transition: height var(--transition), color var(--transition), background var(--transition);
 }
 .bottom-row{ display:flex; align-items:center; gap:12px; }
 .icon-btn{ width:40px; height:40px; border-radius:50%; border:none; background:transparent; color:var(--text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.5rem; opacity:0.8; flex-shrink:0; }
@@ -710,10 +699,6 @@ textarea{
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
-        
-        <div class="menu-bottom-item" id="resetUserBtn" style="opacity: 0.7;">
-            <span>사용자 정보 초기화</span>
-        </div>
 
         <div style="font-size: 0.75rem; color: var(--menu-text); padding: 16px 16px 0 16px; opacity: 0.8;">
             <span id="locationDisplay">위치 정보 확인 중...</span>
@@ -823,8 +808,6 @@ const sideMenuOverlay = document.getElementById('sideMenuOverlay');
 const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
-// 🌟 추가: 사용자 정보 초기화 버튼 🌟
-const resetUserBtn = document.getElementById('resetUserBtn');
 const locationDisplay = document.getElementById('locationDisplay'); 
 
 let abortController = null;
@@ -833,10 +816,6 @@ let username = localStorage.getItem('username') || null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
-
-// 🌟 추가: 자동 스크롤 관리용 변수 🌟
-let isUserScrolling = false; // 사용자 수동 스크롤 감지 플래그
-let scrollTimeout; // 스크롤 정지 감지용
 
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
@@ -852,11 +831,9 @@ function updateTitle() {
 
 
 /* 유틸: 스크롤 끝으로 */
-function scrollToBottom(behavior = 'smooth'){
-  // 🌟 수정: isUserScrolling 플래그가 false일 때만 자동 스크롤 수행 🌟
-  if (!isUserScrolling) {
-    requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: behavior }); });
-  }
+function scrollToBottom(){
+  // 🌟 스크롤이 끝으로 부드럽게 이동 🌟
+  requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
 }
 
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
@@ -872,18 +849,15 @@ function toggleInitialState(isInitial){
       
       if(mainEl.classList.contains('initial-state')) {
           // 1. transform을 초기화하여 부드럽게 'transform: none'으로 이동하도록 유도
+          // (CSS의 .initial-state에 transition이 적용되어 있음)
           mainEl.style.transform = 'none'; 
           
-          // 2. CSS transition 시간만큼 기다립니다.
+          // 2. CSS transition 시간만큼 기다립니다. (글씨와 카드가 부드럽게 이동)
           setTimeout(() => {
               // 3. 정렬 해제 (이동이 끝난 후 정렬 변경 -> 점프 방지)
               mainEl.classList.remove('initial-state');
               // 4. transform 속성을 완전히 제거하여 추후 레이아웃에 지장이 없게 함
               mainEl.style.transform = ''; 
-              
-              // 🌟 추가: 탑바 바로 아래로 부드럽게 스크롤 (제목/카드 위치 고정) 🌟
-              mainEl.scrollTo({ top: 0, behavior: 'smooth' }); 
-              
           }, transitionDuration + 50); // 400ms 후 실행 (여유시간 포함)
       }
     }
@@ -960,14 +934,18 @@ function loadHistory() {
 }
 
 // 새 대화 시작
-function startNewChat(closeMenu = true) {
+function startNewChat(shouldReload = true) {
   const newId = generateChatId();
   allConversations[newId] = { history: [], timestamp: Date.now(), title: null }; 
   currentChatId = newId;
   saveAllConversations();
 
-  // 🌟 수정: 새 대화는 리로드 대신 부드럽게 전환 🌟
-  activateChat(newId, closeMenu);
+  if (shouldReload) {
+    // 🌟 수정: 새 대화는 리로드 대신 부드럽게 전환 🌟
+    activateChat(newId, true);
+  } else {
+    activateChat(newId, false);
+  }
 }
 
 // 특정 대화 활성화
@@ -985,10 +963,7 @@ function activateChat(chatId, closeMenu = true) {
   // 🌟 채팅 전환 시 검색어 초기화 🌟
   if(chatSearchInput) chatSearchInput.value = '';
 
-  // 🌟 수정: closeMenu 플래그에 따라 메뉴 닫기 (PC 메뉴 고정 요청 반영) 🌟
-  if (closeMenu && window.innerWidth < 1024) { 
-      hideSideMenu(); // 모바일에서만 닫음
-  }
+  if (closeMenu) hideSideMenu();
 }
 
 // 개별 대화 삭제
@@ -1001,7 +976,7 @@ function deleteChat(chatId) {
             if (remainingChats.length > 0) {
                 // 가장 최근 대화로 이동
                 const latestChatId = remainingChats.sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
-                activateChat(latestChatId, false);
+                activateChat(latestChatId);
             } else {
                 startNewChat(false); // 남은 대화가 없으면 새 대화 시작
             }
@@ -1036,8 +1011,7 @@ function renderChatList() {
       // 1. 텍스트 클릭 시 대화 활성화 (삭제 버튼과 충돌 방지)
       textSpan.addEventListener('click', (e) => {
           e.stopPropagation();
-          // 🌟 수정: 메뉴 닫지 않기 위해 false 전달 (요청 반영) 🌟
-          activateChat(chat.id, false); 
+          activateChat(chat.id);
       });
 
       // 2. 삭제 버튼 추가
@@ -1084,22 +1058,13 @@ function resetCurrentChat() {
 
 // 전체 대화 초기화 (버튼용)
 function resetAllChats() {
-  // 🌟 모든 대화를 완전히 삭제함 🌟
   localStorage.removeItem('allConversations');
   localStorage.removeItem('currentChatId');
   hideConfirmPopup();
-  startNewChat(false); // 새 대화 생성
+  // 🌟 수정: 리로드 대신 부드럽게 전환 🌟
+  startNewChat(false);
   updateTitle(); 
   renderChatList();
-}
-
-// 🌟 사용자 정보 초기화 함수 🌟
-function resetUserInfo() {
-    localStorage.removeItem('username');
-    username = null;
-    hideConfirmPopup();
-    // 초기화 후 이름 입력 모달 재표시
-    showNameInputModal();
 }
 
 /* -------------------- UI/UX 기능 -------------------- */
@@ -1121,12 +1086,6 @@ function activateAppUI() {
 
 // 메뉴 토글
 function toggleSideMenu() {
-  // 🌟 수정: PC (1024px 이상)에서는 닫히지 않도록 방지 🌟
-  if (window.innerWidth >= 1024) {
-      return; // CSS에서 이미 PC에서는 항상 열려 있도록 처리했으므로, 토글 버튼은 기능 없음
-  }
-
-  // 모바일 동작
   const isOpen = sideMenu.classList.contains('open');
   if (isOpen) {
     hideSideMenu();
@@ -1138,15 +1097,16 @@ function toggleSideMenu() {
 function showSideMenu() {
   sideMenuOverlay.classList.add('open');
   sideMenu.classList.add('open');
-  body.classList.add('menu-open'); 
+  body.classList.add('menu-open'); // PC 모드 및 모바일 스크롤 방지용
   renderChatList();
+  localStorage.setItem('menuOpen', 'true'); // 🌟 추가: 메뉴 상태 저장 🌟
 }
 
 function hideSideMenu() {
-  // PC에서는 CSS가 transform을 덮어쓰므로, 이 로직은 모바일에서만 의미 있습니다.
   sideMenuOverlay.classList.remove('open');
   sideMenu.classList.remove('open');
-  body.classList.remove('menu-open'); 
+  body.classList.remove('menu-open'); // PC 모드 및 모바일 스크롤 방지용
+  localStorage.setItem('menuOpen', 'false'); // 🌟 추가: 메뉴 상태 저장 🌟
 }
 
 // 팝업 표시 함수
@@ -1175,7 +1135,7 @@ function disableUI(){
     stopBtn.style.display = 'flex';
     userInput.disabled = true;
     suggestionsEl.classList.add('disabled');
-    // 🌟 수정: 응답 중에도 메뉴 작동하도록 비활성화 제거 🌟
+    menuToggle.disabled = true;
 }
 
 // 응답 완료 후 UI를 재활성화하는 함수
@@ -1185,7 +1145,7 @@ function enableUI(){
     userInput.disabled = false;
     sendBtn.disabled = !userInput.value.trim();
     suggestionsEl.classList.remove('disabled');
-    // 🌟 비활성화 제거로 이 줄도 불필요 🌟
+    menuToggle.disabled = false;
 }
 
 /* 🌟🌟🌟 수정: visualViewport adjustments for mobile keyboard (메시지 가려짐 해결) 🌟🌟🌟 */
@@ -1196,12 +1156,10 @@ function adjustForViewport(){
   let bottomOffset = 0;
   if(window.visualViewport){
     const vb = window.visualViewport;
-    const windowHeight = window.innerHeight; // 전체 뷰포트 높이
     
     // 1. 키보드에 따른 하단 위치 조정
-    // 현재 보이는 뷰포트 높이가 전체 창 높이보다 작아진 경우 (키보드가 올라온 경우)
-    // 브라우저 주소창 등에 의한 높이 변화를 보정하기 위해 Max(0, ...) 사용
-    bottomOffset = Math.max(0, windowHeight - vb.height - vb.offsetTop);
+    // window.innerHeight 대신 vb.height와 vb.offsetTop을 사용하여 실제 보이는 영역 계산
+    bottomOffset = Math.max(0, window.innerHeight - vb.height - vb.offsetTop);
     
     inputBar.style.bottom = bottomOffset + 'px';
     
@@ -1220,12 +1178,8 @@ function adjustForViewport(){
     infoBtn.style.bottom = (inputBarHeight + 24) + 'px';
     infoPopup.style.bottom = (inputBarHeight + 24 + 36 + 18) + 'px';
   }
-  
   // 🌟 스크롤 조정 시에도 부드러운 스크롤 사용 🌟
-  // 사용자 스크롤 중이 아닐 때만 자동 스크롤
-  if(!isUserScrolling){ 
-    scrollToBottom('auto'); // 레이아웃 변경 시는 점프 현상 방지를 위해 'auto'를 사용
-  }
+  requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
 }
 
 if(window.visualViewport){
@@ -1236,18 +1190,18 @@ window.addEventListener('resize', adjustForViewport);
 // userInput의 높이가 변할 때도 adjustForViewport를 호출해야 합니다. (아래 input 이벤트 리스너 참조)
 adjustForViewport();
 
-/* -------------------- 스트리밍 응답 처리 (로딩 스피너 및 타이핑 효과) -------------------- */
+/* -------------------- 스트리밍 응답 처리 (로딩 바 유지 및 타이핑 효과) -------------------- */
 
 // 로딩 메시지 추가 (작은 버블, "생각 중...")
 function addLoading(){
   const el = document.createElement('div');
-  el.className = 'message bot loading show'; 
+  el.className = 'message bot loading show'; // 로딩 메시지는 즉시 표시
   
-  // 🌟 수정: 새로운 구글 스타일 스피너 HTML 포함 🌟
+  // "생각 중..." 텍스트와 로딩 바를 포함
   el.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 4px;">
+    <div id="streamingTextContainer" style="display: flex; align-items: center; gap: 8px;">
         <span>생각 중...</span>
-        <div class="loading-spinner" aria-hidden="true"></div>
+        <div class="loading-bar" id="loadingBar" aria-hidden="true" style="margin: 0;"></div>
     </div>
   `;
   messagesEl.appendChild(el);
@@ -1390,12 +1344,14 @@ async function sendMessage(){
     if (loadingMsg) {
         loadingMsg.remove(); 
         
+        // 🌟 응답 정지 처리 개선: 중단 시 현재까지 받은 텍스트와 함께 '중단됨' 메시지를 즉시 렌더링 🌟
         const finalContent = fullResponse + (err.name === 'AbortError' ? " [응답 중단됨]" : "\n\n" + errorMsg);
         
         // 오류 메시지는 타이핑 효과 없이 즉시 렌더링
         const errorMsgEl = renderMessage('bot', finalContent);
         errorMsgEl.classList.add('show');
         
+        // 중단된 경우에도 현재까지의 내용을 기록에 남김
         chatHistory.push({role:'bot', content:finalContent});
         saveHistory();
     }
@@ -1493,15 +1449,30 @@ stopBtn.addEventListener('click', ()=>{
     const controller = abortController;
     abortController = null; 
     controller.abort(); // catch 블록에서 최종 처리를 담당합니다.
-    enableUI();
+    // enableUI()는 catch 블록에서 호출됩니다.
   }
 });
 
 /* Enter to send (Shift+Enter for newline) */
 userInput.addEventListener('keydown', e=>{
-  if(e.key === 'Enter' && !e.shiftKey){
-    e.preventDefault();
-    if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
+  // 🌟 모바일에서 엔터로 줄바꿈 허용 (화면 너비 700px 이하) 🌟
+  const isMobile = window.innerWidth <= 700; 
+
+  if(e.key === 'Enter'){
+      if(isMobile) {
+          // 모바일: Enter는 기본 줄바꿈 동작 허용
+          // Shift+Enter는 전송
+          if(e.shiftKey) {
+              e.preventDefault();
+              if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
+          }
+      } else {
+          // PC: Enter는 전송, Shift+Enter는 줄바꿈 (기존 동작)
+          if(!e.shiftKey){
+              e.preventDefault();
+              if(!userInput.disabled && sendBtn.style.display !== 'none' && !sendBtn.disabled) sendMessage();
+          }
+      }
   }
 });
 
@@ -1657,6 +1628,15 @@ nameInputField.addEventListener('keydown', (e) => {
 function initializeAppAfterName() {
     activateAppUI(); 
     updateTitle();
+    
+    // 🌟 추가: 메뉴 상태 복원 🌟
+    const savedMenuState = localStorage.getItem('menuOpen');
+    if (savedMenuState === 'true') {
+        showSideMenu(); 
+    } else {
+        hideSideMenu();
+    }
+
     loadAllConversations();
     adjustForViewport();
     updateRealLocation();
@@ -1687,7 +1667,7 @@ function initializeApp() {
 // 메뉴 버튼 이벤트
 menuToggle.addEventListener('click', toggleSideMenu);
 sideMenuOverlay.addEventListener('click', (e) => {
-  // PC 모드에서는 오버레이 클릭 방지
+  // PC 모드에서는 오버레이 클릭 방지 (PC: window.innerWidth > 1024)
   if (window.innerWidth <= 1024 && e.target === sideMenuOverlay) {
     hideSideMenu();
   }
@@ -1695,8 +1675,9 @@ sideMenuOverlay.addEventListener('click', (e) => {
 
 // 하단 메뉴 항목 클릭 이벤트
 document.getElementById('newChatMenuBtn').addEventListener('click', () => {
-  // 🌟 새 채팅 시작 시에는 메뉴를 닫음 (모바일 UX) 🌟
-  startNewChat(true); 
+  // 🌟 수정: 리로드 대신 부드러운 전환 🌟
+  startNewChat(false);
+  hideSideMenu();
 });
 document.getElementById('settingsBtn').addEventListener('click', () => {
     alert('설정 및 도움말 기능은 개발 중입니다.');
@@ -1723,44 +1704,6 @@ document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
       }
     }
   );
-});
-
-// 🌟 사용자 정보 초기화 버튼 이벤트 🌟
-if (resetUserBtn) {
-    resetUserBtn.addEventListener('click', () => {
-        showConfirmPopup(
-            '사용자 이름 정보를 삭제하고 앱을 초기화할까요?',
-            [
-                { id: 'cancel', text: '취소', class: 'reset-no' },
-                { id: 'reset_user', text: '정보 삭제', class: 'reset-yes' },
-            ],
-            (actionId) => {
-                if (actionId === 'reset_user') {
-                    resetUserInfo();
-                } else {
-                    hideConfirmPopup();
-                }
-            }
-        );
-    });
-}
-
-/* 🌟🌟🌟 자동 스크롤 관리 및 취소 기능 🌟🌟🌟 */
-mainEl.addEventListener('scroll', () => {
-    // 스크롤 이벤트 발생 시 isUserScrolling을 true로 설정
-    // 사용자가 스크롤하면 자동 스크롤 취소 (isUserScrolling = true)
-    isUserScrolling = true;
-
-    // 타이머를 설정하여 멈추면 isUserScrolling을 false로 변경
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-        // 스크롤이 끝에 도달했는지 확인
-        // +5px 오차 허용 (mainEl.scrollHeight - mainEl.clientHeight)는 바닥 위치
-        const isAtBottom = mainEl.scrollHeight - mainEl.clientHeight <= mainEl.scrollTop + 5; 
-        if (isAtBottom) {
-            isUserScrolling = false; // 끝에 도달하면 다음 메시지부터 자동 스크롤 허용
-        }
-    }, 150); // 150ms 동안 스크롤이 멈추면 실행
 });
 
 
