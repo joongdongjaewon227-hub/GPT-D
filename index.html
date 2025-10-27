@@ -798,6 +798,9 @@ const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-
 const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
 
+/* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
+const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 Minsu GPT라고만 말해.' };
+
 /* --------------------------------- */
 
 const body = document.body;
@@ -810,7 +813,6 @@ const modeToggleCheckbox = document.getElementById('modeToggleCheckbox');
 const suggestionsEl = document.getElementById('suggestions');
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
-const inputBar = document.getElementById('inputBar');
 // 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
 
@@ -1288,7 +1290,9 @@ async function sendMessage(){
   let streamClosed = false;
   
   try{
-    const payload = { message: text, history: chatHistory };
+    // 🌟 수정: 시스템 명령어(SYSTEM_INSTRUCTION)를 chatHistory 앞에 추가하여 백엔드로 전송 🌟
+    const historyToSend = [SYSTEM_INSTRUCTION, ...chatHistory];
+    const payload = { message: text, history: historyToSend }; // 수정된 히스토리 사용
     
     // 1. 요청 시작
     const res = await fetch(BACKEND_URL, {
