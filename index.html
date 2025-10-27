@@ -39,7 +39,7 @@
 body.light {
   --bg: #ffffff;
   --text: #111111;
-  --input-bg: #ffffff; /* 🌟 수정: --bg와 동일하게 설정 (요청 반영) 🌟 */
+  --input-bg: #ffffff; 
   --border: #dddddd;
   --border-strong: #aaaaaa;
   --button-bg: #111111;
@@ -61,17 +61,18 @@ body.light {
   --glow-color: rgba(0, 110, 255, 0.3); 
 }
 
-/* 🌟 요청: 모든 스크롤바 숨기기 🌟 */
-/* WebKit (Chrome, Safari) */
-::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
+/* ------------------------ 1. 모든 스크롤바 제거 요청 반영 ------------------------ */
+body::-webkit-scrollbar,
+main::-webkit-scrollbar,
+.chat-list-container::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
+    display: none;
 }
-/* Firefox, IE, Edge */
-html, body, main, textarea, .chat-list-container, .code-block {
-    scrollbar-width: none; /* Firefox */
+body, main, .chat-list-container, textarea {
     -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
 }
+/* -------------------------------------------------------------------------------- */
 
 
 /* 모바일 탭 하이라이트 제거 및 박스 사이즈 설정 */
@@ -421,33 +422,41 @@ main{
   display:flex;
   flex-direction:column;
   align-items:center;
-  /* 🌟 수정: height:100vh 제거 🌟 */
   min-height: 100vh; /* 최소 높이 설정 */
   justify-content: flex-start;
   transform: none;
-  /* 🌟 수정: transform transition 제거 (UI 이동 방지) 🌟 */
+  /* 🌟 수정: main의 padding-top/padding-bottom 전환을 부드럽게 🌟 */
   transition: padding-top var(--transition), padding-bottom var(--transition);
 }
 
-/* 🌟 수정: 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 + 애니메이션 추가 🌟 */
-/* 🌟 수정: transform 관련 속성 제거 (UI 이동 방지 요청 반영) 🌟 */
+/* 🌟 1. 처음에 중앙 배치 + 4. 첫 메시지 애니메이션 (제목/카드 올리기) 🌟 */
 .initial-state {
-    justify-content: center !important;
-    transform: none; /* 요청에 따라 애니메이션 제거 */
-    /* transition: none; 애니메이션 제거 */
-    transition: padding-top var(--transition), padding-bottom var(--transition); /* main의 기본 transition 유지 */
+    justify-content: center !important; /* 채팅이 없을 때 중앙 정렬 */
+    padding-top: 64px !important; /* 초기 상태 패딩 유지 */
+    padding-bottom: 200px !important; /* 초기 상태 패딩 유지 */
 }
 
-/* 🌟 요청: 페이지 로드 및 첫 메시지 애니메이션 🌟 */
-.animate-in-init {
+/* 채팅 시작 후 상태 (제목/카드 탑바 바로 아래로) */
+main:not(.initial-state) {
+    padding-top: calc(56px + 12px); /* Nav 높이(56px) 바로 아래 + 여백 12px */
+    justify-content: flex-start !important; 
+}
+/* main에 transition이 적용되어 있어 부드럽게 전환됩니다. */
+
+
+/* 🌟 5. 페이지 로드 애니메이션 (제목/카드 부드럽게 위로 올라오기) 🌟 */
+#title.initial-element,
+.suggestions.initial-element {
     opacity: 0;
     transform: translateY(20px);
 }
-.animate-in-final {
+#title.initial-element.loaded,
+.suggestions.initial-element.loaded {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
+
 
 #title{ 
   margin-top:0; 
@@ -490,17 +499,6 @@ main{
     transform: translateY(0);
 }
 
-/* 🌟 요청: 기울임, 두꺼운 글씨 색상 강조 🌟 */
-.message em { /* 기울임 */
-    font-style: italic;
-    color: var(--accent-blue);
-}
-.message strong { /* 두꺼운 글씨 */
-    font-weight: 700; 
-    color: var(--accent-blue); 
-}
-
-
 /* 로딩 중 메시지 버블 크기 최소화 (대폭 수정) */
 /* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (텍스트와 스피너를 포함하도록 수정) 🌟🌟🌟 */
 .message.loading {
@@ -522,25 +520,30 @@ main{
 }
 
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
-/* .message strong { font-weight:700; } -> 위에서 색상 강조로 재정의 됨 */
+/* 🌟 실시간 포맷팅을 위해 strong 태그 대신 b 태그를 사용하도록 JS에서 처리 (호환성) 🌟 */
+.message strong { font-weight:700; }
+.message em { font-style: italic; }
+
 
 /* code block */
 .code-wrap{ position:relative; margin-top:8px; }
-.code-block{ 
-    display:block; padding:12px; border-radius:10px; 
-    background:#2c2c2c; color:#f1f1f1; font-family:monospace; 
-    white-space:pre-wrap; overflow:auto; max-width:100%; 
-    border: 1px solid rgba(255,255,255,0.1); /* 테두리 추가 */
-    line-height: 1.5; /* 가독성 향상 */
-}
-/* 🌟 요청: 코드 구문 강조색 🌟 */
-.code-block .k { color: #569CD6; } /* Keyword: blue */
-.code-block .s { color: #ce9178; } /* String: orange */
-.code-block .c { color: #6a9955; } /* Comment: green */
-.code-block .t { color: #4ec9b0; } /* Type/Tag: teal (HTML 태그 등) */
-.code-block .n { color: #9cdcfe; } /* Number/Variable: light blue */
-
+.code-block{ display:block; padding:10px; border-radius:8px; background:#282c34; /* 더 어두운 배경 */ color:#abb2bf; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
+
+/* 🌟 8. 코드 시인성/색깔 요청 반영 (간단한 Syntax Highlighting CSS 추가) 🌟 */
+.code-block code {
+    white-space: pre-wrap;
+}
+/* Common Code Highlighting Colors (inspired by Dracula/Atom One Dark) */
+.code-block .token.keyword { color: #c678dd; } /* const, let, var, function, class, return, if/else, await/async */
+.code-block .token.string { color: #98c379; } /* "string", 'string' */
+.code-block .token.comment { color: #5c6370; } /* // comment */
+.code-block .token.operator { color: #56b6c2; } /* =, +, -, *, / */
+.code-block .token.number { color: #d19a66; } /* 123, 3.14 */
+.code-block .token.punctuation { color: #abb2bf; } /* (){}[],:; */
+.code-block .token.class-name { color: #e6c07b; } /* ClassName */
+.code-block .token.function { color: #61afef; } /* functionName() */
+
 
 /* ------------------------ 새 로딩 스피너 (구글 스타일) ------------------------ */
 .new-google-spinner {
@@ -581,15 +584,9 @@ main{
   position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); 
   /* 🌟 수정: border-top 제거 (대화창과 부드러운 연결) 🌟 */
   border-top: none; 
-  /* 🌟 요청: input-bar 로드 애니메이션 🌟 */
-  transform: translateY(100%);
-  transition: transform 0.5s ease, opacity 0.5s ease;
+  /* 4. 첫 메시지 애니메이션 (입력창: 아래로 내려가는 것처럼 보이기 위한 transition) */
+  transition: transform var(--transition);
 }
-.input-bar.loaded {
-    transform: translateY(0);
-    opacity: 1;
-}
-
 .input-wrapper{ 
   max-width:720px; 
   margin:0 auto; 
@@ -634,67 +631,75 @@ textarea{
 .model-option:hover{ background:rgba(128,128,128,0.15); }
 .model-option.active{ background:rgba(0,153,255,0.15); color:#66ccff; }
 
-/* 🌟 요청: 모던한 전송 버튼 CSS 🌟 */
-.btn{ 
-  width:44px; height:44px; border-radius:50%; border:none; 
-  background:var(--accent-blue); /* 파란색 배경으로 모던하게 */
-  color:white; /* 흰색 아이콘 */
-  cursor:pointer; display:flex; align-items:center; justify-content:center; 
-  flex-shrink:0;
-  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
-  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+/* 🌟 10. 모던한 전송 버튼 CSS 구현 🌟 */
+.btn { 
+    width:44px; 
+    height:44px; 
+    border-radius:50%; 
+    border:none; 
+    background:var(--accent-blue); /* 파란색 배경 */
+    color: white; /* 흰색 아이콘 */
+    cursor:pointer; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    font-size:1.2rem; 
+    flex-shrink:0; 
+    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
 }
 .btn:hover:not(:disabled) {
-    background: #0060c0;
+    background: #0060c7;
     transform: translateY(-1px);
-    box-shadow: 0 6px 10px rgba(0, 122, 255, 0.4);
+    box-shadow: 0 6px 15px rgba(0, 122, 255, 0.4);
 }
 .btn:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 5px rgba(0, 122, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
 }
-.btn:disabled{ opacity:0.5; cursor:not-allowed; box-shadow: none; background: var(--border); color: var(--text); }
-.btn .icon {
-    font-size: 1.4rem; /* 아이콘 크기 조정 */
-    line-height: 1;
-    transform: translateX(1px); /* 세모 모양 보정 */
+.btn:disabled{ 
+    opacity:1; 
+    cursor:not-allowed; 
+    background: var(--border-strong); 
+    color: var(--border); 
+    box-shadow: none; 
 }
 
-/* 🌟 요청: 모던한 중지 버튼 CSS 🌟 */
+/* 전송 버튼 아이콘 스타일 */
+.send-btn-icon {
+    width: 18px; 
+    height: 18px;
+    fill: white;
+}
+
 .stop-btn{ 
-    width:44px; height:44px; border-radius:50%; 
-    background:#c53030; color:white; border:none; cursor:pointer; 
-    display:none; align-items:center; justify-content:center; flex-shrink:0;
-    box-shadow: 0 4px 8px rgba(197, 48, 48, 0.3);
-    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    width:44px; 
+    height:44px; 
+    border-radius:50%; 
+    background:#c53030; 
+    color:white; 
+    border:none; 
+    cursor:pointer; 
+    display:none; 
+    align-items:center; 
+    justify-content:center; 
+    flex-shrink:0; 
+    box-shadow: 0 4px 10px rgba(197, 48, 48, 0.3);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
 }
 .stop-btn:hover {
-    background: #a02a2a;
+    background: #a82727;
     transform: translateY(-1px);
-    box-shadow: 0 6px 10px rgba(197, 48, 48, 0.4);
+    box-shadow: 0 6px 15px rgba(197, 48, 48, 0.4);
 }
-.stop-btn::before{ 
-    content:''; width:16px; height:16px; background:white; border-radius: 4px; /* 정사각형으로 변경 */
+.stop-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(197, 48, 48, 0.3);
 }
-
+.stop-btn::before{ content:''; width:14px; height:14px; background:white; }
 
 /* info button */
-.info-btn{ 
-    position:fixed; right:14px; bottom:140px; /* JS가 이 값을 조정합니다 */ 
-    width:36px;height:36px;border-radius:50%; 
-    background:var(--input-bg); border:1px solid var(--border); 
-    display:flex; align-items:center; justify-content:center; 
-    z-index:45; cursor:pointer; color:var(--text); font-weight:600; 
-    /* 🌟 애니메이션 초기 상태 🌟 */
-    opacity: 0.1; 
-    pointer-events: none;
-    transition: opacity 0.5s ease 0.2s; /* 약간의 지연 */
-}
-.info-btn.loaded {
-    opacity: 1;
-    pointer-events: auto;
-}
-
+.info-btn{ position:fixed; right:14px; bottom:140px; /* JS가 이 값을 조정합니다 */ width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
 .info-popup{ position:fixed; right:14px; bottom:194px; /* JS가 이 값을 조정합니다 */ width:240px; background:var(--menu-bg-primary); color:var(--menu-text); border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); display:none; z-index:46; font-size:0.9rem; }
 
 /* reset popup overlay (ConfirmPopup) */
@@ -796,8 +801,7 @@ textarea{
 }
 </style>
 </head>
-<body class="light">
-<div class="side-menu-overlay" id="sideMenuOverlay">
+<body class="light"> <div class="side-menu-overlay" id="sideMenuOverlay">
   <div class="side-menu" id="sideMenu">
     <div class="menu-header">
         <input type="text" id="chatSearchInput" placeholder="채팅 검색" style="width: 100%; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); outline: none; font-size: 0.95rem; margin-bottom: 8px;">
@@ -849,11 +853,7 @@ textarea{
   </div>
 </nav>
 
-<main id="main" class="initial-state"> 
-  <h1 id="title" class="animate-in-init">안녕하세요!</h1>
-
-  <div class="suggestions animate-in-init" id="suggestions">
-    <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">창의적인 글쓰기 아이디어를 제안해줘</div>
+<main id="main" class="initial-state"> <h1 id="title" class="initial-element">안녕하세요!</h1> <div class="suggestions initial-element" id="suggestions"> <div class="suggestion-card" data-prompt="창의적인 글쓰기 아이디어를 제안해줘">창의적인 글쓰기 아이디어를 제안해줘</div>
     <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">파이썬으로 간단한 게임 만드는 법 알려줘</div>
     <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">효과적인 시간 관리 방법 추천해줘</div>
     <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">재미있는 과학 사실 알려줘</div>
@@ -862,55 +862,52 @@ textarea{
   <div class="messages" id="messages"></div>
 </main>
 
-<div class="input-bar" id="inputBar"> 
-    <div class="input-wrapper">
-    <div class="textarea-area">
-      <textarea id="userInput" placeholder="Minsu GPT에게 물어보기" rows="1" aria-label="메시지 입력"></textarea>
-    </div>
-    <div class="bottom-row">
-      <button class="icon-btn" id="addBtn" title="파일 첨부">+</button>
-      <div class="spacer"></div>
-      <div class="model-selector">
-        <button class="model-select-btn" id="modelSelectBtn">
-          <span id="selectedModel">2.5 Flash</span>
-          <span>&#9660;</span> </button>
-        <div class="model-dropdown" id="modelDropdown">
-          <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
-          <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
+<div class="input-bar" id="inputBar"> <div class="input-wrapper">
+        <div class="textarea-area">
+            <textarea id="userInput" placeholder="Minsu GPT에게 물어보기" rows="1" aria-label="메시지 입력"></textarea>
         </div>
-      </div>
-      <button class="btn" id="sendBtn" disabled>
-        <span class="icon">&#10148;</span>
-      </button>
-      <button class="stop-btn" id="stopBtn"></button>
+        <div class="bottom-row">
+            <button class="icon-btn" id="addBtn" title="파일 첨부">+</button>
+            <div class="spacer"></div>
+            <div class="model-selector">
+                <button class="model-select-btn" id="modelSelectBtn">
+                    <span id="selectedModel">2.5 Flash</span>
+                    <span>&#9660;</span> 
+                </button>
+                <div class="model-dropdown" id="modelDropdown">
+                    <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
+                    <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
+                </div>
+            </div>
+            <button class="btn" id="sendBtn" disabled>
+                <svg class="send-btn-icon" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+            <button class="stop-btn" id="stopBtn"></button>
+        </div>
     </div>
-  </div>
 </div>
 
-<div class="info-btn" id="infoBtn">i</div>
-<div class="info-popup" id="infoPopup">주의: AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div>
-
+<div class="info-btn" id="infoBtn">i</div> <div class="info-popup" id="infoPopup">주의: AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div> 
 <div id="confirmPopup" aria-hidden="true">
-  <div class="reset-card" id="confirmCard">
-    <p id="confirmMessage"></p>
-    <div class="reset-actions" id="confirmActions">
+    <div class="reset-card" id="confirmCard">
+        <p id="confirmMessage"></p>
+        <div class="reset-actions" id="confirmActions"> 
+        </div>
     </div>
-  </div>
-</div>
-
+</div> 
 <div id="nameInputModal" class="visible">
-  <div class="name-card">
-    <h2>환영합니다!</h2>
-    <p>Minsu GPT를 시작하려면 이름을 입력해주세요.</p>
-    <input type="text" id="nameInputField" placeholder="닉네임 또는 이름" maxlength="15">
-    <button id="nameSubmitBtn" disabled>시작하기</button>
-  </div>
+    <div class="name-card">
+        <h2>환영합니다!</h2>
+        <p>Minsu GPT를 시작하려면 이름을 입력해주세요.</p>
+        <input type="text" id="nameInputField" placeholder="닉네임 또는 이름" maxlength="15">
+        <button id="nameSubmitBtn" disabled>시작하기</button>
+    </div>
 </div>
 
 <script>
 /* ------------- 설정 ------------- */
 // ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
-const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
+const BACKEND_URL = '[https://jaewons0227.pythonanywhere.com/ask](https://jaewons0227.pythonanywhere.com/ask)';
 const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-height: 80px)
 const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
@@ -926,11 +923,11 @@ const sendBtn = document.getElementById('sendBtn');
 const stopBtn = document.getElementById('stopBtn');
 const modeToggleCheckbox = document.getElementById('modeToggleCheckbox');
 const suggestionsEl = document.getElementById('suggestions');
-const inputBarEl = document.getElementById('inputBar'); // 🌟 추가: inputBar 요소 🌟
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
 // 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
+
 // 팝업 관련 요소
 const confirmPopup = document.getElementById('confirmPopup');
 const confirmMessage = document.getElementById('confirmMessage');
@@ -944,6 +941,7 @@ const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
 const locationDisplay = document.getElementById('locationDisplay');
+const inputBar = document.getElementById('inputBar'); // inputBar 엘리먼트 추가
 
 let abortController = null;
 let loadingMsg = null;
@@ -952,8 +950,10 @@ let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
 
+/* 3. 기본 모드 화이트 모드로 설정 */
+body.className = 'light';
+modeToggleCheckbox.checked = true;
 
-/* -------------------- 유틸리티 함수 -------------------- */
 
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
@@ -978,159 +978,95 @@ function scrollToBottom(){
     });
 }
 
-/**
- * 전송 버튼과 중지 버튼을 토글합니다.
- * @param {boolean} isStreaming 현재 스트리밍 중인지 여부
- */
-function toggleSendStopButtons(isStreaming) {
-    if (isStreaming) {
-        sendBtn.style.display = 'none';
-        stopBtn.style.display = 'flex';
-    } else {
-        sendBtn.style.display = 'flex';
-        stopBtn.style.display = 'none';
-    }
-}
-
-/* 중앙 정렬 및 스크롤 모드 전환 함수 */
+/* 4. 중앙 정렬 및 스크롤 모드 전환 함수 (애니메이션 포함) */
 function toggleInitialState(isInitial){
-    // 🌟 수정: 애니메이션 로직 및 transform 조작을 제거하고 중앙 정렬 클래스만 관리하여
-    // 채팅 시작 시에도 부드럽게 화면 상단으로 전환되도록 합니다. 🌟
     if(isInitial){
-        // 대화가 없을 때: 중앙 정렬 유지
+        // 대화가 없을 때: 중앙 정렬 유지 및 초기 애니메이션 클래스 활성화
         mainEl.classList.add('initial-state');
-        suggestionsEl.classList.remove('disabled'); // 카드 활성화
+        titleEl.classList.add('initial-element');
+        suggestionsEl.classList.add('initial-element');
+
+        // 입력창이 하단에 고정되어 있으므로, '아래로 내려간다'는 것은 
+        // 중앙에 있던 콘텐츠가 올라가면서 입력창의 상대적 위치가 '아래'로 가는 것을 의미함.
+        // CSS transition으로 부드럽게 처리됩니다.
     } else {
-        // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용)
+        // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용) 및 애니메이션 클래스 제거
         mainEl.classList.remove('initial-state');
-        suggestionsEl.classList.add('disabled'); // 카드 비활성화
-    }
-    adjustMainPaddingAndInitialState(isInitial);
-}
-
-/* 메인 패딩 및 초기 상태 스타일 조정 (스크롤 영역 확보) */
-function adjustMainPaddingAndInitialState(isInitial) {
-    const inputHeight = inputBarEl.offsetHeight;
-    const navHeight = 56; // nav height from CSS
-    
-    // 메시지가 있을 때 (isInitial = false): 상단 네비게이션 아래, 하단 입력창 위로 패딩 설정
-    if (!isInitial) {
-        // 탑바 아래로, 입력창 위로 부드럽게 올라가도록 패딩 조정
-        mainEl.style.paddingTop = `${navHeight + 12}px`;
-        mainEl.style.paddingBottom = `${inputHeight + 12}px`;
-    } 
-    // 메시지가 없을 때 (isInitial = true): 전체 화면 중앙 정렬을 위해 하단 패딩을 줄임 (CSS의 initial-state가 flex-start를 덮어쓰고 center로 만듦)
-    // 상하단 패딩을 최소화하여 콘텐츠가 중앙에 올 수 있도록 합니다.
-    else { 
-         mainEl.style.paddingTop = `${navHeight + 20}px`; // 탑바 아래로 약간만
-         mainEl.style.paddingBottom = `${inputHeight + 20}px`; // 입력창 위로 약간만
-    }
-
-    // infoBtn 위치 조정
-    infoBtn.style.bottom = `${inputHeight + 14}px`;
-    infoPopup.style.bottom = `${inputHeight + 68}px`; // infoBtn + padding
-
-    // 채팅 목록이 있으면 스크롤을 맨 아래로
-    if (!isInitial) {
-        scrollToBottom();
+        titleEl.classList.remove('initial-element', 'loaded');
+        suggestionsEl.classList.remove('initial-element', 'loaded');
     }
 }
 
-/**
- * 마크다운 텍스트를 HTML로 파싱합니다.
- * 🌟 요청 사항 반영: 두꺼운 글씨 줄바꿈 버그 수정, 기울임, 코드 구문 강조 추가 🌟
- * @param {string} text 파싱할 마크다운 텍스트
- * @returns {string} HTML 문자열
- */
-function parseMarkdown(text) {
-    // 1. 코드 블록 (```...```) 처리
-    let codeBlockPlaceholderCount = 0;
-    const codeBlockMap = {};
-    
-    // 구문 강조를 위한 기본 함수 (매우 간단한 구현)
-    function basicSyntaxHighlighting(code) {
-        // HTML 엔티티화 (<, >는 복사 기능 때문에 유지)
-        code = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
-        // 키워드 (k: keyword)
-        code = code.replace(/\b(function|const|let|var|if|else|for|while|return|new|class|import|export|await|async|def|int|str|print|if|for|while|class)\b/g, '<span class="k">$&</span>');
-        // 문자열 (s: string)
-        code = code.replace(/(".*?"|'.*?')/g, '<span class="s">$&</span>');
-        // 주석 (c: comment)
-        code = code.replace(/(\/\/.*|#.*||\/\*[\s\S]*?\*\/)/g, '<span class="c">$&</span>');
-        // 숫자 (n: number)
-        code = code.replace(/(\b\d+(\.\d+)?\b)/g, '<span class="n">$&</span>');
-        // HTML 태그 (t: tag - 클래스명) - &lt;와 &gt;로 변환된 후 처리
-        code = code.replace(/(&lt;[A-Za-z!][\s\S]*?&gt;)/g, '<span class="t">$&</span>');
-        
-        return code;
-    }
 
-    // 전체 코드 블록 찾기: ```[lang]\n[code]\n```
-    // `[\s\S]*?`를 사용하여 줄바꿈을 포함한 모든 문자를 캡처합니다.
-    text = text.replace(/```(.*?)\n([\s\S]*?)```/g, (match, lang, code) => {
-        const id = `__CODE_BLOCK_${codeBlockPlaceholderCount++}__`;
+/* -------------------- 마크다운 파싱 유틸리티 (실시간 적용 및 코드 하이라이팅) -------------------- */
+// 8. 코드 시인성/색깔 요청 및 7. 실시간 포매팅을 위한 단순 마크다운 파서
+
+// 마크다운 코드를 HTML로 변환하고 기본적인 구문 강조를 수행하는 함수
+function markdownToHtmlSimple(markdown) {
+    // 텍스트를 HTML 엔티티로 변환 (마크다운 기호 보호)
+    let html = markdown
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    // 1. 코드 블록 처리 (```언어\n코드\n```)
+    // ```([\w\W]*?)``` 패턴을 사용하면, 내부 코드가 파싱되는 것을 방지합니다.
+    const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)\n?```/g;
+    html = html.replace(codeBlockRegex, (match, lang, code) => {
+        // HTML 엔티티를 다시 텍스트로 복원하여 코드 블록의 내용을 정확히 파싱 (코드 하이라이팅을 위해)
+        let codeContent = code
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
+
+        // 단순 하이라이팅 흉내
+        let highlighted = codeContent;
+        // 키워드 강조 (keyword, function, class-name, string, number, operator, comment)
+        highlighted = highlighted.replace(/\b(const|let|var|function|class|if|else|return|for|while|import|export|new|this|await|async|try|catch|finally)\b/g, '<span class="token keyword">$&</span>');
+        highlighted = highlighted.replace(/(".*?")|('.*?')/g, '<span class="token string">$&</span>');
+        highlighted = highlighted.replace(/(\/\/.*)/g, '<span class="token comment">$1</span>');
+        highlighted = highlighted.replace(/\b([A-Z][a-zA-Z0-9]*)\b(?=\s*\()/g, '<span class="token function">$&</span>'); // function
+        highlighted = highlighted.replace(/\b\d+(\.\d+)?\b/g, '<span class="token number">$&</span>'); // number
         
-        // 구문 강조 적용 (여기서는 언어 구분 없이 기본 강조 적용)
-        const highlightedCode = basicSyntaxHighlighting(code);
-        
-        codeBlockMap[id] = `
-<div class="code-wrap">
-    <pre class="code-block">${highlightedCode}</pre>
-    <button class="copy-btn" onclick="copyCode(this)">복사</button>
-</div>`;
-        return id;
+        const langClass = lang ? `lang-${lang}` : '';
+        // 8. code-block 내부에 <code> 태그를 추가하여 시인성 확보
+        return `<div class="code-wrap"><pre class="code-block ${langClass}"><code>${highlighted}</code></pre><button class="copy-btn">복사</button></div>`;
     });
     
-    // 2. 제목 (h1-h3) 처리 (선택 사항이지만 일관성을 위해 유지)
-    text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-    text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-    text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    // 코드 블록이 아닌 영역에서만 마크다운 적용
+    
+    // 2. 인라인 코드 처리 (`...`)
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
-    // 3. 굵게 (strong)와 기울임 (em) 처리
-    // **bold** -> <strong>bold</strong> (multiline/span 포함)
-    text = text.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
-    // *italic* 또는 _italic_ -> <em>italic</em>. 백슬래시로 이스케이프된 경우 제외.
-    text = text.replace(/(^|[^\\])\*([^\*]+?)\*/g, '$1<em>$2</em>'); 
-    text = text.replace(/(^|[^\\])_([^_]+?)_/g, '$1<em>$2</em>');
-    
-    // 4. 목록 (ul/li) 처리 (간단 구현)
-    text = text.replace(/^\s*[\-\*] (.*)$/gim, '<li>$1</li>');
-    if (text.includes('<li>')) {
-        text = '<ul>' + text + '</ul>';
-        text = text.replace(/<\/li>\n<li>/g, '</li><li>'); // 인접 리스트 합치기
-        // 리스트 주변의 <br> 제거
-        text = text.replace(/(\s*<br\s*\/?>\s*)+/g, '');
-    }
+    // 3. 굵게 처리 (**) (6. 봇 줄바꿈 문제 해결: 전체 텍스트를 파싱하므로 **가 중간에 끊길 가능성이 낮아짐)
+    // <strong> 태그를 사용하여 굵은 글씨
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
-    // 5. 코드 블록 플레이스홀더를 실제 HTML로 치환
-    Object.keys(codeBlockMap).forEach(id => {
-        text = text.replace(id, codeBlockMap[id]);
-    });
+    // 4. 기울임 처리 (*)
+    // <em> 태그를 사용하여 기울임
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
     
-    // 6. 봇 메시지에 white-space: pre-wrap;이 적용되어 있으므로 \n은 유지됩니다.
-    // **주의:** 마크다운 파싱 결과물을 innerHTML에 넣으면 HTML 요소 간의 줄바꿈이 생기지 않으므로, 
-    // 필요에 따라 <p> 태그나 <br>을 추가해야 할 수 있지만, 여기서는 pre-wrap에 의존합니다.
+    // 5. 줄바꿈 (\n)을 <br>로 변환 (코드 블록 내부가 아닌 경우에만)
+    // <pre> 태그 내부는 white-space: pre-wrap;에 의해 처리되므로 일반 텍스트의 줄바꿈만 변환
+    // 주의: 단순 치환은 코드 블록 내부의 \n을 <br>로 바꿀 수 있으므로, 최종 메시지 렌더링 시에는
+    // 이 코드를 제거하거나, 서버가 이미 \n을 `<br>` 또는 `<p>`로 변환하지 않도록 보장해야 합니다.
+    // 기존 CSS에서 white-space:pre-wrap;을 사용하고 있으므로, \n을 <br>로 변환하지 않아도 줄바꿈이 유지되지만,
+    // HTML에 직접 삽입되는 경우에는 <br>이 필요할 수 있습니다.
+    // 여기서는 <pre> 태그 안의 텍스트가 이미 HTML 엔티티로 이스케이프되었고,
+    // <pre>가 아닌 일반 텍스트 영역에서만 줄바꿈을 <br>로 변환합니다.
     
-    return text;
+    // 6. 줄바꿈을 <br>로 변환 (코드 블록 내부가 아닌 경우만)
+    // 이 파서의 구조상, <pre> 태그 내부의 이스케이프된 내용에 줄바꿈이 남아있어
+    // 이스케이프된 <pre> 내부 내용까지 <br>로 바뀔 수 있습니다.
+    // 이를 방지하기 위해, 여기서는 단순 텍스트만 처리하고, 복잡한 파싱을 피하기 위해
+    // `white-space: pre-wrap`에 의존하여 \n -> <br> 치환을 생략합니다.
+    // (만약 줄바꿈이 표시되지 않는 문제가 발생한다면, 이 부분을 주석 해제해야 합니다.)
+    // html = html.replace(/\n/g, '<br>');
+
+    return html;
 }
-
-function copyCode(button) {
-    const codeBlock = button.previousElementSibling;
-    const code = codeBlock.textContent;
-    navigator.clipboard.writeText(code).then(() => {
-        button.textContent = '복사됨!';
-        setTimeout(() => {
-            button.textContent = '복사';
-        }, 2000);
-    }).catch(err => {
-        console.error('복사 실패:', err);
-    });
-}
-window.copyCode = copyCode; // 전역 스코프에 함수 노출
 
 /* -------------------- 대화 관리 기능 -------------------- */
-
 // 고유 ID 생성
 function generateChatId() {
     return 'chat_' + Date.now();
@@ -1145,6 +1081,7 @@ function saveAllConversations() {
         console.error('Error saving conversations:', e);
     }
 }
+
 function loadAllConversations() {
     try {
         const raw = localStorage.getItem('allConversations');
@@ -1155,14 +1092,19 @@ function loadAllConversations() {
         currentChatId = null;
         console.error('Error loading conversations:', e);
     }
+    
+    // 🌟 5. 페이지 로드 시 초기 애니메이션 시작 🌟
+    titleEl.classList.add('loaded');
+    suggestionsEl.classList.add('loaded');
+    
     if (Object.keys(allConversations).length === 0) {
         startNewChat(false);
     } else if (!currentChatId || !allConversations[currentChatId]) {
         // 유효하지 않은 currentChatId인 경우 가장 최근 대화로 설정
         const latestChatId = Object.keys(allConversations).sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
-        activateChat(latestChatId); // 🌟 메뉴 상태 유지 🌟
+        activateChat(latestChatId); 
     } else {
-        activateChat(currentChatId); // 🌟 메뉴 상태 유지 🌟
+        activateChat(currentChatId); 
     }
 }
 
@@ -1184,8 +1126,8 @@ function saveHistory() {
 // 대화 기록 로드 및 렌더링
 function loadHistory() {
     messagesEl.innerHTML = '';
-    // 🌟 수정: 메시지 렌더링 시 show 클래스를 즉시 추가 (새 대화에서는 애니메이션 없이) 🌟
-    chatHistory.forEach(item => {
+    // 🌟 메시지 렌더링 시 실시간 마크다운 적용 🌟
+    chatHistory.forEach(item => { 
         const el = renderMessage(item.role, item.content);
         el.classList.add('show');
     });
@@ -1202,15 +1144,13 @@ function startNewChat(shouldReload = true) {
     currentChatId = newId;
     saveAllConversations();
     if (shouldReload) {
-        // 🌟 수정: 새 대화는 리로드 대신 부드럽게 전환 🌟
-        activateChat(newId); // 🌟 메뉴 상태 유지 🌟
+        activateChat(newId);
     } else {
-        activateChat(newId); // 🌟 메뉴 상태 유지 🌟
+        activateChat(newId);
     }
 }
 
 // 특정 대화 활성화
-// 🌟 수정: closeMenu 인자를 제거하고, 메뉴 상태를 유지합니다. 🌟
 function activateChat(chatId) {
     if (!allConversations[chatId]) return;
     currentChatId = chatId;
@@ -1245,40 +1185,47 @@ function deleteChat(chatId) {
 }
 
 // 대화 목록 렌더링 (삭제 버튼 추가)
-function renderChatList(searchTerm = '') {
+function renderChatList() {
     chatListContainer.innerHTML = '';
     const sortedChats = Object.entries(allConversations)
         .map(([id, conv]) => ({ id, ...conv }))
-        .sort((a, b) => b.timestamp - a.timestamp);
+        .sort((a, b) => b.timestamp - a.timestamp); // 최신 순 정렬
 
-    const filteredChats = sortedChats.filter(chat => 
-        !searchTerm || 
-        (chat.title && chat.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        chat.history.some(msg => msg.content.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    if (sortedChats.length === 0) {
+        chatListContainer.innerHTML = '<div style="padding: 12px 16px; color: var(--menu-text); opacity: 0.7; font-size: 0.9rem;">최근 대화 없음</div>';
+        return;
+    }
 
-    filteredChats.forEach(chat => {
-        const item = document.createElement('div');
-        item.className = 'chat-item';
-        if (chat.id === currentChatId) {
-            item.classList.add('active');
+    const searchQuery = chatSearchInput.value.toLowerCase().trim();
+
+    sortedChats.forEach(chat => {
+        const title = chat.title || '새 대화';
+        
+        // 검색 기능
+        if (searchQuery && !title.toLowerCase().includes(searchQuery)) {
+            return;
         }
+
+        const item = document.createElement('div');
+        item.className = 'chat-item' + (chat.id === currentChatId ? ' active' : '');
         item.dataset.chatId = chat.id;
 
         const textSpan = document.createElement('span');
         textSpan.className = 'chat-item-text';
-        textSpan.textContent = chat.title || '새 대화';
-        
-        // 🌟 수정: 삭제 버튼을 항상 표시 🌟
+        textSpan.textContent = title;
+        textSpan.addEventListener('click', () => {
+            activateChat(chat.id);
+            hideSideMenu();
+        });
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-chat-btn';
         deleteBtn.innerHTML = '&times;'; 
-        deleteBtn.title = '채팅 삭제';
+        deleteBtn.title = '대화 삭제';
         deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // 채팅 항목 클릭 이벤트 방지
-            
+            e.stopPropagation(); // 채팅 활성화 방지
             showConfirmPopup(
-                `"${textSpan.textContent}" 대화를 삭제하시겠습니까?`,
+                `"${title}" 대화를 삭제하시겠습니까?`,
                 [
                     { id: 'cancel', text: '취소', class: 'reset-no' },
                     { id: 'delete', text: '삭제', class: 'reset-yes' },
@@ -1294,118 +1241,86 @@ function renderChatList(searchTerm = '') {
             );
         });
 
-        textSpan.addEventListener('click', () => {
-            activateChat(chat.id);
-        });
-
         item.appendChild(textSpan);
         item.appendChild(deleteBtn);
         chatListContainer.appendChild(item);
     });
+    
+    // 검색 결과가 없을 때 처리
+    if (!chatListContainer.children.length && searchQuery) {
+        chatListContainer.innerHTML = '<div style="padding: 12px 16px; color: var(--menu-text); opacity: 0.7; font-size: 0.9rem;">검색 결과 없음</div>';
+    }
 }
 
-// 메시지 요소를 생성하고 DOM에 추가
-function createMessageElement(role, content, isLoading = false) {
-    const messageEl = document.createElement('div');
-    messageEl.className = `message ${role}`;
-    if (isLoading) {
-        messageEl.classList.add('loading');
-        // 로딩 중에는 스피너와 '답변 생성 중...' 텍스트 표시
-        messageEl.innerHTML = `<span style="font-size: 0.95rem;">답변 생성 중...</span> <div class="new-google-spinner"></div>`;
-    } else {
-        // 봇 메시지는 마크다운 파싱을 적용
-        messageEl.innerHTML = role === 'bot' ? parseMarkdown(content) : content;
-    }
+// 메시지 요소를 생성하고 추가
+function renderMessage(role, content) {
+    const el = document.createElement('div');
+    el.className = 'message ' + role;
+
+    // 🌟 실시간 파서로 HTML 내용을 생성 🌟
+    el.innerHTML = markdownToHtmlSimple(content); 
     
-    // 🌟 새 메시지가 생성될 때마다 등장 애니메이션을 위해 show 클래스를 추가합니다. 🌟
-    // 다만, loadHistory에서는 애니메이션을 건너뛰기 위해 수동으로 show를 추가합니다.
-    if (!isLoading && chatHistory.length > 0) { 
-        setTimeout(() => { 
-            messageEl.classList.add('show');
-        }, 10);
-    }
-    
-    return messageEl;
+    messagesEl.appendChild(el);
+    return el;
 }
 
-// 메시지 전송 및 처리
-async function sendMessage(prompt) {
-    prompt = prompt.trim();
-    if (!prompt) return;
+// 사용자 메시지 전송 및 기록
+function sendMessage(content) {
+    if (!content.trim()) return;
 
-    // 사용자 메시지 표시
-    const userMsg = createMessageElement('user', prompt);
-    messagesEl.appendChild(userMsg);
-    userMsg.classList.add('show'); // 사용자 메시지 바로 표시
-
-    // 텍스트 영역 초기화 및 비활성화
+    // UI 업데이트
     userInput.value = '';
-    userInput.style.height = '30px';
-    userInput.disabled = true;
+    userInput.style.height = 'auto'; // 높이 초기화
     sendBtn.disabled = true;
-    suggestionsEl.classList.add('disabled'); // 카드 비활성화
+    suggestionsEl.classList.add('disabled');
+    toggleInitialState(false); // 채팅 시작, 중앙 정렬 해제 및 애니메이션 시작
 
-    // 히스토리에 사용자 메시지 추가
-    chatHistory.push({ role: 'user', content: prompt });
-    saveHistory(); // 사용자 메시지 저장
-    toggleInitialState(false); // 중앙 정렬 해제 및 상단으로 전환
-    scrollToBottom();
+    // 사용자 메시지 렌더링 및 기록
+    renderMessage('user', content);
+    chatHistory.push({ role: 'user', content: content });
+    saveHistory();
+
+    // 로딩 메시지 추가
+    loadingMsg = renderMessage('bot', '답변을 준비 중입니다...');
+    loadingMsg.classList.add('loading');
     
-    // 봇 답변 스트리밍 시작
-    try {
-        await streamResponse(prompt, chatHistory);
-    } catch (e) {
-        console.error('API call failed:', e);
-        // 오류 메시지 처리
-        if (!abortController.signal.aborted) {
-             const errorMsg = createMessageElement('bot', `**오류 발생:** AI 응답을 가져오는 데 문제가 생겼습니다.`);
-             messagesEl.appendChild(errorMsg);
-             errorMsg.classList.add('show');
-             chatHistory.push({ role: 'bot', content: `**오류 발생:** AI 응답을 가져오는 데 문제가 생겼습니다.` });
-             saveHistory();
-             scrollToBottom();
-        }
-    } finally {
-        userInput.disabled = false;
-        sendBtn.disabled = !userInput.value.trim();
-        suggestionsEl.classList.remove('disabled');
-        toggleSendStopButtons(false); // 🌟 스트리밍 종료 시 send 버튼 표시 🌟
-        userInput.focus();
-        
-        // input bar 높이 재조정
-        adjustMainPaddingAndInitialState(chatHistory.length === 0);
-    }
+    // 로딩 스피너 추가
+    const spinner = document.createElement('div');
+    spinner.className = 'new-google-spinner';
+    loadingMsg.prepend(spinner);
+
+    // 봇 응답 요청
+    fetchBotResponse(content);
+
+    scrollToBottom();
 }
 
-// 봇 응답 스트리밍
-async function streamResponse(prompt, history) {
-    const model = document.getElementById('selectedModel').textContent.trim().split(' ')[0];
-    const systemInstruction = SYSTEM_INSTRUCTION;
-    const messagesToSend = [systemInstruction, ...history];
-    
+
+// 봇 응답 요청 및 스트리밍 처리
+async function fetchBotResponse(prompt) {
     abortController = new AbortController();
     const signal = abortController.signal;
-    toggleSendStopButtons(true); // 🌟 스트리밍 시작 시 stop 버튼 표시 🌟
+    let botContent = '';
 
-    const payload = {
-        model: model, 
-        messages: messagesToSend,
-    };
+    // 시스템 메시지를 포함한 전체 대화 기록
+    const messagesToSend = [SYSTEM_INSTRUCTION, ...chatHistory];
+    
+    // 메시지 마지막에 로딩 스피너만 남기기 (로딩 텍스트는 JS에서 추가)
+    loadingMsg.innerHTML = '<div class="new-google-spinner"></div>';
+    
+    // 🌟 9. 답변 중지 버튼 표시 🌟
+    sendBtn.style.display = 'none';
+    stopBtn.style.display = 'flex';
 
-    // 메시지 버블 생성 (로딩 상태)
-    loadingMsg = createMessageElement('bot', '', true);
-    messagesEl.appendChild(loadingMsg);
-    scrollToBottom();
-
-    let fullText = '';
     try {
         const response = await fetch(BACKEND_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-Username': username || 'User',
             },
-            body: JSON.stringify(payload),
-            signal: signal,
+            body: JSON.stringify({ messages: messagesToSend }),
+            signal: signal 
         });
 
         if (!response.ok) {
@@ -1413,339 +1328,354 @@ async function streamResponse(prompt, history) {
         }
 
         const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        
+        const decoder = new TextDecoder();
+        let buffer = '';
+
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
             
-            const chunk = decoder.decode(value, { stream: true });
-            if (chunk) {
-                fullText += chunk;
-                
-                // 🌟 요청 8 반영: 매 청크마다 마크다운 파싱하여 HTML 업데이트 🌟
-                loadingMsg.classList.remove('loading'); 
-                // parseMarkdown 적용 및 타이핑 커서 추가
-                loadingMsg.innerHTML = parseMarkdown(fullText) + '<span class="typing-cursor"></span>'; 
-                
-                scrollToBottom();
+            // 버퍼에서 완전한 JSON 객체 분리
+            let boundary;
+            while ((boundary = buffer.indexOf('\n')) !== -1) {
+                const chunk = buffer.substring(0, boundary);
+                buffer = buffer.substring(boundary + 1);
+
+                if (chunk.trim() === 'END_OF_STREAM') {
+                    // 서버가 종료 시그널을 보냈을 때
+                    finalizeBotMessage(botContent);
+                    return; 
+                }
+
+                if (chunk.trim().startsWith('{')) {
+                    try {
+                        const data = JSON.parse(chunk);
+                        if (data.text) {
+                            botContent += data.text;
+                            updateBotMessage(botContent); // 7. 실시간 업데이트
+                        }
+                    } catch (e) {
+                        console.error('Error parsing JSON chunk:', e);
+                    }
+                }
             }
         }
         
-    } catch (error) {
-        if (abortController.signal.aborted) {
-            fullText += '\n\n**답변이 중지되었습니다.**'; // 🌟 요청 9 반영: 답변 중지 메시지 추가 🌟
+        // 스트림이 정상적으로 종료되었으나 'END_OF_STREAM'이 오지 않았을 경우 대비
+        finalizeBotMessage(botContent);
+
+    } catch (e) {
+        if (signal.aborted) {
+            handleAbort(e); // 9. 중지 버튼 눌렀을 때
         } else {
-            // 이외의 네트워크 또는 API 오류
-            fullText += '\n\n**죄송합니다. 응답을 생성하는 중 오류가 발생했습니다.**';
-            console.error('Streaming error:', error);
+            console.error('Fetch error:', e);
+            botContent = botContent || '죄송합니다. 서버와의 연결에 문제가 발생했습니다.';
+            finalizeBotMessage(botContent);
         }
-    } finally {
-        // 🌟 최종적으로 커서 제거 및 최종 마크다운 적용 🌟
-        loadingMsg.innerHTML = parseMarkdown(fullText);
-        loadingMsg.classList.add('show'); // 최종적으로 메시지 표시 완료
-
-        // 히스토리에 봇 메시지 추가 및 저장
-        chatHistory.push({ role: 'bot', content: fullText });
-        saveHistory();
-
-        // 정리
-        abortController = null;
-        loadingMsg = null;
-        toggleSendStopButtons(false); // 🌟 스트리밍 종료 시 send 버튼 표시 🌟
     }
 }
 
+// 7. 실시간 업데이트 함수 (9. 답변 중지 버튼 표시 포함)
+function updateBotMessage(text) {
+    if (!loadingMsg) return;
 
-/* -------------------- UI/UX 및 이벤트 리스너 -------------------- */
-
-// 🌟 요청: 페이지 로드 및 첫 메시지 애니메이션 🌟
-function animateInitialLoad() {
-    const title = document.getElementById('title');
-    const suggestions = document.getElementById('suggestions');
-    const infoBtnEl = document.getElementById('infoBtn');
+    // 🌟 실시간 마크다운 변환 적용 (7, 6, 8. 실시간 포매팅, 굵은글씨 줄바꿈 방지, 코드 하이라이팅) 🌟
+    const htmlContent = markdownToHtmlSimple(text);
     
-    // 0. main 및 infoBtn의 pointer-events를 auto로 설정
-    mainEl.style.pointerEvents = 'auto';
-    inputBarEl.style.pointerEvents = 'auto';
-    infoBtnEl.classList.add('loaded'); // infoBtn 애니메이션 (CSS transition)
+    // 커서 추가
+    loadingMsg.innerHTML = htmlContent + '<span class="typing-cursor"></span>';
+    
+    // 🌟 9. 답변 중지 버튼: 타이핑 중에도 표시 🌟
+    stopBtn.style.display = 'flex'; 
+    sendBtn.style.display = 'none';
 
-    // 1. input-bar 애니메이션 (CSS의 .input-bar.loaded 클래스를 사용)
-    inputBarEl.classList.add('loaded');
-
-    // 2. main 내부 요소 애니메이션
-    setTimeout(() => {
-        title.classList.remove('animate-in-init');
-        title.classList.add('animate-in-final');
-
-        suggestions.classList.remove('animate-in-init');
-        suggestions.classList.add('animate-in-final');
-    }, 100); 
+    scrollToBottom();
 }
 
 
-// 이벤트 리스너 설정
-function setupListeners() {
-    // 🌟 요청 9 반영: stopBtn 이벤트 리스너 추가 🌟
-    stopBtn.addEventListener('click', () => {
-        if (abortController) {
-            abortController.abort();
-            // 나머지 정리 작업은 streamResponse의 finally 블록에서 처리됨.
-        }
-    });
-    toggleSendStopButtons(false); // 초기 상태는 send 버튼 표시
+function finalizeBotMessage(finalContent) {
+    if (!loadingMsg) return;
+    
+    // 챗 히스토리에 최종 내용 추가
+    chatHistory.push({ role: 'bot', content: finalContent });
+    saveHistory();
+    
+    // 최종 컨텐츠에 대해 마크다운 변환 적용
+    loadingMsg.innerHTML = markdownToHtmlSimple(finalContent);
+    loadingMsg.classList.remove('loading');
+    
+    loadingMsg = null;
+    abortController = null;
 
-    // Enter 키로 메시지 전송
-    userInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey && !userInput.disabled && userInput.value.trim()) {
-            e.preventDefault();
-            sendMessage(userInput.value);
-        }
-    });
+    // UI 상태 복구
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+    suggestionsEl.classList.remove('disabled');
 
-    // 전송 버튼 클릭
-    sendBtn.addEventListener('click', () => {
+    // 🌟 9. 답변 중지 버튼 숨기기 🌟
+    stopBtn.style.display = 'none'; 
+    sendBtn.style.display = 'flex'; // 전송 버튼 다시 표시
+
+    scrollToBottom();
+}
+
+// 9. 답변 중지 버튼 이벤트 처리
+function handleAbort(e) {
+    console.log('Abort called.', e);
+    if (!loadingMsg) return;
+    
+    // 🌟 9. 타이핑 중지 및 최종 처리: 현재까지 받은 내용으로 최종 메시지 확정 🌟
+    // chatHistory에서 마지막 봇 메시지를 가져와 최종 처리
+    const currentContent = chatHistory.slice(-1)[0].content;
+    
+    // 로딩 메시지에 '답변이 중단되었습니다' 같은 문구 추가 가능 (선택 사항)
+    let abortedContent = currentContent + '\n\n**답변이 중단되었습니다.**';
+    
+    finalizeBotMessage(abortedContent); // 현재까지 받은 내용으로 최종 마크다운 처리
+}
+
+
+/* -------------------- UI 이벤트 핸들러 -------------------- */
+
+// 9. 답변 중지 버튼 클릭 이벤트
+stopBtn.addEventListener('click', () => {
+    if (abortController) {
+        abortController.abort();
+    }
+});
+
+// 입력창 리사이징
+userInput.addEventListener('input', () => {
+    userInput.style.height = 'auto';
+    userInput.style.height = userInput.scrollHeight + 'px';
+    sendBtn.disabled = !userInput.value.trim();
+    
+    // 입력창이 확장되면 main의 패딩 조정
+    const newHeight = inputBar.offsetHeight;
+    mainEl.style.paddingBottom = `${newHeight + 16}px`; // input-bar 높이 + 여백 16px
+    
+    scrollToBottom();
+});
+
+// 전송 버튼 클릭
+sendBtn.addEventListener('click', () => {
+    sendMessage(userInput.value);
+});
+
+// 엔터 키 입력
+userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
         if (!sendBtn.disabled) {
             sendMessage(userInput.value);
         }
-    });
-    
-    // 텍스트 영역 입력 감지 및 버튼 활성화/높이 조정
-    userInput.addEventListener('input', () => {
-        // 전송 버튼 활성화
-        sendBtn.disabled = !userInput.value.trim();
-        // 높이 자동 조정
-        userInput.style.height = 'auto';
-        userInput.style.height = userInput.scrollHeight + 'px';
-        // input bar 높이 변경에 따른 메인 패딩 조정
-        adjustMainPaddingAndInitialState(chatHistory.length === 0);
-    });
-
-    // 제안 카드 클릭
-    suggestionsEl.addEventListener('click', (e) => {
-        const card = e.target.closest('.suggestion-card');
-        if (card) {
-            sendMessage(card.dataset.prompt);
-        }
-    });
-
-    // 모델 드롭다운 토글
-    document.getElementById('modelSelectBtn').addEventListener('click', () => {
-        document.getElementById('modelDropdown').classList.toggle('show');
-    });
-
-    // 모델 선택
-    document.getElementById('modelDropdown').addEventListener('click', (e) => {
-        const option = e.target.closest('.model-option');
-        if (option) {
-            document.getElementById('selectedModel').textContent = option.dataset.model;
-            // 활성 클래스 업데이트
-            document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('active'));
-            option.classList.add('active');
-            document.getElementById('modelDropdown').classList.remove('show');
-        }
-    });
-
-    // 드롭다운 외부 클릭 시 닫기
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.model-selector')) {
-            document.getElementById('modelDropdown').classList.remove('show');
-        }
-    });
-
-    // 모드 토글
-    modeToggleCheckbox.addEventListener('change', () => {
-        if (modeToggleCheckbox.checked) {
-            body.classList.remove('light');
-            body.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            body.classList.remove('dark');
-            body.classList.add('light');
-            localStorage.setItem('theme', 'light');
-        }
-    });
-
-    // 사이드 메뉴 토글
-    menuToggle.addEventListener('click', () => {
-        sideMenu.classList.toggle('open');
-        sideMenuOverlay.classList.toggle('open');
-        body.classList.toggle('menu-open');
-    });
-    sideMenuOverlay.addEventListener('click', hideSideMenu);
-    function hideSideMenu() {
-        sideMenu.classList.remove('open');
-        sideMenuOverlay.classList.remove('open');
-        body.classList.remove('menu-open');
     }
+});
 
-    // 새 채팅 버튼 (메뉴 내부)
-    newChatMenuBtn.addEventListener('click', () => {
-        hideSideMenu();
-        startNewChat();
-    });
-
-    // 채팅 목록 클릭 이벤트 (renderChatList에서 처리됨)
-    // 채팅 검색 이벤트
-    chatSearchInput.addEventListener('input', (e) => {
-        renderChatList(e.target.value);
-    });
-
-    // info 버튼 토글
-    infoBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // document 클릭 이벤트 방지
-        infoPopup.style.display = (infoPopup.style.display === 'block') ? 'none' : 'block';
-    });
-    // info 팝업 외부 클릭 시 닫기
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#infoPopup') && !e.target.closest('#infoBtn')) {
-            infoPopup.style.display = 'none';
-        }
-    });
+// 초기 높이 설정 (초기 로드 시)
+function setInitialLayout() {
+    userInput.style.height = 'auto';
+    userInput.style.height = userInput.scrollHeight + 'px';
     
-    // 위치 정보 가져오기 (Geolocaton API)
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                locationDisplay.textContent = `위도: ${position.coords.latitude.toFixed(2)}, 경도: ${position.coords.longitude.toFixed(2)}`;
-            },
-            (error) => {
-                console.warn('Geolocation Error:', error);
-                locationDisplay.textContent = '위치 정보를 가져올 수 없음';
-            },
-            { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
-        );
-    } else {
-        locationDisplay.textContent = '브라우저가 Geolocation을 지원하지 않음';
-    }
+    // 초기 레이아웃을 위해 input-bar의 높이를 한 번 계산
+    const currentInputBarHeight = inputBar.offsetHeight;
+    mainEl.style.paddingBottom = `${currentInputBarHeight + 16}px`; 
+
+    // 5. 초기 애니메이션 트리거 (DOMContentLoaded에서 처리)
 }
 
-/* -------------------- 모달 및 팝업 -------------------- */
 
-// 확인 팝업 표시
+// 추천 카드 클릭
+suggestionsEl.addEventListener('click', (e) => {
+    const card = e.target.closest('.suggestion-card');
+    if (card) {
+        sendMessage(card.dataset.prompt);
+    }
+});
+
+// 모델 선택 드롭다운
+const modelSelectBtn = document.getElementById('modelSelectBtn');
+const modelDropdown = document.getElementById('modelDropdown');
+const selectedModelEl = document.getElementById('selectedModel');
+
+modelSelectBtn.addEventListener('click', () => {
+    modelDropdown.classList.toggle('show');
+});
+
+modelDropdown.addEventListener('click', (e) => {
+    const option = e.target.closest('.model-option');
+    if (option) {
+        const model = option.dataset.model;
+        selectedModelEl.textContent = model;
+        // 활성 클래스 업데이트
+        document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        modelDropdown.classList.remove('show');
+        
+        // 실제 모델 전환 로직 (미구현 상태)
+        console.log('Model switched to:', model); 
+    }
+});
+document.addEventListener('click', (e) => {
+    if (!modelSelectBtn.contains(e.target) && !modelDropdown.contains(e.target)) {
+        modelDropdown.classList.remove('show');
+    }
+});
+
+// 다크/라이트 모드 토글
+modeToggleCheckbox.addEventListener('change', () => {
+    if (modeToggleCheckbox.checked) {
+        body.classList.remove('dark');
+        body.classList.add('light');
+    } else {
+        body.classList.remove('light');
+        body.classList.add('dark');
+    }
+    localStorage.setItem('darkMode', modeToggleCheckbox.checked ? 'light' : 'dark');
+});
+
+
+// 로컬 스토리지에서 테마 로드
+function loadTheme() {
+    const savedMode = localStorage.getItem('darkMode');
+    // 3. 기본 모드 화이트 모드로 설정: savedMode가 없으면 'light'로 설정
+    const currentMode = savedMode || 'light'; 
+
+    if (currentMode === 'dark') {
+        body.classList.add('dark');
+        body.classList.remove('light');
+        modeToggleCheckbox.checked = false;
+    } else {
+        body.classList.add('light');
+        body.classList.remove('dark');
+        modeToggleCheckbox.checked = true; // Light Mode is ON/Checked
+    }
+    modeToggleCheckbox.disabled = false;
+    document.getElementById('menuToggle').disabled = false;
+}
+
+// 메뉴 토글 기능
+function showSideMenu() {
+    sideMenuOverlay.classList.add('open');
+    sideMenu.classList.add('open');
+    body.classList.add('menu-open');
+}
+function hideSideMenu() {
+    sideMenuOverlay.classList.remove('open');
+    sideMenu.classList.remove('open');
+    body.classList.remove('menu-open');
+}
+
+menuToggle.addEventListener('click', showSideMenu);
+sideMenuOverlay.addEventListener('click', (e) => {
+    if (e.target === sideMenuOverlay) {
+        hideSideMenu();
+    }
+});
+newChatMenuBtn.addEventListener('click', () => {
+    startNewChat();
+    hideSideMenu();
+});
+
+// 채팅 검색 기능
+chatSearchInput.addEventListener('input', () => {
+    renderChatList();
+});
+
+// Info Button & Popup
+infoBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    infoPopup.style.display = infoPopup.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', (e) => {
+    if (!infoBtn.contains(e.target) && !infoPopup.contains(e.target)) {
+        infoPopup.style.display = 'none';
+    }
+});
+
+// Confirm Popup (재설정)
 function showConfirmPopup(message, actions, callback) {
-    confirmMessage.textContent = message;
+    confirmMessage.innerHTML = message;
     confirmActions.innerHTML = '';
     actions.forEach(action => {
-        const button = document.createElement('button');
-        button.textContent = action.text;
-        button.className = action.class;
-        button.addEventListener('click', () => callback(action.id));
-        confirmActions.appendChild(button);
+        const btn = document.createElement('button');
+        btn.id = action.id;
+        btn.className = action.class;
+        btn.textContent = action.text;
+        btn.addEventListener('click', () => callback(action.id));
+        confirmActions.appendChild(btn);
     });
     confirmPopup.classList.add('visible');
-    // 팝업이 표시될 때 배경 스크롤 방지
-    document.body.style.overflow = 'hidden'; 
+    confirmPopup.setAttribute('aria-hidden', 'false');
 }
 
-// 확인 팝업 숨기기
 function hideConfirmPopup() {
     confirmPopup.classList.remove('visible');
-    document.body.style.overflow = ''; 
+    confirmPopup.setAttribute('aria-hidden', 'true');
 }
 
-// 이름 입력 모달
+// 사용자 이름 입력 모달
 const nameInputModal = document.getElementById('nameInputModal');
 const nameInputField = document.getElementById('nameInputField');
 const nameSubmitBtn = document.getElementById('nameSubmitBtn');
 
-function showNameInputModal() {
-    // 모든 초기화 UI를 비활성화 상태로 둡니다. (애니메이션 전에)
-    mainEl.style.pointerEvents = 'none';
-    inputBarEl.style.pointerEvents = 'none';
-    infoBtn.style.pointerEvents = 'none';
-    infoBtn.classList.remove('loaded');
-    inputBarEl.classList.remove('loaded');
-    document.getElementById('title').classList.add('animate-in-init');
-    document.getElementById('suggestions').classList.add('animate-in-init');
-
-    nameInputModal.classList.add('visible');
-    nameInputField.value = '';
-    nameSubmitBtn.disabled = true;
-    nameInputField.focus();
-}
-
 nameInputField.addEventListener('input', () => {
-    nameSubmitBtn.disabled = nameInputField.value.trim().length < 2;
+    nameSubmitBtn.disabled = !nameInputField.value.trim();
 });
 
 nameSubmitBtn.addEventListener('click', () => {
     username = nameInputField.value.trim();
-    if (username.length >= 2) {
-        localStorage.setItem('username', username);
-        nameInputModal.classList.remove('visible');
-        updateTitle();
-        setupInitialUIEnd(); // 이름 입력 후 UI 초기화 완료
-    }
-});
-
-/* -------------------- 초기화 -------------------- */
-
-// 초기 UI 설정 (테마, 대화 로드)
-function setupInitialUI() {
-    // 1. 테마 설정
-    const savedTheme = localStorage.getItem('theme') || 'light'; // 🌟 요청: 기본 모드를 'light'로 변경 🌟
-    if (savedTheme === 'dark') {
-        body.classList.remove('light');
-        body.classList.add('dark');
-        modeToggleCheckbox.checked = true;
-    } else {
-        body.classList.remove('dark');
-        body.classList.add('light');
-        modeToggleCheckbox.checked = false;
-    }
-    modeToggleCheckbox.disabled = false;
-    menuToggle.disabled = false;
-
-    // 2. 대화 기록 로드
-    loadAllConversations();
-    // 3. 리스너 설정
-    setupListeners();
-
-    // 4. 이름 확인 및 모달 표시
-    if (!username) {
-        showNameInputModal();
-    } else {
-        updateTitle();
-        setupInitialUIEnd();
-    }
-}
-
-// 이름 입력 후 최종 UI 설정 및 애니메이션
-function setupInitialUIEnd() {
-    // input bar 높이 초기 조정
-    adjustMainPaddingAndInitialState(chatHistory.length === 0); 
+    localStorage.setItem('username', username);
+    hideNameInputModal();
+    updateTitle(); // 제목 업데이트
     
-    // 🌟 페이지 로드 애니메이션 시작 🌟
-    animateInitialLoad(); 
-}
-
-
-// 이벤트: 전체 초기화 버튼
-document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
-  showConfirmPopup(
-    '모든 대화 기록을 완전히 삭제하고 초기화할까요?',
-    [
-      { id: 'cancel', text: '취소', class: 'reset-no' },
-      { id: 'reset_all', text: '전체 삭제', class: 'reset-yes' },
-    ],
-    (actionId) => {
-      if (actionId === 'reset_all') {
-        localStorage.removeItem('allConversations');
-        localStorage.removeItem('currentChatId');
-        localStorage.removeItem('theme'); // 테마도 초기화 (요청)
-        hideConfirmPopup();
-        hideSideMenu();
-        // 전체 리로드
-        window.location.reload(); 
-      } else {
-        hideConfirmPopup();
-      }
-    }
-  );
+    // 5. 이름 입력 후 애니메이션 재시작
+    titleEl.classList.remove('initial-element');
+    suggestionsEl.classList.remove('initial-element');
+    setTimeout(() => {
+        titleEl.classList.add('initial-element', 'loaded');
+        suggestionsEl.classList.add('initial-element', 'loaded');
+    }, 100);
 });
 
-// 이벤트: 사용자 이름 초기화 버튼
+function showNameInputModal() {
+    nameInputModal.classList.add('visible');
+    nameInputField.value = '';
+    nameSubmitBtn.disabled = true;
+    setTimeout(() => nameInputField.focus(), 300);
+}
+
+function hideNameInputModal() {
+    nameInputModal.classList.remove('visible');
+}
+
+// 위치 정보 업데이트 (기존 로직 유지)
+function updateLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            // 간단하게 위도/경도만 표시
+            locationDisplay.textContent = `위치: Lat ${lat.toFixed(4)}, Lon ${lon.toFixed(4)}`;
+        }, error => {
+            console.error('Geolocation error:', error);
+            locationDisplay.textContent = '위치 정보 접근 거부됨';
+        });
+    } else {
+        locationDisplay.textContent = '위치 정보 사용 불가';
+    }
+}
+updateLocation();
+
+
+// 업그레이드 버튼 (로직 유지)
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+    alert('업그레이드 페이지로 이동합니다.');
+});
+
+// 사용자 이름 초기화 버튼 (로직 유지)
 document.getElementById('resetNameMenuBtn').addEventListener('click', () => {
   showConfirmPopup(
     `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
@@ -1768,9 +1698,42 @@ document.getElementById('resetNameMenuBtn').addEventListener('click', () => {
   );
 });
 
+// 전체 초기화 (로직 유지)
+document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
+  showConfirmPopup(
+    '모든 대화 기록을 완전히 삭제하고 초기화할까요?',
+    [
+      { id: 'cancel', text: '취소', class: 'reset-no' },
+      { id: 'reset_all', text: '전체 삭제', class: 'reset-yes' },
+    ],
+    (actionId) => {
+      if (actionId === 'reset_all') {
+        localStorage.removeItem('allConversations');
+        localStorage.removeItem('currentChatId');
+        location.reload(); // 전체 초기화 후 페이지 새로고침
+      } else {
+        hideConfirmPopup();
+      }
+    }
+  );
+});
 
-// 페이지 로드 시 초기화 시작
-document.addEventListener('DOMContentLoaded', setupInitialUI);
+// 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    loadTheme();
+    
+    if (!username) {
+        showNameInputModal();
+    } else {
+        // 이름이 있으면 바로 로드 시작
+        hideNameInputModal();
+        updateTitle();
+        loadAllConversations();
+    }
+    
+    // 초기 레이아웃 설정 (입력창 높이 계산 등)
+    setInitialLayout();
+});
 </script>
 </body>
 </html>
