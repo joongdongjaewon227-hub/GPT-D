@@ -1,65 +1,116 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>홈페이지 점검중</title>
-<style>
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: #f7f9fc;
-    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사이트 점검 안내</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-  h1 {
-    font-size: 3em;
-    font-weight: 800;
-    background: linear-gradient(90deg, #007BFF, #00CFFF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 0;
-  }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  p {
-    margin-top: 10px;
-    font-size: 1em;
-    color: #555;
-  }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+    }
 
-  .loader {
-    margin-top: 30px;
-    width: 200px;
-    height: 10px;
-    background: #e0e0e0;
-    border-radius: 5px;
-    overflow: hidden;
-    position: relative;
-  }
+    .container {
+      max-width: 500px;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
 
-  .loader::before {
-    content: "";
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, #007BFF, #00CFFF);
-    animation: loading 1.5s infinite ease-in-out;
-  }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
 
-  @keyframes loading {
-    0% { left: -50%; }
-    50% { left: 100%; }
-    100% { left: -50%; }
-  }
-</style>
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+    }
+
+    .time {
+      margin-top: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255,255,255,0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .countdown {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #d0d0d0;
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #bfbfbf;
+    }
+  </style>
 </head>
 <body>
-  <h1>홈페이지가 점검중입니다.</h1>
-  <p>점검 일정 : 28일 오후 5시 ~ 29일 오후 5시</p>
-  <div class="loader"></div>
+  <div class="container">
+    <h1>사이트 점검 중입니다</h1>
+    <p>
+      보다 나은 서비스를 제공하기 위해<br>
+      현재 시스템 점검이 진행 중입니다.<br>
+      잠시만 기다려주세요.
+    </p>
+    <div class="time">
+      점검 기간: 10월 28일 오후 5시 ~ 10월 29일 오후 5시
+    </div>
+    <div class="countdown" id="countdown">
+      종료까지 남은 시간 계산 중...
+    </div>
+    <footer>
+      © 2025 Your Company. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    // 점검 종료 시간 설정 (한국 시간 기준)
+    const endTime = new Date('2025-10-29T17:00:00+09:00').getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = endTime - now;
+
+      if (distance <= 0) {
+        document.getElementById("countdown").textContent = "점검이 종료되었습니다.";
+        return;
+      }
+
+      const hours = Math.floor((distance / (1000 * 60 * 60)));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").textContent =
+        `종료까지 ${hours}시간 ${minutes}분 ${seconds}초 남음`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
 </body>
 </html>
