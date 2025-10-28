@@ -579,7 +579,8 @@ textarea{
 .btn{ width:44px; height:44px; border-radius:50%; border:none; background:var(--button-bg); color:var(--button-text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
 .btn:disabled{ opacity:0.3; cursor:not-allowed; }
 .stop-btn{ width:44px; height:44px; border-radius:50%; background:#c53030; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
-.stop-btn::before{ content:''; width:14px; height:14px; background:white; }
+/* 🌟 수정: 응답 중지 버튼 내부 사각형 크기 (14px -> 12px) */
+.stop-btn::before{ content:''; width:12px; height:12px; background:white; }
 
 /* info button */
 .info-btn{ position:fixed; right:14px; bottom:140px; /* JS가 이 값을 조정합니다 */ width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
@@ -766,7 +767,12 @@ textarea{
           <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
         </div>
       </div>
-      <button class="btn" id="sendBtn" disabled>&#9654;</button> <button class="stop-btn" id="stopBtn"></button>
+      <button class="btn" id="sendBtn" disabled>
+        <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+        </svg>
+      </button> 
+      <button class="stop-btn" id="stopBtn"></button>
     </div>
   </div>
 </div>
