@@ -32,17 +32,14 @@
   /* 토글 및 글로우 색상 (다크 모드) */
   --toggle-off-bg: #444444;
   --toggle-on-bg: var(--accent-blue);
+  /* 🌟 수정: 다크 모드 글로우는 흰색 🌟 */
   --glow-color: rgba(255, 255, 255, 0.25); 
-  
-  /* 🌟 추가: ADMIN 모드 그라데이션 색상 변수 🌟 */
-  --admin-gradient-start: #007aff; /* 파란색 */
-  --admin-gradient-end: #ff0000; /* 빨간색 */
 }
 /* 라이트 모드 회색 계열 조정 */
 body.light {
   --bg: #ffffff;
   --text: #111111;
-  --input-bg: #ffffff; 
+  --input-bg: #ffffff; /* 🌟 수정: --bg와 동일하게 설정 (요청 반영) 🌟 */
   --border: #dddddd;
   --border-strong: #aaaaaa;
   --button-bg: #111111;
@@ -60,6 +57,7 @@ body.light {
   /* 토글 및 글로우 색상 (라이트 모드) */
   --toggle-off-bg: #cccccc;
   --toggle-on-bg: var(--accent-blue); 
+  /* 🌟 수정: 라이트 모드 글로우는 기존 색상 🌟 */
   --glow-color: rgba(0, 110, 255, 0.3); 
 }
 
@@ -72,7 +70,9 @@ html, body, main, textarea {
 
 /* 모바일 탭 하이라이트 제거 및 박스 사이즈 설정 */
 *{ -webkit-tap-highlight-color: transparent; box-sizing: border-box; transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition); }
+/* 🌟 수정: height: 100% 제거 (모바일 스크롤 문제 해결 시도) 🌟 */
 html,body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; background:var(--bg); color:var(--text); font-size:var(--small-font); overflow-x: hidden; } 
+/* body height는 콘텐츠에 따라 결정 */
 
 /* PC 버전 텍스트 크기 확대 */
 @media(min-width: 701px){
@@ -175,6 +175,7 @@ body.light .menu-toggle:hover {
   width:85%; 
   max-width: 320px; 
   background:var(--menu-bg-primary); 
+  /* 블러 효과 제거 */
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: 4px 0 25px rgba(0,0,0,0.5);
@@ -204,18 +205,18 @@ body.menu-open {
         background: none; /* 오버레이 제거 */
         pointer-events: none;
         width: 320px; /* 메뉴 너비 고정 */
-        position: absolute; 
+        position: absolute; /* fixed 대신 absolute를 사용하여 스크롤에 영향을 주지 않도록 */
         left: 0;
         top: 0;
         bottom: 0;
     }
     .side-menu{
-        position: fixed; 
-        height: 100vh; 
+        position: fixed; /* 🌟 PC에서도 메뉴는 fixed로 고정해야 스크롤에 독립적입니다 🌟 */
+        height: 100vh; /* 뷰포트 높이 고정 */
         width: 320px;
         transform:translateX(-100%);
-        box-shadow: none; 
-        z-index: 29; 
+        box-shadow: none; /* 그림자 제거 */
+        z-index: 29; /* nav보다 아래 */
         border-right: 1px solid var(--border);
     }
 
@@ -331,14 +332,14 @@ body.light .chat-item.active{
     flex-grow: 1;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 10px; 
-    pointer-events: auto; 
+    padding-right: 10px; /* 아이콘과 텍스트 간격 */
+    pointer-events: auto; /* 텍스트 클릭으로 채팅 이동 */
 }
 
-/* 개별 삭제 버튼 스타일 (X 아이콘, 항상 표시) */
+/* 🌟 수정: 개별 삭제 버튼 스타일 (X 아이콘, 항상 표시) 🌟 */
 .delete-chat-btn {
-    opacity: 1; 
-    font-size: 1.4rem; 
+    opacity: 1; /* 항상 표시 */
+    font-size: 1.4rem; /* X 아이콘이 잘 보이도록 크기 확대 */
     color: var(--menu-text);
     background: transparent;
     border: none;
@@ -352,18 +353,18 @@ body.light .chat-item.active{
     justify-content: center;
     transition: color 0.2s;
     z-index: 10;
-    line-height: 1; 
+    line-height: 1; /* X 아이콘 중앙 정렬 */
 }
 
 /* 호버 시 색상 변화만 적용 */
 .delete-chat-btn:hover {
-    color: #c53030; 
+    color: #c53030; /* 삭제 색상 강조 */
 }
 .chat-item.active .delete-chat-btn {
-    color: var(--menu-active-text); 
+    color: var(--menu-active-text); /* 활성 상태에서는 흰색 */
 }
 .chat-item.active .delete-chat-btn:hover {
-    color: #ff7777; 
+    color: #ff7777; /* 활성 상태에서 더 밝은 삭제 색상 */
 }
 
 /* 메뉴 내부 버튼 스타일 (새 대화) */
@@ -389,7 +390,7 @@ body.light .chat-item.active{
   border: 1px solid var(--border);
 }
 
-/* 새 대화 버튼을 회색으로 변경 */
+/* 🌟 수정: 새 대화 버튼을 회색으로 변경 🌟 */
 .menu-action-btn.menu-action-new {
     background: var(--input-bg); 
     color: var(--text); 
@@ -408,37 +409,39 @@ body.light .chat-item.active{
 }
 /* main area */
 main{
-  /* 🌟 수정: input-bar가 올라가면서 패딩 조정 */
-  padding:64px 12px 160px; 
+  padding:64px 12px 200px; /* JS에서 이 값을 기준으로 패딩 조정 (초기값) */
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   display:flex;
   flex-direction:column;
   align-items:center;
-  min-height: 100vh; 
+  /* 🌟 수정: height:100vh 제거 🌟 */
+  min-height: 100vh; /* 최소 높이 설정 */
   justify-content: flex-start;
   transform: none;
+  /* 🌟 수정: transform transition 제거 (UI 이동 방지) 🌟 */
   transition: padding-top var(--transition), padding-bottom var(--transition);
 }
 
-/* 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 */
+/* 🌟 수정: 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 + 애니메이션 추가 🌟 */
+/* 🌟 수정: transform 관련 속성 제거 (UI 이동 방지 요청 반영) 🌟 */
 .initial-state {
     justify-content: center !important;
-    transform: none; 
-    transition: none; 
+    transform: none; /* 요청에 따라 애니메이션 제거 */
+    transition: none; /* 애니메이션 제거 */
 }
 
-/* 초기 상태 (제목 및 카드) 등장 애니메이션 설정 */
+/* 🌟 추가: 초기 상태 (제목 및 카드) 등장 애니메이션 설정 🌟 */
 #title{ 
   margin-top:0; 
   font-size:1.4rem; 
   font-weight:700; 
   text-align:center; 
-  transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; 
+  transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; /* 등장 애니메이션 추가 */
   opacity: 0;
   transform: translateY(20px);
   
-  /* 기본 그라데이션: 진한 파랑 -> 밝은 하늘색 */
+  /* 그라데이션 정의: 진한 파랑 -> 밝은 하늘색 */
   background: linear-gradient(to right, #007aff, #66ccff); 
   
   /* 텍스트에만 배경을 적용하는 핵심 속성 */
@@ -448,23 +451,14 @@ main{
   text-fill-color: transparent; 
 }
 
-/* 🌟 추가: ADMIN 모드 그라데이션 적용 (파란색/빨간색) 🌟 */
-body.admin-mode #title {
-  background: linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end));
-  -webkit-background-clip:text; 
-  -webkit-text-fill-color:transparent; 
-  background-clip: text; 
-  text-fill-color: transparent; 
-}
-
-/* 카드는 항상 띄우고 중앙 정렬을 위해 max-width만 설정 */
+/* 🌟 수정: 카드는 항상 띄우고 중앙 정렬을 위해 max-width만 설정 🌟 */
 .suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:12px; transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; }
 .suggestions{
     opacity: 0;
-    transform: translateY(20px); 
+    transform: translateY(20px); /* 등장 애니메이션 추가 */
 }
 
-/* 대화가 없을 때만 애니메이션 시작 */
+/* 🌟 추가: 대화가 없을 때만 애니메이션 시작 🌟 */
 .initial-state.animate #title, .initial-state.animate .suggestions {
     opacity: 1;
     transform: translateY(0);
@@ -481,7 +475,7 @@ body.admin-mode #title {
 .message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
 .message.bot{ align-self:flex-start; background:var(--input-bg); border:0.5px solid var(--border); color:var(--text); }
 
-/* 메시지 등장 애니메이션 */
+/* 🌟 추가: 메시지 등장 애니메이션 (부드러운 채팅 전환을 위해 사용) 🌟 */
 .message {
     opacity: 0;
     transform: translateY(10px);
@@ -492,22 +486,24 @@ body.admin-mode #title {
     transform: translateY(0);
 }
 
-/* 로딩 중 메시지 버블 크기 최소화 */
+/* 로딩 중 메시지 버블 크기 최소화 (대폭 수정) */
+/* 🌟🌟🌟 수정: 로딩 중 메시지 버블 크기 (텍스트와 스피너를 포함하도록 수정) 🌟🌟🌟 */
 .message.loading {
     max-width: fit-content; 
-    padding: 8px 12px; 
-    font-size: 0.95rem; 
-    color: var(--text); 
+    padding: 8px 12px; /* 패딩을 약간 키움 */
+    font-size: 0.95rem; /* 폰트 크기 복구 */
+    color: var(--text); /* 색상 복구 */
     opacity: 1; 
     border: 0.5px solid var(--border); 
+    /* 버블 안에 스피너 중앙 정렬을 위해 추가 */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: auto; 
-    height: auto; 
+    width: auto; /* 고정 크기 제거 */
+    height: auto; /* 고정 크기 제거 */
     min-width: 0;
     min-height: 0;
-    gap: 8px; 
+    gap: 8px; /* 텍스트와 스피너 간격 추가 */
 }
 
 .message .large { font-size:1.2rem; font-weight:700; display:block; margin-bottom:6px; }
@@ -518,21 +514,24 @@ body.admin-mode #title {
 .code-block{ display:block; padding:10px; border-radius:8px; background:#2c2c2c; color:#f1f1f1; font-family:monospace; white-space:pre-wrap; overflow:auto; max-width:100%; }
 .copy-btn{ position:absolute; top:8px; right:8px; background:var(--button-bg); color:var(--button-text); border:none; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:0.8rem; }
 
-/* 새 로딩 스피너 (구글 스타일) */
+/* ------------------------ 새 로딩 스피너 (구글 스타일) ------------------------ */
 .new-google-spinner {
-    width: 20px; 
-    height: 20px; 
-    border: 3px solid var(--accent-blue); 
-    border-top-color: transparent; 
+    width: 20px; /* 🌟 수정: 스피너 크기 키움 🌟 */
+    height: 20px; /* 🌟 수정: 스피너 크기 키움 🌟 */
+    border: 3px solid var(--accent-blue); /* 🌟 수정: 테두리 두께 키움 🌟 */
+    border-top-color: transparent; /* 윗부분을 투명하게 만들어 개방된 원 모양 */
     border-radius: 50%;
+    /* Material Design에 가까운 가속/감속 애니메이션 */
     animation: spinnerRotate 0.75s cubic-bezier(0.4, 0.0, 0.2, 1) infinite; 
     margin: 0;
-    flex-shrink: 0; 
+    flex-shrink: 0; /* 텍스트가 길어져도 스피너가 줄어들지 않도록 */
 }
 
 @keyframes spinnerRotate {
     to { transform: rotate(360deg); }
 }
+
+/* 🌟 기존 .loading-bar 관련 CSS는 제거됨 🌟 */
 
 /* 타이핑 커서 스타일 */
 .typing-cursor {
@@ -550,20 +549,10 @@ body.admin-mode #title {
 }
 
 /* input area */
-/* 🌟 수정: input-bar 패딩 조정 및 안내 문구 추가 */
 .input-bar{ 
-  position:fixed; left:0; right:0; bottom:0; padding:16px 16px 8px; /* 아래 패딩을 줄여서 입력창을 위로 올립니다 */ 
-  z-index:40; background:var(--bg); 
+  position:fixed; left:0; right:0; bottom:0; padding:16px; z-index:40; background:var(--bg); 
+  /* 🌟 수정: border-top 제거 (대화창과 부드러운 연결) 🌟 */
   border-top: none; 
-}
-.disclaimer-text {
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: center;
-    font-size: 0.7rem; /* 작은 글씨 */
-    color: var(--menu-text);
-    padding-top: 4px;
-    padding-bottom: 8px; 
 }
 .input-wrapper{ 
   max-width:720px; 
@@ -593,6 +582,7 @@ textarea{
   font-size:1.05rem; 
   line-height:1.5rem; 
   padding:4px 0; 
+  /* 🌟 추가: textarea 내에서 줄바꿈이 시각적으로 보이도록 pre-wrap 설정 🌟 */
   white-space: pre-wrap; 
 }
 .bottom-row{ display:flex; align-items:center; gap:12px; }
@@ -609,8 +599,8 @@ textarea{
 .model-option.active{ background:rgba(0,153,255,0.15); color:#66ccff; }
 .btn{ width:44px; height:44px; border-radius:50%; border:none; background:var(--button-bg); color:var(--button-text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
 .btn:disabled{ opacity:0.3; cursor:not-allowed; }
-/* 🌟 추가: 답변 중지 버튼 스타일 🌟 */
 .stop-btn{ width:44px; height:44px; border-radius:50%; background:#c53030; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
+/* 🌟 수정: 응답 중지 버튼 내부 사각형 크기 (14px -> 12px) */
 .stop-btn::before{ content:''; width:12px; height:12px; background:white; }
 
 /* info button */
@@ -707,118 +697,6 @@ textarea{
     cursor: not-allowed;
 }
 
-/* ------------------------ 프로필 버튼/팝업 스타일 (추가) ------------------------ */
-.profile-btn { 
-    width: 30px; 
-    height: 30px; 
-    border-radius: 50%; 
-    border: 2px solid var(--text); 
-    background: var(--button-bg); 
-    color: var(--button-text); 
-    cursor: pointer; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 1rem; 
-    font-weight: 600; 
-    flex-shrink: 0; 
-    transition: transform 0.1s;
-}
-.profile-btn:hover {
-    opacity: 0.9;
-}
-.profile-btn:active {
-    transform: scale(0.95);
-}
-
-#profilePopup {
-    position: fixed;
-    top: 56px; 
-    right: 12px;
-    width: 280px;
-    background: var(--menu-bg-primary); 
-    color: var(--menu-text); 
-    border-radius: 12px; 
-    border: 1px solid var(--border);
-    padding: 16px; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
-    display: none; 
-    z-index: 50;
-    transform-origin: top right;
-    transform: scale(0.95);
-    opacity: 0;
-    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
-}
-#profilePopup.show {
-    display: block;
-    transform: scale(1);
-    opacity: 1;
-}
-.profile-info h3 {
-    margin-top: 0;
-    margin-bottom: 4px;
-    font-size: 1.1rem;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-}
-.profile-info p {
-    margin: 0 0 16px;
-    font-size: 0.85rem;
-    color: var(--menu-text);
-}
-.usage-limit-container {
-    margin-bottom: 16px;
-    padding: 12px;
-    background: var(--input-bg);
-    border-radius: 8px;
-    border: 1px solid var(--border);
-}
-.usage-limit-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--text);
-}
-.progress-bar-bg {
-    width: 100%;
-    height: 10px;
-    background: var(--border);
-    border-radius: 5px;
-    overflow: hidden;
-}
-.progress-bar-fill {
-    height: 100%;
-    width: 0%; 
-    background: var(--accent-blue);
-    transition: width 0.3s ease;
-}
-.reset-profile-btn {
-    width: 100%;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-top: 12px;
-    background: #c53030;
-    color: white;
-}
-.admin-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: var(--admin-gradient-start);
-  color: white;
-  padding: 3px 6px;
-  border-radius: 4px;
-  margin-left: 8px;
-}
-
-
 /* small screens */
 @media(max-width:700px){
   .suggestions{ grid-template-columns:repeat(2,1fr); gap:8px; }
@@ -854,6 +732,10 @@ textarea{
             <span>업그레이드</span>
         </div>
         
+        <div class="menu-bottom-item" id="resetNameMenuBtn" style="opacity: 0.9;">
+            <span>사용자 정보(이름) 초기화</span>
+        </div>
+        
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
@@ -871,9 +753,6 @@ textarea{
     <button id="menuToggle" class="menu-toggle" disabled>&#x2261;</button> <div class="logo">Minsu GPT</div>
   </div>
   <div class="actions">
-    <button class="profile-btn" id="profileBtn" title="내 프로필" disabled>
-        M
-    </button>
     <label class="mode-toggle-label" id="modeToggleLabel" title="테마 전환">
         <input type="checkbox" id="modeToggleCheckbox" disabled> <span class="mode-toggle-slider"></span>
     </label>
@@ -888,15 +767,12 @@ textarea{
     <div class="suggestion-card" data-prompt="파이썬으로 간단한 게임 만드는 법 알려줘">파이썬으로 간단한 게임 만드는 법 알려줘</div>
     <div class="suggestion-card" data-prompt="효과적인 시간 관리 방법 추천해줘">효과적인 시간 관리 방법 추천해줘</div>
     <div class="suggestion-card" data-prompt="재미있는 과학 사실 알려줘">재미있는 과학 사실 알려줘</div>
-  </div> 
+  </div>
+
   <div class="messages" id="messages"></div>
 </main>
 
-<div class="input-bar" id="inputBar" style="opacity: 0.1; pointer-events: none;">
-  <div class="disclaimer-text" id="disclaimerText">
-    Minsu GPT는 실수 할 수 있습니다. 중요한 정보 제공시 한번더 확인하세요.
-  </div>
-  <div class="input-wrapper">
+<div class="input-bar" id="inputBar" style="opacity: 0.1; pointer-events: none;"> <div class="input-wrapper">
     <div class="textarea-area">
       <textarea id="userInput" placeholder="Minsu GPT에게 물어보기" rows="1" aria-label="메시지 입력"></textarea>
     </div>
@@ -905,8 +781,8 @@ textarea{
       <div class="spacer"></div>
       <div class="model-selector">
         <button class="model-select-btn" id="modelSelectBtn">
-          <span id="selectedModel">2.5 Flash</span> <span>&#9660;</span>
-        </button>
+          <span id="selectedModel">2.5 Flash</span>
+          <span>&#9660;</span> </button>
         <div class="model-dropdown" id="modelDropdown">
           <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
           <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
@@ -925,28 +801,11 @@ textarea{
 <div class="info-btn" id="infoBtn" style="opacity: 0.1; pointer-events: none;">i</div>
 <div class="info-popup" id="infoPopup">주의: AI의 답변은 참고용입니다.<br>중요한 정보는 반드시 다시 확인하세요.<br><br>제작자: 신재원</div>
 
-<div id="profilePopup">
-  <div class="profile-info">
-    <h3><span id="profileNickname">사용자 이름</span></h3>
-    <p>환영합니다! Minsu GPT를 사용하세요.</p>
-  </div>
-  <div class="usage-limit-container">
-    <div class="usage-limit-header">
-      <span>오늘의 메시지 한도</span>
-      <span id="limitRemaining">n개 남음</span>
-    </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progressBarFill"></div>
-    </div>
-    <p style="font-size:0.75rem; color:var(--menu-text); margin-top:8px; margin-bottom:0;">(매일 00시 초기화)</p>
-  </div>
-  <button class="reset-profile-btn" id="resetProfileNameBtn">사용자 정보 초기화</button>
-</div>
-
 <div id="confirmPopup" aria-hidden="true">
   <div class="reset-card" id="confirmCard">
     <p id="confirmMessage"></p>
-    <div class="reset-actions" id="confirmActions"> </div>
+    <div class="reset-actions" id="confirmActions">
+    </div>
   </div>
 </div>
 
@@ -963,20 +822,17 @@ textarea{
 /* ------------- 설정 ------------- */
 // ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
-const INPUT_BAR_PADDING_VERTICAL = 24; 
-const INPUT_WRAPPER_MIN_HEIGHT = 80; 
-const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INPUT_WRAPPER_MIN_HEIGHT + INPUT_BAR_PADDING_VERTICAL; 
+const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-height: 80px)
+const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
+const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
 
 /* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
-const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.' };
-
-/* 🌟 추가: 메시지 한도 관련 변수 🌟 */
-const DAILY_LIMIT = 200;
-let isAdmin = false;
-let dailyUsage = parseInt(localStorage.getItem('dailyUsage') || '0', 10);
-let lastUsedDay = localStorage.getItem('lastUsedDay') || new Date().toISOString().split('T')[0];
-
+const SYSTEM_INSTRUCTION = {
+  role: 'system',
+  content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.'
+};
 /* --------------------------------- */
+
 const body = document.body;
 const mainEl = document.getElementById('main');
 const messagesEl = document.getElementById('messages');
@@ -987,11 +843,15 @@ const modeToggleCheckbox = document.getElementById('modeToggleCheckbox');
 const suggestionsEl = document.getElementById('suggestions');
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
+// 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
+
 // 팝업 관련 요소
 const confirmPopup = document.getElementById('confirmPopup');
 const confirmMessage = document.getElementById('confirmMessage');
 const confirmActions = document.getElementById('confirmActions');
+
+// 추가
 // 메뉴 관련 요소
 const menuToggle = document.getElementById('menuToggle');
 const sideMenu = document.getElementById('sideMenu');
@@ -1000,15 +860,7 @@ const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
 const locationDisplay = document.getElementById('locationDisplay');
-
-// 🌟 추가: 프로필 관련 요소 🌟
-const profileBtn = document.getElementById('profileBtn');
-const profilePopup = document.getElementById('profilePopup');
-const profileNickname = document.getElementById('profileNickname');
-const limitRemaining = document.getElementById('limitRemaining');
-const progressBarFill = document.getElementById('progressBarFill');
-const resetProfileNameBtn = document.getElementById('resetProfileNameBtn');
-
+const resetNameMenuBtn = document.getElementById('resetNameMenuBtn');
 
 let abortController = null;
 let loadingMsg = null;
@@ -1021,9 +873,14 @@ let isAutoScrollEnabled = true;
 
 /* 유틸: 스크롤 끝으로 */
 function scrollToBottom(){
+  // 🌟 자동 스크롤 비활성화 시 작동 중지 🌟
   if(!isAutoScrollEnabled) return;
+
   requestAnimationFrame(()=>{
-    mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' });
+    mainEl.scrollTo({ 
+      top: mainEl.scrollHeight, 
+      behavior: 'smooth' 
+    });
   });
 }
 
@@ -1032,7 +889,8 @@ mainEl.addEventListener('scroll', ()=>{
   const scrollHeight = mainEl.scrollHeight;
   const clientHeight = mainEl.clientHeight;
   const scrollTop = mainEl.scrollTop;
-  const scrollThreshold = 5; 
+  const scrollThreshold = 5; // 바닥에서 5px 이내
+
   // 1. 바닥에 도달했는지 확인 -> 자동 스크롤 재활성화
   if(scrollTop >= scrollHeight - clientHeight - scrollThreshold){
     if(!isAutoScrollEnabled){
@@ -1046,92 +904,30 @@ mainEl.addEventListener('scroll', ()=>{
   }
 });
 
-/* 🌟 추가: 일일 사용량 확인 및 초기화 🌟 */
-function checkAndResetDailyUsage() {
-  const today = new Date().toISOString().split('T')[0];
-  if (today !== lastUsedDay) {
-    dailyUsage = 0;
-    localStorage.setItem('dailyUsage', '0');
-    lastUsedDay = today;
-    localStorage.setItem('lastUsedDay', today);
-    console.log("Daily usage reset.");
-  }
-}
-
-/* 🌟 추가: 프로필 팝업 및 상태 업데이트 🌟 */
-function updateProfileStatus() {
-  const limit = isAdmin ? Infinity : DAILY_LIMIT;
-  const usage = isAdmin ? 0 : dailyUsage;
-  const remaining = isAdmin ? Infinity : (limit - usage);
-  const percentage = isAdmin ? 100 : Math.min(100, (usage / limit) * 100);
-
-  const displayNickname = username;
-  
-  // 프로필 팝업 정보 업데이트
-  profileNickname.innerHTML = isAdmin ? `${displayNickname} <span class="admin-badge">ADMIN</span>` : displayNickname;
-
-  if (isAdmin) {
-    limitRemaining.textContent = '무제한';
-    // Admin은 무제한이므로 게이지를 파란색/빨간색 그라데이션으로 채움
-    progressBarFill.style.background = `linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end))`;
-    progressBarFill.style.width = '100%';
-  } else {
-    const actualRemaining = Math.max(0, remaining);
-    limitRemaining.textContent = `${actualRemaining}개 남음`;
-    progressBarFill.style.width = `${percentage}%`;
-    progressBarFill.style.background = `var(--accent-blue)`;
-  }
-
-  // 프로필 버튼 닉네임 표시
-  profileBtn.textContent = username ? username.charAt(0).toUpperCase() : 'M';
-  
-  // 메인 버튼 활성화/비활성화
-  const canSend = isAdmin || remaining > 0;
-  // userInput.value.trim() === '' 조건은 sendMessage에서 처리하지만, 버튼 자체의 disabled 상태는 여기서 설정
-  sendBtn.disabled = !canSend || userInput.value.trim() === ''; 
-  userInput.placeholder = canSend ? "Minsu GPT에게 물어보기" : "일일 메시지 한도를 모두 사용했습니다.";
-  userInput.disabled = !canSend;
-  
-  // ADMIN 모드 CSS 클래스 적용 (그라데이션/로고)
-  const logoEl = document.querySelector('.logo');
-  if (isAdmin) {
-    body.classList.add('admin-mode');
-    logoEl.textContent = 'ADMIN';
-  } else {
-    body.classList.remove('admin-mode');
-    logoEl.textContent = 'Minsu GPT';
-  }
-}
-
-function toggleProfilePopup() {
-  if (profilePopup.classList.contains('show')) {
-    profilePopup.classList.remove('show');
-  } else {
-    // 팝업 열기 전에 상태 업데이트
-    updateProfileStatus();
-    profilePopup.classList.add('show');
-  }
-}
 
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
 function updateTitle() {
-  // 🌟 ADMIN 로직 포함하여 제목 업데이트 🌟
   if (username) {
+    // 이름이 있으면 "안녕하세요! [이름]님"으로 업데이트
     titleEl.textContent = `안녕하세요! ${username}님`;
   } else {
+    // 이름이 없으면 기본 문구 유지
     titleEl.textContent = `안녕하세요!`;
   }
 }
 
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
 function toggleInitialState(isInitial){
+  // 🌟 수정: 애니메이션 로직 및 transform 조작을 제거하고 중앙 정렬 클래스만 관리하여
+  // 채팅 시작 시에도 부드럽게 화면 상단으로 전환되도록 합니다. 🌟
   if(isInitial){
     // 대화가 없을 때: 중앙 정렬 유지
     mainEl.classList.add('initial-state');
   } else {
     // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용)
     mainEl.classList.remove('initial-state');
+    // 🌟 애니메이션 클래스 제거 (대화가 있으면 필요 없음) 🌟
     mainEl.classList.remove('animate'); 
   }
 }
@@ -1141,19 +937,17 @@ function toggleInitialState(isInitial){
 function generateChatId() {
   return 'chat_' + Date.now();
 }
+
 // 전체 대화 저장/복원
 function saveAllConversations() {
   try{
     localStorage.setItem('allConversations', JSON.stringify(allConversations));
     localStorage.setItem('currentChatId', currentChatId);
-    // 🌟 사용량/관리자 정보 저장 🌟
-    localStorage.setItem('dailyUsage', dailyUsage.toString());
-    localStorage.setItem('lastUsedDay', lastUsedDay);
-    localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
   }catch(e){
     console.error('Error saving conversations:', e);
   }
 }
+
 function loadAllConversations() {
   try {
     const raw = localStorage.getItem('allConversations');
@@ -1164,666 +958,910 @@ function loadAllConversations() {
     currentChatId = null;
     console.error('Error loading conversations:', e);
   }
-  
-  // 🌟 관리자 상태 로드 및 일일 사용량 확인 🌟
-  checkAndResetDailyUsage();
-  if (localStorage.getItem('isAdmin') === 'true' && username === 'minsu0227') {
-    isAdmin = true;
-  } else {
-    isAdmin = false;
-  }
-  
+
   if (Object.keys(allConversations).length === 0) {
     startNewChat(false);
   } else if (!currentChatId || !allConversations[currentChatId]) {
     // 유효하지 않은 currentChatId인 경우 가장 최근 대화로 설정
     const latestChatId = Object.keys(allConversations).sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
-    activateChat(latestChatId); 
+    activateChat(latestChatId); // 🌟 메뉴 상태 유지 🌟
   } else {
-    activateChat(currentChatId); 
+    activateChat(currentChatId); // 🌟 메뉴 상태 유지 🌟
   }
-  
-  updateProfileStatus();
 }
+
 // 현재 대화 기록을 저장
 function saveHistory() {
   if (currentChatId && allConversations[currentChatId]) {
     allConversations[currentChatId].history = chatHistory;
+    
     // 제목이 없는 대화에 첫 사용자 메시지를 제목으로 설정
-    if (chatHistory.length > 1 && chatHistory.filter(msg => msg.role === 'user')[0] && !allConversations[currentChatId].title) {
-        const firstUserMsg = chatHistory.filter(msg => msg.role === 'user')[0].content;
-        const firstLine = firstUserMsg.split('\n')[0];
-        allConversations[currentChatId].title = firstLine.substring(0, 30) + (firstLine.length > 30 ? '...' : '');
+    if (chatHistory.length > 0 && chatHistory[0].role === 'user' && !allConversations[currentChatId].title) {
+      const firstLine = chatHistory[0].content.split('\n')[0];
+      allConversations[currentChatId].title = firstLine.substring(0, 30) + (firstLine.length > 30 ? '...' : '');
     }
-    allConversations[currentChatId].timestamp = Date.now(); // 저장 시점 업데이트
+
+    allConversations[currentChatId].timestamp = Date.now(); // 시간 업데이트
     saveAllConversations();
     renderChatList();
   }
 }
-// 새 대화 시작
-function startNewChat(activate = true) {
-  currentChatId = generateChatId();
-  chatHistory = [SYSTEM_INSTRUCTION]; // 시스템 명령 포함하여 새 대화 시작
-  allConversations[currentChatId] = {
-    id: currentChatId,
-    title: '새로운 대화',
-    timestamp: Date.now(),
-    history: chatHistory
-  };
-  saveAllConversations();
-  renderChatList();
-  
-  if (activate) {
-    activateChat(currentChatId);
-    hideSideMenu();
-  }
-}
-// 대화 활성화
-function activateChat(chatId) {
-  currentChatId = chatId;
-  chatHistory = allConversations[chatId].history;
-  
+
+// 대화 기록 로드 및 렌더링
+// 🌟 수정: 대화 전환 시 부드럽게 메시지가 올라오도록 수정 🌟
+function loadHistory() {
   messagesEl.innerHTML = '';
-  chatHistory.slice(1).forEach(msg => { // 시스템 메시지는 제외
-    appendMessage(msg, false);
+
+  // 🌟 초기 상태 애니메이션 관리 🌟
+  const isInitial = chatHistory.length === 0;
+  toggleInitialState(isInitial);
+
+  if (isInitial) {
+    // 대화가 없을 때만 제목/카드의 등장 애니메이션을 실행합니다.
+    mainEl.classList.remove('animate');
+    setTimeout(() => { 
+      mainEl.classList.add('animate'); 
+    }, 50); // CSS transition이 작동하도록 딜레이를 줍니다.
+  }
+
+  // 🌟 메시지 부드러운 등장 (채팅 전환) 🌟
+  chatHistory.forEach((item, index) => {
+    const el = renderMessage(item.role, item.content);
+    // 메시지 등장 애니메이션에 인덱스 기반 딜레이 적용
+    setTimeout(() => {
+      el.classList.add('show');
+    }, 50 * index); // 50ms 간격으로 메시지 등장
   });
 
-  // 레이아웃 업데이트: 대화가 있는지 확인하여 중앙/상단 정렬 조정
-  updateMainLayout(chatHistory.length > 1);
-  
-  // 메뉴에서 활성 상태 업데이트
-  document.querySelectorAll('.chat-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  const activeItem = document.querySelector(`.chat-item[data-id="${chatId}"]`);
-  if (activeItem) {
-    activeItem.classList.add('active');
+  if (chatHistory.length > 0) {
+    // 🌟 로딩 완료 후 자동 스크롤 켜고 스크롤 🌟
+    isAutoScrollEnabled = true;
+    // 마지막 메시지 등장 후 스크롤
+    setTimeout(scrollToBottom, 50 * chatHistory.length + 100); 
   }
-  
-  // 스크롤 맨 아래로
-  scrollToBottom();
-  
-  // 입력창 활성화
-  userInput.disabled = false;
-  sendBtn.disabled = userInput.value.trim() === '';
-  userInput.focus();
 }
 
-/* 🌟 수정: 대화가 있을 때도 제목/카드를 숨기지 않고 상단으로 이동 🌟 */
-function updateMainLayout(hasHistory) {
-  if (hasHistory) {
-    // 대화가 있을 때: 상단에 고정
-    mainEl.style.justifyContent = 'flex-start';
-    mainEl.classList.remove('initial-state');
-    mainEl.classList.remove('animate'); 
+// 새 대화 시작
+function startNewChat(shouldReload = true) {
+  const newId = generateChatId();
+  allConversations[newId] = { 
+    history: [], 
+    timestamp: Date.now(), 
+    title: '새 채팅',
+    model: document.getElementById('selectedModel').textContent.trim() // 현재 선택된 모델 저장
+  };
+  
+  activateChat(newId, shouldReload);
+  // 🌟 메뉴 닫기 로직은 여기에 추가하지 않습니다 (새 채팅 버튼 클릭 시에만 닫도록) 🌟
+}
+
+// 특정 대화 활성화
+function activateChat(chatId, shouldReload = true) {
+  if (currentChatId === chatId) return;
+
+  // 이전 채팅 히스토리 저장
+  if (currentChatId) {
+    saveHistory();
+  }
+
+  currentChatId = chatId;
+  
+  if (allConversations[chatId]) {
+    // 🌟 모델 정보 로드 및 적용 🌟
+    const savedModel = allConversations[chatId].model || '2.5 Flash'; 
+    document.getElementById('selectedModel').textContent = savedModel;
+
+    // 히스토리 로드 (시스템 프롬프트 제외)
+    chatHistory = allConversations[chatId].history.filter(m => m.role !== 'system');
     
-    // 🌟 title과 suggestions는 그대로 두고 메시지만 아래에 추가 🌟
-    // CSS에 이미 설정되어 있어 별도 JS 스타일 조작이 필요 없습니다.
-    
-    // 스크롤 바로 끝으로 이동
-    scrollToBottom();
+    if (shouldReload) {
+      loadHistory();
+    }
+    renderChatList(); // 활성 상태 업데이트를 위해 리렌더링
+    userInput.focus();
   } else {
-    // 대화가 없을 때: 중앙 정렬
-    mainEl.style.justifyContent = 'center';
-    mainEl.classList.add('initial-state');
-    animateInitialState(); // 애니메이션 재실행
+    // 존재하지 않는 ID면 새 채팅 시작
+    startNewChat(shouldReload);
   }
 }
 
-/* 이름 모달 */
-const nameInputModal = document.getElementById('nameInputModal');
-const nameInputField = document.getElementById('nameInputField');
-const nameSubmitBtn = document.getElementById('nameSubmitBtn');
-
-function showNameInputModal() {
-  nameInputModal.classList.add('visible');
-  nameInputField.focus();
-}
-
-function hideNameInputModal() {
-  nameInputModal.classList.remove('visible');
-}
-
-function processNameInput(name) {
-  username = name;
-  localStorage.setItem('username', username);
+// 특정 대화 삭제
+function deleteChat(chatId) {
+  delete allConversations[chatId];
+  saveAllConversations();
   
-  // 🌟 ADMIN 로직 추가 🌟
-  if (username === 'minsu0227') {
-    isAdmin = true;
-    localStorage.setItem('isAdmin', 'true');
-  } else {
-    isAdmin = false;
-    localStorage.removeItem('isAdmin');
-  }
-  
-  hideNameInputModal();
-  updateTitle();
-  updateProfileStatus(); 
-  init(); 
-  animateInitialState(); 
-}
-
-
-/* 메시지 UI 추가 */
-function appendMessage(message, animate = true) {
-  if (message.role === 'system') return; // 시스템 메시지는 표시하지 않음
-  
-  const messageEl = document.createElement('div');
-  messageEl.className = `message ${message.role}`;
-  messageEl.innerHTML = formatMessageContent(message.content); // 포매팅 적용
-  
-  messagesEl.appendChild(messageEl);
-  
-  // 🌟 수정: 첫 메시지가 추가될 때만 layout 업데이트 🌟
-  if (messagesEl.children.length === 1) { 
-    updateMainLayout(true); 
-  }
-
-  // 애니메이션 적용
-  if(animate) {
-    requestAnimationFrame(() => {
-        messageEl.classList.add('show');
-    });
-  } else {
-    messageEl.classList.add('show');
-  }
-  
-  scrollToBottom();
-}
-
-/* 로딩 메시지 추가/제거 */
-function showLoadingMessage() {
-  loadingMsg = document.createElement('div');
-  loadingMsg.className = 'message bot loading';
-  loadingMsg.innerHTML = `
-    <div class="new-google-spinner"></div>
-    <span>응답 중...</span>
-  `;
-  messagesEl.appendChild(loadingMsg);
-  
-  // 🌟 응답 중지 버튼 표시 🌟
-  sendBtn.style.display = 'none';
-  stopBtn.style.display = 'flex';
-  
-  scrollToBottom();
-}
-
-/* 🌟 응답 중지 로직 🌟 */
-function abortResponse() {
-  if (abortController) {
-    abortController.abort();
-    console.log("Response aborted by user.");
-    cleanupResponseState(true);
-  }
-}
-
-/* 응답 후 정리 */
-function cleanupResponseState(isAborted = false) {
-  // 🌟 스톱 버튼 숨기기 및 전송 버튼 표시 🌟
-  if (loadingMsg) {
-    // 타이핑 커서 제거
-    const cursor = loadingMsg.querySelector('.typing-cursor');
-    if(cursor) cursor.remove();
-    
-    const loadingText = loadingMsg.querySelector('span');
-    const spinner = loadingMsg.querySelector('.new-google-spinner');
-
-    if (isAborted) {
-      if(loadingText) loadingText.textContent = loadingText.textContent.trim() + ' (응답 중지됨)';
-      if(spinner) spinner.remove();
+  if (chatId === currentChatId) {
+    // 현재 대화를 삭제하면 가장 최근 대화로 이동하거나, 없으면 새 대화 시작
+    const chatIds = Object.keys(allConversations);
+    if (chatIds.length > 0) {
+      // 가장 최근 대화 찾기
+      const latestChatId = chatIds.sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp)[0];
+      activateChat(latestChatId);
     } else {
-      if(loadingText) loadingText.remove();
-      if(spinner) spinner.remove();
+      startNewChat();
     }
-    
-    loadingMsg.classList.remove('loading');
-    loadingMsg = null;
-  }
-
-  stopBtn.style.display = 'none';
-  sendBtn.style.display = 'flex';
-  
-  userInput.disabled = false;
-  userInput.focus();
-  
-  // 🌟 프로필 상태에 따라 전송 버튼 재활성화 (한도 체크 포함) 🌟
-  updateProfileStatus();
-}
-
-
-/* 서버 스트림 요청 */
-async function streamResponse() {
-  abortController = new AbortController();
-  const signal = abortController.signal;
-  
-  let botMessageContent = '';
-  
-  // 로딩 메시지에서 스피너 제거 및 타이핑 커서 추가
-  if (loadingMsg) {
-    loadingMsg.innerHTML = `
-      <span></span>
-      <span class="typing-cursor"></span>
-    `;
-    // content가 들어갈 <span> 요소 참조 업데이트
-    loadingMsg.contentSpan = loadingMsg.querySelector('span');
-  }
-
-  try {
-    const response = await fetch(BACKEND_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messages: chatHistory,
-        model: document.getElementById('selectedModel').textContent.trim() 
-      }),
-      signal
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-
-      const chunk = decoder.decode(value);
-      botMessageContent += chunk;
-
-      // 스트림 데이터를 로딩 메시지에 실시간으로 반영
-      if (loadingMsg && loadingMsg.contentSpan) {
-        loadingMsg.contentSpan.textContent = botMessageContent;
-      }
-      
-      scrollToBottom();
-    }
-    
-    // 최종 응답 기록 및 UI 업데이트
-    const botMessage = { role: 'bot', content: botMessageContent.trim() };
-    chatHistory.push(botMessage);
-    
-    // 로딩 메시지를 최종 메시지로 변환
-    if(loadingMsg) {
-        loadingMsg.innerHTML = formatMessageContent(botMessageContent.trim());
-        loadingMsg.classList.remove('loading');
-        loadingMsg.classList.add('show');
-    }
-    
-  } catch (error) {
-    if (error.name === 'AbortError') {
-      console.log('Fetch aborted');
-    } else {
-      console.error('Streaming failed:', error);
-      const errorMessage = `죄송합니다, 응답을 처리하는 데 문제가 발생했습니다. (${error.message})`;
-      if(loadingMsg) {
-          loadingMsg.innerHTML = errorMessage;
-      } else {
-          appendMessage({ role: 'bot', content: errorMessage }, true);
-      }
-      chatHistory.push({ role: 'bot', content: errorMessage });
-    }
-  } finally {
-    cleanupResponseState();
-    abortController = null;
-    loadingMsg = null;
-  }
-}
-
-/* 이벤트 리스너 설정 */
-document.addEventListener('DOMContentLoaded', () => {
-  // 이름이 저장되어 있지 않으면 모달 표시
-  if (!username) {
-    showNameInputModal();
   } else {
-    loadAllConversations();
-    updateTitle();
-    animateInitialState(); 
-    init(); // 나머지 초기화 진행
-    profileBtn.disabled = false;
+    renderChatList();
   }
-
-  // 메뉴 토글
-  menuToggle.addEventListener('click', () => {
-    sideMenu.classList.add('open');
-    sideMenuOverlay.classList.add('open');
-    body.classList.add('menu-open');
-  });
-
-  sideMenuOverlay.addEventListener('click', (e) => {
-    if (e.target === sideMenuOverlay) {
-      hideSideMenu();
-    }
-  });
-
-  function hideSideMenu() {
-    sideMenu.classList.remove('open');
-    sideMenuOverlay.classList.remove('open');
-    body.classList.remove('menu-open');
-  }
-  
-  // 🌟 프로필 버튼 이벤트 🌟
-  profileBtn.addEventListener('click', toggleProfilePopup);
-
-  // 🌟 프로필 팝업 외부 클릭 시 닫기 🌟
-  document.addEventListener('click', (e) => {
-      if (profilePopup.classList.contains('show') && 
-          !profilePopup.contains(e.target) && 
-          e.target !== profileBtn) {
-          profilePopup.classList.remove('show');
-      }
-  });
-  
-  // 🌟 프로필 내 사용자 정보 초기화 버튼 이벤트 🌟
-  resetProfileNameBtn.addEventListener('click', () => {
-    showConfirmPopup(
-      `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
-      [
-        { id: 'cancel', text: '취소', class: 'reset-no' },
-        { id: 'reset_name', text: '초기화', class: 'reset-yes' },
-      ],
-      (actionId) => {
-        if (actionId === 'reset_name') {
-          localStorage.removeItem('username');
-          localStorage.removeItem('isAdmin');
-          localStorage.removeItem('dailyUsage'); 
-          localStorage.removeItem('lastUsedDay'); 
-          username = null;
-          isAdmin = false;
-          dailyUsage = 0;
-          hideConfirmPopup();
-          profilePopup.classList.remove('show');
-          
-          // 초기화 후 이름 입력 모달 재실행
-          showNameInputModal(); 
-        } else {
-          hideConfirmPopup();
-        }
-      }
-    );
-  });
-
-  // 다크 모드 토글
-  modeToggleCheckbox.addEventListener('change', (e) => {
-    if (e.target.checked) {
-      body.classList.remove('dark');
-      body.classList.add('light');
-      localStorage.setItem('theme', 'light');
-    } else {
-      body.classList.remove('light');
-      body.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  });
-
-  // 초기 테마 설정
-  const savedTheme = localStorage.getItem('theme') || 'dark';
-  if (savedTheme === 'light') {
-    body.classList.remove('dark');
-    body.classList.add('light');
-    modeToggleCheckbox.checked = true;
-  } else {
-    body.classList.remove('light');
-    body.classList.add('dark');
-    modeToggleCheckbox.checked = false;
-  }
-  
-  // 사용자 입력 이벤트
-  userInput.addEventListener('input', () => {
-    adjustTextareaHeight(userInput);
-    const canSend = isAdmin || DAILY_LIMIT - dailyUsage > 0;
-    sendBtn.disabled = !canSend || userInput.value.trim() === '';
-  });
-
-  userInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!sendBtn.disabled) {
-        sendMessage(userInput.value);
-      }
-    }
-  });
-
-  sendBtn.addEventListener('click', () => {
-    sendMessage(userInput.value);
-  });
-
-  // 🌟 추가: 응답 중지 버튼 이벤트 리스너 🌟
-  stopBtn.addEventListener('click', abortResponse); 
-
-  // 이름 입력 모달 이벤트
-  nameInputField.addEventListener('input', () => {
-    nameSubmitBtn.disabled = nameInputField.value.trim().length < 2;
-  });
-
-  nameInputField.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (!nameSubmitBtn.disabled) {
-        processNameInput(nameInputField.value.trim());
-      }
-    }
-  });
-
-  nameSubmitBtn.addEventListener('click', () => {
-    processNameInput(nameInputField.value.trim());
-  });
-
-  // 기타 버튼 이벤트 (새 채팅, 전체 초기화)
-  newChatMenuBtn.addEventListener('click', () => {
-    startNewChat();
-    hideSideMenu();
-  });
-
-  document.getElementById('upgradeBtn').addEventListener('click', () => {
-    alert('업그레이드 페이지로 이동합니다.');
-  });
-
-  // 전체 초기화는 하단 메뉴 항목으로 이동
-  document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
-    showConfirmPopup(
-      '모든 대화 기록을 완전히 삭제하고 초기화할까요?',
-      [
-        { id: 'cancel', text: '취소', class: 'reset-no' },
-        { id: 'reset_all', text: '전체 삭제', class: 'reset-yes' },
-      ],
-      (actionId) => {
-        if (actionId === 'reset_all') {
-          localStorage.removeItem('allConversations');
-          localStorage.removeItem('currentChatId');
-          localStorage.removeItem('dailyUsage');
-          localStorage.removeItem('lastUsedDay');
-          allConversations = {};
-          chatHistory = [];
-          currentChatId = null;
-          dailyUsage = 0; // 한도 초기화
-          updateProfileStatus(); // 한도 UI 업데이트
-          hideConfirmPopup();
-          hideSideMenu();
-          startNewChat(true); // 새 채팅으로 시작
-        } else {
-          hideConfirmPopup();
-        }
-      }
-    );
-  });
-  
-  // 초기 카드 클릭 이벤트
-  document.querySelectorAll('.suggestion-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      const prompt = e.target.dataset.prompt;
-      if (prompt) {
-        userInput.value = prompt;
-        adjustTextareaHeight(userInput);
-        sendMessage(prompt);
-      }
-    });
-  });
-
-});
-
-/* 나머지 함수들 (adjustTextareaHeight, formatMessageContent, renderChatList, showConfirmPopup, hideConfirmPopup, animateInitialState) */
-
-function init() {
-  checkAndResetDailyUsage();
-  if (localStorage.getItem('isAdmin') === 'true' && username === 'minsu0227') {
-    isAdmin = true;
-  }
-  updateProfileStatus();
-  
-  // 초기 로드 시 UI 설정
-  const hasHistory = chatHistory.length > 1;
-  updateMainLayout(hasHistory);
-  
-  // 나머지 초기화
-  adjustTextareaHeight(userInput);
-  renderChatList();
-  
-  // infoBtn 위치 조정 (input-bar 높이 변화에 따라)
-  const inputBarHeight = document.getElementById('inputBar').offsetHeight;
-  infoBtn.style.bottom = `${inputBarHeight + 10}px`;
-  infoPopup.style.bottom = `${inputBarHeight + 64}px`;
-  infoBtn.style.opacity = '1';
-  infoBtn.style.pointerEvents = 'auto';
-  
-  // 로딩 상태 해제
-  mainEl.style.opacity = '1';
-  mainEl.style.pointerEvents = 'auto';
-  document.getElementById('inputBar').style.opacity = '1';
-  document.getElementById('inputBar').style.pointerEvents = 'auto';
-  menuToggle.disabled = false;
-  modeToggleCheckbox.disabled = false;
 }
 
-function adjustTextareaHeight(textarea) {
-  textarea.style.height = 'auto';
-  const newHeight = Math.min(textarea.scrollHeight, 168);
-  textarea.style.height = newHeight + 'px';
-  
-  // input-bar 높이 변화에 따라 main padding과 infoBtn 위치 조정
-  const inputBarEl = document.getElementById('inputBar');
-  // input-wrapper 높이 + disclaimer 높이 + input-bar 패딩 (16px + 8px)
-  const wrapperHeight = inputBarEl.querySelector('.input-wrapper').offsetHeight;
-  const disclaimerHeight = inputBarEl.querySelector('.disclaimer-text').offsetHeight;
-  const inputBarTotalHeight = wrapperHeight + disclaimerHeight + 24;
-
-  mainEl.style.paddingBottom = `${inputBarTotalHeight + 36}px`;
-  infoBtn.style.bottom = `${inputBarTotalHeight + 10}px`;
-  infoPopup.style.bottom = `${inputBarTotalHeight + 64}px`;
-}
-
-function formatMessageContent(content) {
-  // Code block 포매팅
-  let formatted = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-    const language = lang || 'code';
-    const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
-    return `<div class="code-wrap"><pre class="code-block" id="${codeId}">${code.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre><button class="copy-btn" data-target="#${codeId}">복사</button></div>`;
-  });
-  
-  // 굵은 텍스트 포매팅
-  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  
-  return formatted;
-}
-
-function renderChatList() {
+// 채팅 목록 렌더링
+function renderChatList(searchTerm = '') {
   chatListContainer.innerHTML = '';
   
-  const chatIds = Object.keys(allConversations).sort((a, b) => allConversations[b].timestamp - allConversations[a].timestamp);
-  
-  chatIds.forEach(id => {
-    const chat = allConversations[id];
+  // 최근 대화 목록을 시간 역순으로 정렬
+  const sortedChats = Object.entries(allConversations)
+    .sort(([, a], [, b]) => b.timestamp - a.timestamp)
+    .filter(([, chat]) => 
+        chat.title && chat.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  if (sortedChats.length === 0 && searchTerm) {
+      chatListContainer.innerHTML = '<div style="padding: 12px 16px; color: var(--menu-text); opacity: 0.7;">검색 결과가 없습니다.</div>';
+      return;
+  }
+    
+  sortedChats.forEach(([id, chat]) => {
     const item = document.createElement('div');
     item.className = `chat-item ${id === currentChatId ? 'active' : ''}`;
-    item.dataset.id = id;
+    item.dataset.chatId = id;
+
+    // 🌟 텍스트 컨테이너와 삭제 버튼 분리 🌟
+    const textSpan = document.createElement('span');
+    textSpan.className = 'chat-item-text';
+    textSpan.textContent = chat.title || '새 채팅';
+    item.appendChild(textSpan);
     
-    const title = chat.title || '제목 없음';
-    item.innerHTML = `
-      <span class="chat-item-text">${title}</span>
-      <button class="delete-chat-btn" data-id="${id}" title="채팅 삭제">&#10005;</button>
-    `;
-    
-    // 채팅 항목 클릭 이벤트 (텍스트 부분)
-    item.querySelector('.chat-item-text').addEventListener('click', () => {
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-chat-btn';
+    deleteBtn.innerHTML = '&times;'; 
+    deleteBtn.title = '대화 삭제';
+    deleteBtn.onclick = (e) => {
+        e.stopPropagation(); // 채팅 항목 클릭 이벤트 방지
+        showConfirmPopup(
+            `"${chat.title || '새 채팅'}" 대화를 삭제할까요?`,
+            [
+                { id: 'cancel', text: '취소', class: 'reset-no' },
+                { id: 'delete', text: '삭제', class: 'reset-yes' },
+            ],
+            (actionId) => {
+                if (actionId === 'delete') {
+                    deleteChat(id);
+                }
+                hideConfirmPopup();
+            }
+        );
+    };
+
+    item.appendChild(deleteBtn);
+
+    // 텍스트 클릭 시 대화 전환
+    item.addEventListener('click', () => {
       activateChat(id);
       hideSideMenu();
-    });
-
-    // 삭제 버튼 클릭 이벤트
-    item.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      const deleteId = e.currentTarget.dataset.id;
-      
-      showConfirmPopup(
-        `"${allConversations[deleteId].title}" 대화를 삭제할까요?`,
-        [
-          { id: 'cancel', text: '취소', class: 'reset-no' },
-          { id: 'delete', text: '삭제', class: 'reset-yes' },
-        ],
-        (actionId) => {
-          if (actionId === 'delete') {
-            delete allConversations[deleteId];
-            saveAllConversations();
-            
-            if (deleteId === currentChatId) {
-              // 현재 대화가 삭제되면 새 대화 시작
-              startNewChat(true);
-            } else {
-              renderChatList();
-            }
-          }
-          hideConfirmPopup();
-        }
-      );
     });
 
     chatListContainer.appendChild(item);
   });
 }
 
+// 채팅 검색 이벤트 리스너
+chatSearchInput.addEventListener('input', (e) => {
+    renderChatList(e.target.value);
+});
+
+
+/* -------------------- 팝업 및 모달 관리 -------------------- */
+let confirmCallback = null;
+
 function showConfirmPopup(message, actions, callback) {
   confirmMessage.textContent = message;
   confirmActions.innerHTML = '';
-  
+  confirmCallback = callback;
+
   actions.forEach(action => {
     const btn = document.createElement('button');
+    btn.id = action.id;
     btn.textContent = action.text;
     btn.className = action.class;
-    btn.addEventListener('click', () => {
-      callback(action.id);
-    });
+    btn.onclick = () => confirmCallback(action.id);
     confirmActions.appendChild(btn);
   });
   
   confirmPopup.classList.add('visible');
-  
-  // Esc 키로 닫기
-  const escapeHandler = (e) => {
-    if (e.key === 'Escape') {
-      callback('cancel');
-      document.removeEventListener('keydown', escapeHandler);
-    }
-  };
-  document.addEventListener('keydown', escapeHandler);
 }
 
 function hideConfirmPopup() {
   confirmPopup.classList.remove('visible');
+  confirmCallback = null;
 }
 
-function animateInitialState() {
-  mainEl.classList.remove('animate');
-  requestAnimationFrame(() => {
-    mainEl.classList.add('animate');
-  });
+// -------------------- 이름 입력 모달 --------------------
+const nameInputModal = document.getElementById('nameInputModal');
+const nameInputField = document.getElementById('nameInputField');
+const nameSubmitBtn = document.getElementById('nameSubmitBtn');
+
+function showNameInputModal() {
+    // 이름이 이미 있으면 모달 표시 안 함
+    if (username) return; 
+
+    // 모든 UI 상호작용 막기
+    mainEl.style.opacity = '0.1';
+    mainEl.style.pointerEvents = 'none';
+    document.getElementById('inputBar').style.opacity = '0.1';
+    document.getElementById('inputBar').style.pointerEvents = 'none';
+    infoBtn.style.opacity = '0.1';
+    infoBtn.style.pointerEvents = 'none';
+    menuToggle.disabled = true;
+    modeToggleCheckbox.disabled = true;
+    
+    // 모달 표시
+    nameInputModal.classList.add('visible');
+    nameInputField.focus();
 }
+
+function hideNameInputModal() {
+    nameInputModal.classList.remove('visible');
+    
+    // UI 상호작용 복구
+    mainEl.style.opacity = '1';
+    mainEl.style.pointerEvents = 'auto';
+    document.getElementById('inputBar').style.opacity = '1';
+    document.getElementById('inputBar').style.pointerEvents = 'auto';
+    infoBtn.style.opacity = '1';
+    infoBtn.style.pointerEvents = 'auto';
+    menuToggle.disabled = false;
+    modeToggleCheckbox.disabled = false;
+
+    userInput.focus();
+}
+
+// 이름 입력 필드 이벤트
+nameInputField.addEventListener('input', () => {
+    // 공백만 있는 경우를 제외하고 버튼 활성화
+    nameSubmitBtn.disabled = nameInputField.value.trim().length === 0;
+});
+
+// 이름 제출 버튼 이벤트
+nameSubmitBtn.addEventListener('click', () => {
+    const newName = nameInputField.value.trim();
+    if (newName) {
+        username = newName;
+        localStorage.setItem('username', username);
+        updateTitle();
+        hideNameInputModal();
+    }
+});
+// 엔터 키로 이름 제출
+nameInputField.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !nameSubmitBtn.disabled) {
+        nameSubmitBtn.click();
+    }
+});
+
+
+/* -------------------- 메시지 렌더링 및 통신 -------------------- */
+// markdown-it 및 하이라이트 설정
+const md = window.markdownit({
+    html: false, // HTML 삽입 방지
+    linkify: true,
+    typographer: true,
+    highlight: function (str, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                // 코드 블록에 복사 버튼 추가
+                const highlighted = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+                return `<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button><code class="code-block hljs ${lang}">${highlighted}</code></div>`;
+            } catch (__) {}
+        }
+
+        const highlighted = md.utils.escapeHtml(str);
+        return `<div class="code-wrap"><button class="copy-btn" onclick="copyCode(this)">복사</button><code class="code-block">${highlighted}</code></div>`;
+    }
+});
+
+// 코드 복사 함수
+window.copyCode = function(button) {
+    const codeBlock = button.nextElementSibling;
+    const textToCopy = codeBlock.textContent;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        button.textContent = '복사 완료!';
+        setTimeout(() => {
+            button.textContent = '복사';
+        }, 2000);
+    }).catch(err => {
+        console.error('복사 실패:', err);
+    });
+}
+
+function renderMessage(role, content) {
+  const messageEl = document.createElement('div');
+  messageEl.className = `message ${role}`;
+  messageEl.innerHTML = md.render(content);
+  messagesEl.appendChild(messageEl);
+  return messageEl;
+}
+
+// 🌟 수정: 타이핑 효과 함수 (스트리밍 파싱/렌더링) 🌟
+function streamMessage(role, responseStream) {
+    loadingMsg = renderMessage(role, '');
+    loadingMsg.classList.add('loading'); // 로딩 클래스 추가
+    loadingMsg.innerHTML = '<div class="new-google-spinner"></div> 응답 대기 중';
+    
+    messagesEl.appendChild(loadingMsg);
+    scrollToBottom();
+
+    let fullContent = '';
+    let isCodeBlock = false; // 코드 블록 플래그
+    let codeBlockContent = ''; // 현재 코드 블록 내용
+    let codeBlockLang = ''; // 현재 코드 블록 언어
+    let codeBlockEl = null; // 현재 코드 블록 엘리먼트
+
+    // 초기 상태: 로딩 버블 제거
+    loadingMsg.innerHTML = '';
+    loadingMsg.classList.remove('loading');
+
+    // 🌟 새로운 마크다운 렌더링 로직 (스트리밍 파싱) 🌟
+    function updateMessageContent(newContent) {
+        fullContent = newContent;
+        // 마크다운 파싱 및 렌더링
+        loadingMsg.innerHTML = md.render(fullContent);
+
+        // 마지막 요소가 텍스트 노드가 아니거나, 텍스트가 비어있으면 커서 추가
+        const lastChild = loadingMsg.lastChild;
+        const addCursor = !lastChild || (lastChild.nodeType === Node.TEXT_NODE && lastChild.textContent.trim() === '') || lastChild.classList?.contains('code-wrap') || lastChild.tagName === 'P';
+
+        if (addCursor) {
+            // 기존 커서 제거
+            const existingCursor = loadingMsg.querySelector('.typing-cursor');
+            if (existingCursor) existingCursor.remove();
+            
+            // 새 커서 추가
+            const cursor = document.createElement('span');
+            cursor.className = 'typing-cursor';
+            
+            if (lastChild && lastChild.tagName === 'P') {
+                lastChild.appendChild(cursor);
+            } else if (lastChild && lastChild.tagName === 'DIV' && lastChild.classList.contains('code-wrap')) {
+                 // 코드 블록 다음 줄에 커서 추가 (코드 블록에는 커서 추가 안함)
+                 loadingMsg.appendChild(cursor);
+            } else {
+                loadingMsg.appendChild(cursor);
+            }
+        }
+    }
+
+    // 초기 내용 설정 (빈 상태로 시작)
+    updateMessageContent('');
+    
+    let contentBuffer = '';
+
+    // 응답 스트림 처리
+    responseStream.onmessage = (event) => {
+        if (event.data === '[DONE]') {
+            // 스트림 완료
+            loadingMsg.querySelector('.typing-cursor')?.remove();
+            loadingMsg.classList.add('show');
+            loadingMsg = null;
+            sendBtn.disabled = false;
+            stopBtn.style.display = 'none';
+            userInput.disabled = false;
+            userInput.focus();
+            
+            chatHistory.push({ role: 'bot', content: fullContent });
+            saveHistory(); // 완료 후 저장
+            return;
+        }
+
+        try {
+            const data = JSON.parse(event.data);
+            if (data.text) {
+                contentBuffer += data.text;
+                updateMessageContent(contentBuffer);
+                scrollToBottom();
+            }
+        } catch (e) {
+            console.error('Error parsing stream data:', e);
+        }
+    };
+
+    responseStream.onerror = (err) => {
+        console.error('Stream error:', err);
+        const errorMessage = `요청 처리 중 오류가 발생했습니다. (자세한 내용: ${err.message || '알 수 없는 오류'})`;
+        
+        // 오류 메시지로 최종 업데이트
+        loadingMsg.innerHTML = md.render(errorMessage);
+        loadingMsg.classList.add('show');
+        loadingMsg.classList.remove('loading');
+        
+        loadingMsg = null;
+        sendBtn.disabled = false;
+        stopBtn.style.display = 'none';
+        userInput.disabled = false;
+        userInput.focus();
+        
+        // 오류 메시지는 히스토리에 추가하지 않습니다.
+        // chatHistory.push({ role: 'bot', content: errorMessage });
+        // saveHistory();
+    };
+}
+
+
+// 채팅 메시지 전송
+async function sendMessage(prompt) {
+  if (!prompt.trim() || !username) return;
+
+  // UI 상태 업데이트
+  sendBtn.disabled = true;
+  userInput.value = '';
+  userInput.style.height = 'auto'; // 입력창 높이 초기화
+  userInput.disabled = true;
+  stopBtn.style.display = 'flex';
+  
+  // 🌟 초기 상태 애니메이션 종료 🌟
+  toggleInitialState(false);
+  mainEl.classList.remove('animate');
+
+  // 사용자 메시지 렌더링 및 히스토리 추가
+  renderMessage('user', prompt).classList.add('show');
+  chatHistory.push({ role: 'user', content: prompt });
+  saveHistory(); // 사용자 메시지 전송 후 즉시 저장
+  scrollToBottom();
+
+  abortController = new AbortController();
+  const signal = abortController.signal;
+
+  try {
+    const historyToSend = [SYSTEM_INSTRUCTION, ...chatHistory];
+    const model = document.getElementById('selectedModel').textContent.trim();
+    
+    // 🌟 모델명에 따라 URL을 다르게 요청 🌟
+    const url = `${BACKEND_URL}?model=${encodeURIComponent(model)}&username=${encodeURIComponent(username)}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        history: historyToSend,
+        location: locationDisplay.textContent // 위치 정보 포함
+      }),
+      signal: signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // SSE 스트림 읽기
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    
+    const stream = new EventSourceStream(reader, decoder);
+    streamMessage('bot', stream);
+
+  } catch (error) {
+    if (error.name !== 'AbortError') {
+      console.error('Fetch error:', error);
+      
+      let errorMessage = 'AI 응답을 받아오는 중 오류가 발생했습니다.';
+      if (error.message.includes('400')) {
+        errorMessage = '요청에 문제가 있습니다. (400 Bad Request)';
+      } else if (error.message.includes('500')) {
+        errorMessage = '서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+      } else if (error.message.includes('Fetch error')) {
+        errorMessage = '서버 연결에 실패했습니다. (네트워크 또는 서버 확인 필요)';
+      }
+
+      // 로딩 메시지가 있다면 오류 메시지로 대체
+      if (loadingMsg) {
+        loadingMsg.innerHTML = md.render(errorMessage);
+        loadingMsg.classList.remove('loading');
+        loadingMsg.classList.add('show');
+        loadingMsg = null;
+      } else {
+        // 로딩 메시지가 없으면 새 메시지 버블로 오류 출력
+        renderMessage('bot', errorMessage).classList.add('show');
+      }
+
+    } else {
+        // Abort 시에는 최종 메시지 렌더링 로직이 streamMessage의 onerror/onmessage에서 처리되므로 별도 처리 불필요
+        if (loadingMsg) {
+            loadingMsg.innerHTML += '<br><strong>(응답 중지됨)</strong>';
+            loadingMsg.classList.remove('loading');
+            loadingMsg.classList.add('show');
+            loadingMsg = null;
+        }
+    }
+
+    // UI 복구
+    sendBtn.disabled = false;
+    stopBtn.style.display = 'none';
+    userInput.disabled = false;
+    userInput.focus();
+  }
+}
+
+// 응답 중지 버튼 이벤트
+stopBtn.addEventListener('click', () => {
+    if (abortController) {
+        abortController.abort();
+        // UI는 sendMessage의 catch 블록에서 정리됨
+    }
+});
+
+
+/* -------------------- UI 이벤트 핸들러 -------------------- */
+
+// 입력창 자동 높이 조절
+userInput.addEventListener('input', () => {
+  userInput.style.height = 'auto';
+  userInput.style.height = userInput.scrollHeight + 'px';
+  // 전송 버튼 활성화/비활성화
+  sendBtn.disabled = userInput.value.trim().length === 0; 
+  adjustUIForInputBar();
+});
+
+// 엔터 키로 메시지 전송 (Shift + Enter는 줄바꿈)
+userInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !sendBtn.disabled && !userInput.disabled) {
+    e.preventDefault();
+    sendMessage(userInput.value);
+  }
+});
+
+// 모델 선택 버튼 토글
+const modelSelectBtn = document.getElementById('modelSelectBtn');
+const modelDropdown = document.getElementById('modelDropdown');
+modelSelectBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  modelDropdown.classList.toggle('show');
+});
+
+// 모델 선택 옵션
+document.querySelectorAll('.model-option').forEach(option => {
+  option.addEventListener('click', function() {
+    document.getElementById('selectedModel').textContent = this.dataset.model;
+    
+    // 활성 클래스 업데이트
+    document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('active'));
+    this.classList.add('active');
+
+    // 현재 채팅에 선택된 모델 저장
+    if (currentChatId && allConversations[currentChatId]) {
+        allConversations[currentChatId].model = this.dataset.model;
+        saveAllConversations();
+    }
+    
+    modelDropdown.classList.remove('show');
+    userInput.focus();
+  });
+});
+
+// 외부 클릭 시 모델 드롭다운 닫기
+document.addEventListener('click', () => {
+  modelDropdown.classList.remove('show');
+});
+
+// 추천 카드 클릭 이벤트
+suggestionsEl.addEventListener('click', (e) => {
+  if (e.target.classList.contains('suggestion-card')) {
+    if (sendBtn.disabled) return; // 전송 중일 때는 클릭 방지
+    sendMessage(e.target.dataset.prompt);
+  }
+});
+
+
+// 다크/라이트 모드 토글
+modeToggleCheckbox.addEventListener('change', () => {
+  body.classList.toggle('light', modeToggleCheckbox.checked);
+  body.classList.toggle('dark', !modeToggleCheckbox.checked);
+  localStorage.setItem('theme', modeToggleCheckbox.checked ? 'light' : 'dark');
+});
+
+// 초기 테마 로드
+function loadTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    body.classList.add('light');
+    modeToggleCheckbox.checked = true;
+  } else {
+    body.classList.add('dark');
+    modeToggleCheckbox.checked = false;
+  }
+}
+
+
+/* -------------------- 사이드 메뉴 관련 기능 -------------------- */
+function toggleSideMenu() {
+    const isOpen = sideMenu.classList.toggle('open');
+    sideMenuOverlay.classList.toggle('open', isOpen);
+    body.classList.toggle('menu-open', isOpen); // 모바일 스크롤 방지 클래스
+    if(isOpen) {
+        renderChatList(chatSearchInput.value); // 메뉴 열 때 목록 새로 고침
+        chatSearchInput.focus();
+    } else {
+        userInput.focus();
+    }
+}
+
+function hideSideMenu() {
+    sideMenu.classList.remove('open');
+    sideMenuOverlay.classList.remove('open');
+    body.classList.remove('menu-open');
+}
+
+menuToggle.addEventListener('click', toggleSideMenu);
+sideMenuOverlay.addEventListener('click', (e) => {
+    // 오버레이 클릭 시 닫기 (사이드 메뉴 자체 클릭 방지)
+    if(e.target === sideMenuOverlay) {
+        hideSideMenu();
+    }
+});
+
+// 새 채팅 버튼 (메뉴 내부)
+newChatMenuBtn.addEventListener('click', () => {
+  startNewChat();
+  hideSideMenu(); 
+});
+
+
+/* -------------------- UI 위치 조정 -------------------- */
+const inputBarEl = document.getElementById('inputBar');
+const infoPopupEl = document.getElementById('infoPopup');
+
+function adjustUIForInputBar() {
+  const inputBarHeight = inputBarEl.offsetHeight;
+  const newMainPaddingBottom = inputBarHeight + 20; // input-bar 높이 + 여백 (20px)
+
+  // main 엘리먼트 패딩 조정
+  mainEl.style.paddingBottom = `${newMainPaddingBottom}px`;
+
+  // infoBtn 위치 조정
+  infoBtn.style.bottom = `${inputBarHeight + 14}px`; // input-bar 높이 + 14px 여백
+
+  // infoPopup 위치 조정
+  infoPopupEl.style.bottom = `${inputBarHeight + 14 + infoBtn.offsetHeight + 6}px`; // infoBtn 위치 + infoBtn 높이 + 6px 여백
+
+  // 🌟 스크롤바가 아래로 내려간 경우에만 스크롤 🌟
+  if(isAutoScrollEnabled) {
+    scrollToBottom();
+  }
+}
+
+
+/* -------------------- 정보 버튼 (i) 팝업 -------------------- */
+let infoPopupTimeout;
+let isInfoPopupVisible = false;
+
+infoBtn.addEventListener('click', () => {
+    isInfoPopupVisible = !isInfoPopupVisible;
+    infoPopup.style.display = isInfoPopupVisible ? 'block' : 'none';
+    clearTimeout(infoPopupTimeout);
+
+    if (isInfoPopupVisible) {
+        // 5초 후 자동 닫기 타이머 설정
+        infoPopupTimeout = setTimeout(() => {
+            infoPopup.style.display = 'none';
+            isInfoPopupVisible = false;
+        }, 5000);
+    }
+});
+
+// 마우스가 팝업 위에 있으면 타이머 초기화 (PC 환경)
+infoPopup.addEventListener('mouseenter', () => {
+    clearTimeout(infoPopupTimeout);
+});
+infoPopup.addEventListener('mouseleave', () => {
+    if (isInfoPopupVisible) {
+        infoPopupTimeout = setTimeout(() => {
+            infoPopup.style.display = 'none';
+            isInfoPopupVisible = false;
+        }, 1000); // 마우스가 벗어나면 1초 후 닫기
+    }
+});
+
+
+/* -------------------- 위치 정보 (Geolocation) -------------------- */
+function updateLocation(position) {
+    const lat = position.coords.latitude.toFixed(2);
+    const lon = position.coords.longitude.toFixed(2);
+    locationDisplay.textContent = `위치: 위도 ${lat}, 경도 ${lon}`;
+}
+
+function locationError(error) {
+    let msg;
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            msg = "위치 정보 권한 거부됨";
+            break;
+        case error.POSITION_UNAVAILABLE:
+            msg = "위치 정보를 사용할 수 없음";
+            break;
+        case error.TIMEOUT:
+            msg = "위치 요청 시간 초과";
+            break;
+        default:
+            msg = "알 수 없는 위치 오류";
+            break;
+    }
+    locationDisplay.textContent = `위치 오류: ${msg}`;
+    console.warn(`Geolocation Error(${error.code}): ${error.message}`);
+}
+
+function getLocation() {
+    if (navigator.geolocation) {
+        // 현재 위치를 한 번만 가져옵니다.
+        navigator.geolocation.getCurrentPosition(updateLocation, locationError, {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        });
+    } else {
+        locationDisplay.textContent = "브라우저가 Geolocation을 지원하지 않음";
+    }
+}
+
+
+/* -------------------- 전체 초기화 버튼 이벤트 -------------------- */
+// 설정/도움말 버튼 (현재는 기능 없음)
+document.getElementById('settingsBtn').addEventListener('click', () => {
+    alert('설정 및 도움말 페이지로 이동합니다.');
+    // 🌟 메뉴 닫기 로직 제거 🌟
+});
+
+// 업그레이드 버튼 (현재는 기능 없음)
+document.getElementById('upgradeBtn').addEventListener('click', () => {
+    alert('업그레이드 페이지로 이동합니다.');
+    // 🌟 메뉴 닫기 로직 제거 🌟
+});
+
+// 🌟 추가: 사용자 이름 초기화 버튼 이벤트 🌟
+document.getElementById('resetNameMenuBtn').addEventListener('click', () => {
+  showConfirmPopup(
+    `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
+    [
+      { id: 'cancel', text: '취소', class: 'reset-no' },
+      { id: 'reset_name', text: '초기화', class: 'reset-yes' },
+    ],
+    (actionId) => {
+      if (actionId === 'reset_name') {
+        localStorage.removeItem('username');
+        username = null;
+        hideConfirmPopup();
+        hideSideMenu();
+        // 초기화 후 이름 입력 모달 재실행
+        showNameInputModal(); 
+        updateTitle();
+      } else {
+        hideConfirmPopup();
+      }
+    }
+  );
+});
+
+// 전체 초기화는 하단 메뉴 항목으로 이동
+document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
+  showConfirmPopup(
+    '모든 대화 기록을 완전히 삭제하고 초기화할까요?',
+    [
+      { id: 'cancel', text: '취소', class: 'reset-no' },
+      { id: 'reset_all', text: '전체 삭제', class: 'reset-yes' },
+    ],
+    (actionId) => {
+      if (actionId === 'reset_all') {
+        localStorage.removeItem('allConversations');
+        localStorage.removeItem('currentChatId');
+        allConversations = {};
+        currentChatId = null;
+        chatHistory = [];
+        loadHistory(); // 화면 초기화 (새로운 빈 화면)
+        renderChatList();
+        userInput.value = '';
+        userInput.style.height = 'auto';
+        hideConfirmPopup();
+        hideSideMenu();
+        alert('모든 대화 기록이 삭제되었습니다.');
+      } else {
+        hideConfirmPopup();
+      }
+    }
+  );
+});
+
+
+/* -------------------- EventSource Stream 클래스 (Polyfill) -------------------- */
+class EventSourceStream {
+  constructor(reader, decoder) {
+    this.reader = reader;
+    this.decoder = decoder;
+    this.onmessage = null;
+    this.onerror = null;
+    this.processStream();
+  }
+
+  async processStream() {
+    let buffer = '';
+    
+    try {
+      while (true) {
+        const { value, done } = await this.reader.read();
+        if (done) {
+          if (this.onmessage) this.onmessage({ data: '[DONE]' });
+          break;
+        }
+
+        buffer += this.decoder.decode(value, { stream: true });
+
+        // SSE 이벤트 파싱
+        let lastIndex = 0;
+        let eventStart;
+        while ((eventStart = buffer.indexOf('data:', lastIndex)) !== -1) {
+          const newLine = buffer.indexOf('\n\n', eventStart);
+          if (newLine === -1) break; // 불완전한 이벤트
+
+          const event = buffer.substring(eventStart + 5, newLine).trim();
+          if (event) {
+            if (this.onmessage) {
+              this.onmessage({ data: event });
+            }
+          }
+          lastIndex = newLine + 2;
+        }
+        buffer = buffer.substring(lastIndex);
+      }
+    } catch (error) {
+        // AbortError 또는 네트워크 오류 처리
+        if (this.onerror) this.onerror(error);
+    }
+  }
+}
+
+
+/* -------------------- 초기화 함수 -------------------- */
+function initialize() {
+  loadTheme();
+  loadAllConversations();
+  renderChatList();
+  adjustUIForInputBar();
+  getLocation();
+  updateTitle();
+  
+  // 이름이 없으면 이름 입력 모달 표시
+  if (!username) {
+    showNameInputModal();
+  } else {
+    // 이름이 있으면 UI 활성화
+    hideNameInputModal();
+  }
+
+  // 🌟 UI 활성화 (이름 모달이 표시될 경우 다시 비활성화됨) 🌟
+  mainEl.style.opacity = '1';
+  document.getElementById('inputBar').style.opacity = '1';
+  infoBtn.style.opacity = '1';
+  menuToggle.disabled = false;
+  modeToggleCheckbox.disabled = false;
+
+  // 초기 로드 후 애니메이션 시작 (대화가 없을 때만)
+  if (chatHistory.length === 0) {
+    mainEl.classList.remove('animate');
+    setTimeout(() => {
+        mainEl.classList.add('animate');
+    }, 100);
+  }
+}
+
+// -------------------- DOMContentLoaded --------------------
+document.addEventListener('DOMContentLoaded', initialize);
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@14.0.0/dist/markdown-it.min.js"></script>
+
 </body>
 </html>
