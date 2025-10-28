@@ -156,6 +156,28 @@ body.light .menu-toggle:hover {
 }
 /* ------------------------------------------------------------------- */
 
+/* 🌟 추가: 프로필 버튼 스타일 🌟 */
+.profile-btn {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:1px solid var(--border-strong);
+    background:var(--input-bg);
+    color:var(--text);
+    cursor:pointer;
+    font-size:1.1rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight: 600;
+    margin-left: 8px; /* 다크 모드 토글과의 간격 */
+    transition: background-color 0.2s, border-color 0.2s;
+    text-transform: uppercase; /* 이모지 대신 첫 글자 표시를 위해 */
+}
+.profile-btn:hover {
+    background: var(--border);
+}
+
 
 /* 추가: 사이드 메뉴 (Gemini 모바일 스타일 적용, 단색 배경) */
 .side-menu-overlay{ 
@@ -424,13 +446,6 @@ main{
   transition: padding-top var(--transition), padding-bottom var(--transition);
 }
 
-/* 🌟 수정: 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 + 애니메이션 추가 🌟 */
-/* 🌟 수정: initial-state 클래스 및 관련 CSS 제거 (제목/카드 사라짐 방지) 🌟 */
-/* .initial-state {
-    justify-content: center !important;
-    transform: none;
-    transition: none;
-} */
 
 /* 🌟 추가: 초기 상태 (제목 및 카드) 등장 애니메이션 설정 🌟 */
 #title{ 
@@ -442,14 +457,22 @@ main{
   opacity: 0;
   transform: translateY(20px);
   
-  /* 그라데이션 정의: 진한 파랑 -> 밝은 하늘색 */
+  /* 그라데이션 정의: 진한 파랑 -> 밝은 하늘색 (기본) */
   background: linear-gradient(to right, #007aff, #66ccff); 
+  
+  /* 🌟 ADMIN: Blue to Red Gradient 🌟 */
+  /* JS에서 .admin 클래스를 추가하면 적용됩니다. */
   
   /* 텍스트에만 배경을 적용하는 핵심 속성 */
   -webkit-background-clip:text; 
   -webkit-text-fill-color:transparent; 
   background-clip: text; 
   text-fill-color: transparent; 
+}
+
+/* 🌟 ADMIN 전용 그라데이션 🌟 */
+#title.admin {
+  background: linear-gradient(to right, #007aff, #c53030); 
 }
 
 /* 🌟 수정: 카드는 항상 띄우고 중앙 정렬을 위해 max-width만 설정 🌟 */
@@ -531,8 +554,6 @@ main{
 @keyframes spinnerRotate {
     to { transform: rotate(360deg); }
 }
-
-/* 🌟 기존 .loading-bar 관련 CSS는 제거됨 🌟 */
 
 /* 타이핑 커서 스타일 */
 .typing-cursor {
@@ -698,6 +719,93 @@ textarea{
     cursor: not-allowed;
 }
 
+/* -------------------- 프로필 모달 스타일 (추가) -------------------- */
+#profileModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+#profileModal.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+.profile-card {
+    width: 90%;
+    max-width: 360px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+.profile-card h2 {
+    margin: 0 0 10px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.profile-card p {
+    margin: 0 0 20px;
+    font-size: 0.9rem;
+    color: var(--menu-text);
+}
+.profile-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 15px 0 10px;
+    color: var(--text);
+}
+
+/* 메시지 한도 막대 그래프 */
+.limit-bar-container {
+    background: var(--border);
+    border-radius: 8px;
+    height: 16px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+.limit-progress-bar {
+    height: 100%;
+    background: var(--accent-blue);
+    width: 0%; /* JS가 조정 */
+    transition: width 0.5s ease;
+}
+.limit-info {
+    font-size: 0.85rem;
+    color: var(--menu-text);
+    margin-bottom: 20px;
+}
+.limit-info strong {
+    font-weight: 700;
+    color: var(--text);
+}
+.profile-card button.reset-name-in-modal {
+    width: 100%;
+    padding: 10px;
+    background: #c53030;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+.profile-card button.reset-name-in-modal:hover {
+    background: #a02525;
+}
+/* ------------------------------------------------------------------- */
+
+
 /* small screens */
 @media(max-width:700px){
   .suggestions{ grid-template-columns:repeat(2,1fr); gap:8px; }
@@ -733,10 +841,6 @@ textarea{
             <span>업그레이드</span>
         </div>
         
-        <div class="menu-bottom-item" id="resetNameMenuBtn" style="opacity: 0.9;">
-            <span>사용자 정보(이름) 초기화</span>
-        </div>
-        
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
@@ -757,6 +861,7 @@ textarea{
     <label class="mode-toggle-label" id="modeToggleLabel" title="테마 전환">
         <input type="checkbox" id="modeToggleCheckbox" disabled> <span class="mode-toggle-slider"></span>
     </label>
+    <button class="profile-btn" id="profileBtn" disabled>P</button>
   </div>
 </nav>
 
@@ -822,16 +927,30 @@ textarea{
   </div>
 </div>
 
+<div id="profileModal">
+  <div class="profile-card">
+    <h2>내 프로필</h2>
+    <p>닉네임: <strong id="profileDisplayName"></strong></p>
+
+    <h3>일일 메시지 한도</h3>
+    <div class="limit-bar-container">
+      <div class="limit-progress-bar" id="limitProgressBar"></div>
+    </div>
+    <div class="limit-info">
+      <span id="limitRemainingText"></span>
+    </div>
+
+    <button class="reset-name-in-modal" id="resetNameInModalBtn">사용자 정보 초기화</button>
+  </div>
+</div>
 <script>
 /* ------------- 설정 ------------- */
 // ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask';
-// 🌟 수정: 입력창 높이 + 면책 조항 높이 고려하여 상수 업데이트 필요 (150px 패딩과 연동) 🌟
-const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-height: 80px)
-const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
-// 새 면책조항 높이(약 14px) + 상하 마진(4px*2) = 약 22px 추가됨.
-const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING + 22; // 약 134px
-// main 패딩 200px -> 150px으로 변경했으므로, JS에서 사용하는 상수는 그대로 둡니다.
+// 🌟 메시지 한도 관련 상수 🌟
+const DAILY_LIMIT = 200;
+const ADMIN_USER = 'minsu0227';
+// ------------------------------------
 
 /* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
 const SYSTEM_INSTRUCTION = {
@@ -865,6 +984,15 @@ const chatListContainer = document.getElementById('chatListContainer');
 const newChatMenuBtn = document.getElementById('newChatMenuBtn');
 const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
 const locationDisplay = document.getElementById('locationDisplay');
+// 🌟 프로필 관련 요소 🌟
+const profileBtn = document.getElementById('profileBtn');
+const profileModal = document.getElementById('profileModal');
+const profileDisplayName = document.getElementById('profileDisplayName');
+const limitProgressBar = document.getElementById('limitProgressBar');
+const limitRemainingText = document.getElementById('limitRemainingText');
+const resetNameInModalBtn = document.getElementById('resetNameInModalBtn');
+const titleEl = document.getElementById('title');
+
 
 let abortController = null;
 let loadingMsg = null;
@@ -874,6 +1002,11 @@ let currentChatId = null;
 let chatHistory = [];
 // Global state for auto-scroll
 let isAutoScrollEnabled = true;
+// Global state for usage
+let messageUsage = {
+    count: 0,
+    date: new Date().toLocaleDateString() // 'M/D/YYYY' 또는 'D. M. YYYY' 형식으로 저장됨.
+};
 
 /* 유틸: 스크롤 끝으로 */
 function scrollToBottom(){
@@ -909,43 +1042,125 @@ mainEl.addEventListener('scroll', ()=>{
 });
 
 /* 이름 입력 및 제목 업데이트 */
-const titleEl = document.getElementById('title');
 function updateTitle() {
-  if (username) {
-    // 이름이 있으면 "안녕하세요! [이름]님"으로 업데이트
-    titleEl.textContent = `안녕하세요! ${username}님`;
+  const displayUsername = (username === ADMIN_USER) ? 'ADMIN' : username;
+  
+  if (displayUsername) {
+    titleEl.textContent = `안녕하세요! ${displayUsername}님`;
+    profileBtn.textContent = displayUsername.charAt(0).toUpperCase(); // 프로필 버튼 텍스트 설정
   } else {
-    // 이름이 없으면 기본 문구 유지
     titleEl.textContent = `안녕하세요!`;
+    profileBtn.textContent = 'P';
+  }
+  
+  // 닉네임이 minsu0227이면 ADMIN 스타일 적용 (파란색+빨간색 그라데이션)
+  if (username === ADMIN_USER) {
+    titleEl.classList.add('admin');
+  } else {
+    titleEl.classList.remove('admin');
   }
 }
 
-/* 중앙 정렬 및 스크롤 모드 전환 함수 */
-// 🌟 제거: 초기 화면 유지 요청에 따라 이 함수와 호출 부분을 제거합니다. 🌟
-/*
-function toggleInitialState(isInitial){
-  // 🌟 수정: 애니메이션 로직 및 transform 조작을 제거하고 중앙 정렬 클래스만 관리하여
-  // 채팅 시작 시에도 부드럽게 화면 상단으로 전환되도록 합니다. 🌟
-  if(isInitial){
-    // 대화가 없을 때: 중앙 정렬 유지
-    mainEl.classList.add('initial-state');
-  } else {
-    // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용)
-    mainEl.classList.remove('initial-state');
-    // 🌟 애니메이션 클래스 제거 (대화가 있으면 필요 없음) 🌟
-    mainEl.classList.remove('animate');
-  }
+/* -------------------- 메시지 한도 관리 -------------------- */
+
+function loadUsage() {
+    const today = new Date().toLocaleDateString();
+    try {
+        const raw = localStorage.getItem('messageUsage');
+        if (raw) {
+            const usage = JSON.parse(raw);
+            if (usage.date === today) {
+                messageUsage = usage;
+            } else {
+                // 날짜가 다르면 초기화
+                messageUsage = { count: 0, date: today };
+            }
+        }
+    } catch(e) {
+        console.error('Error loading usage:', e);
+    }
+    saveUsage(); // 로드된 (또는 초기화된) 값을 저장
 }
-*/
+
+function saveUsage() {
+    try {
+        localStorage.setItem('messageUsage', JSON.stringify(messageUsage));
+    } catch(e) {
+        console.error('Error saving usage:', e);
+    }
+}
+
+function isLimitReached() {
+    if (username === ADMIN_USER) {
+        return false; // ADMIN은 무제한
+    }
+    return messageUsage.count >= DAILY_LIMIT;
+}
+
+function incrementUsage() {
+    if (username === ADMIN_USER) return; // ADMIN은 카운트 안 함
+    
+    loadUsage(); // 최신 상태 로드
+    messageUsage.count++;
+    saveUsage();
+    updateProfileModal(); // 프로필 모달 업데이트
+}
+
+// 프로필 모달 업데이트
+function updateProfileModal() {
+    const displayUsername = (username === ADMIN_USER) ? 'ADMIN' : username;
+    
+    // 1. 디스플레이 이름 설정
+    profileDisplayName.textContent = displayUsername;
+
+    // 2. 메시지 한도 계산 및 표시
+    let limit, count, remaining;
+
+    if (username === ADMIN_USER) {
+        // ADMIN (무제한)
+        limit = '무제한';
+        count = 0;
+        remaining = '무제한';
+        limitProgressBar.style.width = '100%';
+        limitProgressBar.style.background = '#4CAF50'; // Green for unlimited
+        limitRemainingText.innerHTML = `<strong>${remaining}</strong> 남음`;
+
+    } else {
+        // 일반 사용자 (200개 한도)
+        loadUsage(); // UI 업데이트 직전에 다시 로드
+        limit = DAILY_LIMIT;
+        count = messageUsage.count;
+        remaining = limit - count;
+        
+        const percentage = Math.min(100, (count / limit) * 100);
+        
+        limitProgressBar.style.width = `${percentage}%`;
+        
+        // 색상 변경 (예: 90% 이상 사용 시 경고)
+        if (percentage >= 100) {
+            limitProgressBar.style.background = '#F44336'; // Red
+            limitRemainingText.innerHTML = `<strong>0개</strong> 남음 (한도 초과)`;
+            
+        } else if (percentage >= 90) {
+            limitProgressBar.style.background = '#FF9800'; // Orange
+            limitRemainingText.innerHTML = `<strong>${remaining}개</strong> 남음 (총 ${limit}개 중 ${count}개 사용)`;
+            
+        } else {
+            limitProgressBar.style.background = 'var(--accent-blue)';
+            limitRemainingText.innerHTML = `<strong>${remaining}개</strong> 남음 (총 ${limit}개 중 ${count}개 사용)`;
+        }
+    }
+}
+
 
 /* -------------------- 대화 관리 기능 -------------------- */
 
-// 고유 ID 생성
+// 고유 ID 생성 (기존 로직 유지)
 function generateChatId() {
   return 'chat_' + Date.now();
 }
 
-// 전체 대화 저장/복원
+// 전체 대화 저장/복원 (기존 로직 유지)
 function saveAllConversations() {
   try{
     localStorage.setItem('allConversations', JSON.stringify(allConversations));
@@ -977,7 +1192,7 @@ function loadAllConversations() {
   }
 }
 
-// 현재 대화 기록을 저장
+// 현재 대화 기록을 저장 (기존 로직 유지)
 function saveHistory() {
   if (currentChatId && allConversations[currentChatId]) {
     allConversations[currentChatId].history = chatHistory;
@@ -994,27 +1209,23 @@ function saveHistory() {
   }
 }
 
-// 대화 기록 로드 및 렌더링
-// 🌟 수정: 대화 전환 시 부드럽게 메시지가 올라오도록 수정 🌟
+// 대화 기록 로드 및 렌더링 (기존 로직 유지)
 function loadHistory() {
   messagesEl.innerHTML = '';
   
-  // 🌟 수정: 초기 상태 애니메이션 관리 (initial-state 제거) 🌟
   const isInitial = chatHistory.length === 0;
   
   if (isInitial) {
-    // 대화가 없을 때만 제목/카드의 등장 애니메이션을 실행합니다.
     mainEl.classList.remove('animate');
     setTimeout(() => {
         mainEl.classList.add('animate');
-    }, 50); // CSS transition이 작동하도록 딜레이를 줍니다.
+    }, 50); 
   } else {
-    // 대화가 있으면 애니메이션 상태 유지 (필요 시)
     mainEl.classList.add('animate');
   }
 
 
-  // 🌟 메시지 부드러운 등장 (채팅 전환) 🌟
+  // 메시지 부드러운 등장 (채팅 전환) 
   chatHistory.forEach((item, index) => {
     const el = renderMessage(item.role, item.content);
     // 메시지 등장 애니메이션에 인덱스 기반 딜레이 적용
@@ -1024,19 +1235,16 @@ function loadHistory() {
   });
 
   if (chatHistory.length > 0) {
-    // 🌟 로딩 완료 후 자동 스크롤 켜고 스크롤 🌟
     isAutoScrollEnabled = true;
     scrollToBottom();
   } else {
-    // 초기 상태에서는 스크롤 필요 없음
     mainEl.scrollTo(0, 0); 
   }
   
   updateMainPadding();
 }
 
-
-// 새 대화 시작 (history 초기화, ID 생성)
+// 새 대화 시작 (history 초기화, ID 생성) (기존 로직 유지)
 function startNewChat(renderList = true) {
   currentChatId = generateChatId();
   allConversations[currentChatId] = {
@@ -1052,7 +1260,7 @@ function startNewChat(renderList = true) {
   }
 }
 
-// 특정 대화 활성화
+// 특정 대화 활성화 (기존 로직 유지)
 function activateChat(chatId) {
   if (currentChatId === chatId) return; // 이미 활성 상태
 
@@ -1066,7 +1274,7 @@ function activateChat(chatId) {
   userInput.focus();
 }
 
-// 대화 삭제
+// 대화 삭제 (기존 로직 유지)
 function deleteChat(chatId) {
   // 현재 활성 대화인 경우 새 대화 시작
   if (chatId === currentChatId) {
@@ -1083,7 +1291,7 @@ function deleteChat(chatId) {
   }
 }
 
-// 대화 목록 렌더링
+// 대화 목록 렌더링 (기존 로직 유지)
 function renderChatList(filterText = '') {
     chatListContainer.innerHTML = '';
     
@@ -1139,7 +1347,7 @@ function renderChatList(filterText = '') {
     });
 }
 
-// 채팅 검색 기능
+// 채팅 검색 기능 (기존 로직 유지)
 chatSearchInput.addEventListener('input', (e) => {
     renderChatList(e.target.value);
 });
@@ -1147,7 +1355,7 @@ chatSearchInput.addEventListener('input', (e) => {
 
 // -------------------- 메시지 처리 --------------------
 
-// 메시지 DOM 생성
+// 메시지 DOM 생성 (기존 로직 유지)
 function renderMessage(role, content) {
   const messageEl = document.createElement('div');
   messageEl.className = `message ${role}`;
@@ -1159,7 +1367,7 @@ function renderMessage(role, content) {
   return messageEl;
 }
 
-// 로딩 메시지 추가
+// 로딩 메시지 추가 (기존 로직 유지)
 function addLoadingMessage() {
   loadingMsg = renderMessage('bot', '답변을 생성 중입니다.');
   loadingMsg.classList.add('loading');
@@ -1174,7 +1382,7 @@ function addLoadingMessage() {
   scrollToBottom();
 }
 
-// 로딩 메시지 제거
+// 로딩 메시지 제거 (기존 로직 유지)
 function removeLoadingMessage(error = false) {
   if (loadingMsg) {
     if (error) {
@@ -1253,7 +1461,7 @@ function markdownToHtml(markdown) {
     return markdown;
 }
 
-// 코드 복사 버튼 이벤트 리스너 추가 (동적으로 생성되는 버튼에 대해)
+// 코드 복사 버튼 이벤트 리스너 추가 (동적으로 생성되는 버튼에 대해) (기존 로직 유지)
 messagesEl.addEventListener('click', (e) => {
     if (e.target && e.target.classList.contains('copy-btn')) {
         const encodedCode = e.target.getAttribute('data-code');
@@ -1277,22 +1485,38 @@ messagesEl.addEventListener('click', (e) => {
 
 // -------------------- API 통신 및 UI 상호작용 --------------------
 
-// 사용자 메시지 전송 처리
+// 사용자 메시지 전송 처리 (메시지 한도 로직 추가)
 async function handleSendClick() {
   const text = userInput.value.trim();
+  
   if (!text || loadingMsg) return;
 
+  // 🌟 한도 검사 🌟
+  if (isLimitReached()) {
+      showConfirmPopup(
+          `일일 메시지 한도 (${DAILY_LIMIT}개)를 초과했습니다. 내일 다시 시도하거나, 사용자 정보를 초기화하세요.`,
+          [
+              { id: 'ok', text: '확인', class: 'reset-no' }
+          ],
+          hideConfirmPopup
+      );
+      return; // 한도 초과 시 전송 중단
+  }
+  
   // UI 상태 업데이트
   userInput.value = '';
-  adjustTextareaHeight(userInput); // 입력창 높이 재조정
-  sendBtn.disabled = true; // 전송 버튼 비활성화
-  
-  // suggestionsEl.classList.add('disabled'); // 🌟 제거: 초기 화면 유지 요청에 따라 제거 🌟
+  adjustTextareaHeight(userInput);
+  sendBtn.style.display = 'none'; // 전송 버튼 숨김
+  stopBtn.style.display = 'flex'; // 중지 버튼 표시
+  stopBtn.disabled = false;
 
   // 사용자 메시지 렌더링 및 저장
   renderMessage('user', text).classList.add('show');
   chatHistory.push({ role: 'user', content: text });
-  saveHistory(); // 채팅 기록 저장 및 리스트 업데이트
+  saveHistory();
+
+  // 🌟 사용량 증가 🌟
+  incrementUsage();
 
   // 로딩 메시지 추가 및 스크롤
   addLoadingMessage();
@@ -1305,7 +1529,8 @@ async function handleSendClick() {
 
     const requestBody = {
       user_input: text,
-      history: [...chatHistory.slice(-10), { role: 'user', content: text }], // 최근 10개 기록 + 현재 메시지 전송
+      // slice(-10)은 마지막 10개만 가져오고, 현재 메시지는 이미 history에 추가되었으므로 별도로 추가하지 않습니다.
+      history: chatHistory, 
       system_instruction: SYSTEM_INSTRUCTION.content,
       username: username
     };
@@ -1319,7 +1544,6 @@ async function handleSendClick() {
       signal: signal
     });
 
-    // 2xx 상태 코드가 아니면 오류 처리
     if (!response.ok) {
         throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
@@ -1330,32 +1554,28 @@ async function handleSendClick() {
     // 봇 응답 저장 및 렌더링
     chatHistory.push({ role: 'bot', content: botResponse });
     
-    // 로딩 메시지 제거 후 실제 응답 렌더링
     removeLoadingMessage(false);
     renderMessage('bot', botResponse).classList.add('show');
-    saveHistory(); // 최종 기록 저장
+    saveHistory();
     
   } catch (error) {
+    // 🌟 중지 버튼 눌렀을 때도 이 catch 블록으로 들어오므로, AbortError를 처리합니다. 🌟
     if (error.name === 'AbortError') {
       console.log('Fetch aborted');
-      // 로딩 메시지는 stopBtn 핸들러에서 제거했거나, 여기서 오류 메시지를 표시해야 함
-      removeLoadingMessage(false); // 로딩 메시지는 없애고
-      // 마지막 사용자 메시지 뒤에 중지됨 메시지 추가
+      removeLoadingMessage(false);
       renderMessage('bot', '✅ 응답 생성이 중지되었습니다.').classList.add('show');
+      // AbortError 시에는 사용량 복구 필요 없음 (메시지 전송은 이미 완료된 상태)
     } else {
       console.error('API call failed:', error);
-      removeLoadingMessage(true); // 오류 발생 시 로딩 메시지 수정
+      removeLoadingMessage(true);
       chatHistory.push({ role: 'bot', content: '죄송합니다. 오류가 발생했습니다.' });
-      saveHistory(); // 오류 메시지 기록 저장
+      saveHistory();
     }
   } finally {
     // 최종 UI 상태 업데이트
     abortController = null;
-    sendBtn.disabled = false;
-    stopBtn.style.display = 'none';
-    
-    // suggestionsEl.classList.remove('disabled'); // 🌟 제거: 초기 화면 유지 요청에 따라 제거 🌟
-    
+    sendBtn.style.display = 'flex'; // 전송 버튼 다시 표시
+    stopBtn.style.display = 'none'; // 중지 버튼 숨김
     scrollToBottom();
   }
 }
@@ -1364,24 +1584,16 @@ async function handleSendClick() {
 function handleStopClick() {
   if (abortController) {
     abortController.abort();
-    // 로딩 메시지는 API 호출 finally 블록에서 처리되거나 여기서 직접 제거
-    removeLoadingMessage(false); // 로딩 메시지 제거
-    // 마지막 사용자 메시지 뒤에 중지됨 메시지 추가
-    renderMessage('bot', '✅ 응답 생성이 중지되었습니다.').classList.add('show');
-    
-    abortController = null;
-    sendBtn.disabled = false;
+    // 🌟 즉시 UI 복구 (handleSendClick/finally에서 최종 처리) 🌟
     stopBtn.style.display = 'none';
-    scrollToBottom();
-    
-    // suggestionsEl.classList.remove('disabled'); // 🌟 제거: 초기 화면 유지 요청에 따라 제거 🌟
+    sendBtn.style.display = 'flex';
   }
 }
 
 
 // -------------------- UI/UX 및 이벤트 핸들러 --------------------
 
-// 텍스트 영역 높이 자동 조절
+// 텍스트 영역 높이 자동 조절 (기존 로직 유지)
 function adjustTextareaHeight(textarea) {
   textarea.style.height = 'auto'; // 높이 초기화
   const newHeight = Math.min(textarea.scrollHeight, 168); // 최대 168px
@@ -1389,19 +1601,9 @@ function adjustTextareaHeight(textarea) {
   updateMainPadding(); // 메인 콘텐츠의 패딩도 업데이트
 }
 
-// 메인 콘텐츠 하단 패딩 업데이트 (입력창 높이에 따라)
+// 메인 콘텐츠 하단 패딩 업데이트 (기존 로직 유지)
 function updateMainPadding() {
   const inputBarHeight = document.getElementById('inputBar').offsetHeight;
-  // 입력창의 높이 + (여유 마진)
-  const newPaddingBottom = inputBarHeight + 38; // 38px 여유 공간 (기존 200px에서 150px로 줄였으므로, 새로운 계산 필요)
-  
-  // 초기 CSS 값인 150px을 기준으로 계산하도록 수정
-  // 150px은 (input bar 높이 + 여유) 임. 여기서 inputBarHeight를 뺸 나머지 값이 여유분.
-  // 즉, 150 - (초기 input bar 높이 112px) = 38px 여유 마진을 사용한 것.
-  // 현재는 CSS에서 150px로 고정하였으므로, JS에서 동적으로 변경하지 않도록 기존 로직을 제거하고 스크롤만 하도록 합니다.
-  
-  // 🌟 동적 패딩 조정 로직 제거 (CSS에서 150px로 고정) 🌟
-  // mainEl.style.paddingBottom = `${newPaddingBottom}px`; 
   
   // 정보 버튼 위치 조정
   const infoBtnBottom = inputBarHeight + 20;
@@ -1409,7 +1611,7 @@ function updateMainPadding() {
   infoPopup.style.bottom = `${infoBtnBottom + 54}px`; // 팝업은 버튼보다 위에
 }
 
-// 입력창 관련 이벤트 리스너
+// 입력창 관련 이벤트 리스너 (기존 로직 유지)
 userInput.addEventListener('input', (e) => {
   adjustTextareaHeight(e.target);
   sendBtn.disabled = e.target.value.trim() === '';
@@ -1430,17 +1632,11 @@ userInput.addEventListener('keydown', (e) => {
 });
 
 
-// 전송/중지 버튼 이벤트 리스너
-sendBtn.addEventListener('click', () => {
-  handleSendClick();
-  sendBtn.style.display = 'none'; // 전송 버튼 숨김
-  stopBtn.style.display = 'flex'; // 중지 버튼 표시
-  stopBtn.disabled = false;
-});
-
+// 전송/중지 버튼 이벤트 리스너 (수정됨)
+sendBtn.addEventListener('click', handleSendClick);
 stopBtn.addEventListener('click', handleStopClick);
 
-// 추천 카드 클릭 이벤트
+// 추천 카드 클릭 이벤트 (기존 로직 유지)
 suggestionsEl.addEventListener('click', (e) => {
   const card = e.target.closest('.suggestion-card');
   if (card && !loadingMsg) {
@@ -1448,13 +1644,10 @@ suggestionsEl.addEventListener('click', (e) => {
     userInput.value = prompt;
     adjustTextareaHeight(userInput); // 높이 조정
     handleSendClick();
-    sendBtn.style.display = 'none';
-    stopBtn.style.display = 'flex';
-    stopBtn.disabled = false;
   }
 });
 
-// 테마 토글
+// 테마 토글 (기존 로직 유지)
 modeToggleCheckbox.addEventListener('change', () => {
   if (modeToggleCheckbox.checked) {
     body.classList.remove('dark');
@@ -1467,7 +1660,7 @@ modeToggleCheckbox.addEventListener('change', () => {
   }
 });
 
-// 메뉴 토글
+// 메뉴 토글 (기존 로직 유지)
 menuToggle.addEventListener('click', () => {
   if (sideMenu.classList.contains('open')) {
     hideSideMenu();
@@ -1499,12 +1692,12 @@ newChatMenuBtn.addEventListener('click', () => {
 });
 
 
-// 정보 버튼 (i)
+// 정보 버튼 (i) (기존 로직 유지)
 infoBtn.addEventListener('click', () => {
     infoPopup.style.display = infoPopup.style.display === 'block' ? 'none' : 'block';
 });
 
-// 페이지 클릭 시 팝업 닫기
+// 페이지 클릭 시 팝업 닫기 (기존 로직 유지)
 document.addEventListener('click', (e) => {
     if (infoPopup.style.display === 'block' && 
         !infoPopup.contains(e.target) && 
@@ -1535,36 +1728,59 @@ nameSubmitBtn.addEventListener('click', () => {
   if (username.length >= 2) {
     localStorage.setItem('username', username);
     nameInputModal.classList.remove('visible');
-    updateTitle(); // 제목 업데이트
-    // 초기화 완료 후 UI 활성화
+    
+    // 🌟 초기화 후 재설정 🌟
+    loadUsage(); // 사용량 초기화 및 로드
+    updateTitle(); // 제목 업데이트 (ADMIN 반영)
+    updateProfileModal(); // 프로필 모달 업데이트
+    
     enableUI(); 
   }
 });
 
-// 사용자 정보(이름) 초기화 버튼 이벤트 (메뉴 하단)
-document.getElementById('resetNameMenuBtn').addEventListener('click', () => {
-  showConfirmPopup(
-    `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
-    [
-      { id: 'cancel', text: '취소', class: 'reset-no' },
-      { id: 'reset_name', text: '초기화', class: 'reset-yes' },
-    ],
-    (actionId) => {
-      if (actionId === 'reset_name') {
-        localStorage.removeItem('username');
-        username = null;
-        hideConfirmPopup();
-        hideSideMenu();
-        // 초기화 후 이름 입력 모달 재실행
-        showNameInputModal(); 
-        // 이름 초기화 시 UI 비활성화
-        disableUI();
-      } else {
-        hideConfirmPopup();
-      }
-    }
-  );
+
+// 🌟 프로필 버튼 및 모달 이벤트 리스너 🌟
+
+profileBtn.addEventListener('click', () => {
+    updateProfileModal();
+    profileModal.classList.add('visible');
 });
+
+// 모달 외부 클릭 시 닫기
+profileModal.addEventListener('click', (e) => {
+    if (e.target === profileModal) {
+        profileModal.classList.remove('visible');
+    }
+});
+
+// 모달 내 사용자 정보 초기화 버튼 이벤트
+resetNameInModalBtn.addEventListener('click', () => {
+    profileModal.classList.remove('visible'); // 프로필 모달 닫기
+    hideSideMenu(); // 메뉴가 열려있다면 닫기
+
+    showConfirmPopup(
+        `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까? (메시지 한도는 함께 초기화됩니다.)`,
+        [
+            { id: 'cancel', text: '취소', class: 'reset-no' },
+            { id: 'reset_name', text: '초기화', class: 'reset-yes' },
+        ],
+        (actionId) => {
+            if (actionId === 'reset_name') {
+                localStorage.removeItem('username');
+                localStorage.removeItem('messageUsage'); // 사용량도 초기화
+                username = null;
+                hideConfirmPopup();
+                
+                // 이름 초기화 시 UI 비활성화, 이름 입력 모달 재실행
+                disableUI();
+                showNameInputModal(); 
+            } else {
+                hideConfirmPopup();
+            }
+        }
+    );
+});
+
 
 // 전체 초기화 버튼 이벤트 (메뉴 하단)
 document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
@@ -1579,6 +1795,8 @@ document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
         localStorage.removeItem('allConversations');
         localStorage.removeItem('currentChatId');
         localStorage.removeItem('username');
+        localStorage.removeItem('messageUsage'); // 🌟 사용량도 초기화 🌟
+        
         username = null; // 사용자 이름도 초기화
         allConversations = {};
         currentChatId = null;
@@ -1597,7 +1815,7 @@ document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
   );
 });
 
-/* 확인 팝업 (Confirm Popup) */
+/* 확인 팝업 (Confirm Popup) (기존 로직 유지) */
 let confirmCallback = null;
 
 function showConfirmPopup(message, actions, callback) {
@@ -1639,6 +1857,7 @@ function initializeTheme() {
 function enableUI() {
     menuToggle.disabled = false;
     modeToggleCheckbox.disabled = false;
+    profileBtn.disabled = false; // 🌟 추가 🌟
     mainEl.style.opacity = 1;
     mainEl.style.pointerEvents = 'auto';
     document.getElementById('inputBar').style.opacity = 1;
@@ -1648,10 +1867,11 @@ function enableUI() {
     userInput.focus();
 }
 
-// UI 비활성화 (이름 입력 모달 시)
+// UI 비활성화
 function disableUI() {
     menuToggle.disabled = true;
     modeToggleCheckbox.disabled = true;
+    profileBtn.disabled = true; // 🌟 추가 🌟
     mainEl.style.opacity = 0.1;
     mainEl.style.pointerEvents = 'none';
     document.getElementById('inputBar').style.opacity = 0.1;
@@ -1664,13 +1884,15 @@ function disableUI() {
 function init() {
   initializeTheme();
   updateMainPadding(); // 초기 패딩 설정
+  loadUsage(); // 🌟 사용량 로드 🌟
 
   if (username) {
     // 이름이 있으면 UI 활성화 및 대화 로드
     updateTitle();
+    updateProfileModal(); // 🌟 프로필 모달 초기화 🌟
     enableUI();
     loadAllConversations();
-    // 🌟 초기 애니메이션 재실행 🌟
+    // 초기 애니메이션 재실행
     if (chatHistory.length === 0) {
       mainEl.classList.remove('animate');
       setTimeout(() => {
@@ -1688,7 +1910,7 @@ function init() {
 }
 
 
-// Geolocation API (간략화)
+// Geolocation API (간략화) (기존 로직 유지)
 function getLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -1724,10 +1946,10 @@ function getLocation() {
     }
 }
 
-// 위치 업데이트 버튼 이벤트
+// 위치 업데이트 버튼 이벤트 (기존 로직 유지)
 locationDisplay.parentElement.addEventListener('click', getLocation);
 
-// 모델 선택 드롭다운 기능
+// 모델 선택 드롭다운 기능 (기존 로직 유지)
 const modelSelectBtn = document.getElementById('modelSelectBtn');
 const modelDropdown = document.getElementById('modelDropdown');
 const selectedModel = document.getElementById('selectedModel');
