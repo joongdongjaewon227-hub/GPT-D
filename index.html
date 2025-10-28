@@ -61,6 +61,13 @@ body.light {
   --glow-color: rgba(0, 110, 255, 0.3); 
 }
 
+/* 🌟 추가: 스크롤바 숨기기 (모든 스크롤바에 적용) 🌟 */
+::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+html, body, main, textarea {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 /* 모바일 탭 하이라이트 제거 및 박스 사이즈 설정 */
 *{ -webkit-tap-highlight-color: transparent; box-sizing: border-box; transition: color var(--transition), background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition); }
 /* 🌟 수정: height: 100% 제거 (모바일 스크롤 문제 해결 시도) 🌟 */
@@ -424,12 +431,15 @@ main{
     transition: none; /* 애니메이션 제거 */
 }
 
+/* 🌟 추가: 초기 상태 (제목 및 카드) 등장 애니메이션 설정 🌟 */
 #title{ 
   margin-top:0; 
   font-size:1.4rem; 
   font-weight:700; 
   text-align:center; 
-  transition: margin-top var(--transition); /* 부드러운 이동 */
+  transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; /* 등장 애니메이션 추가 */
+  opacity: 0;
+  transform: translateY(20px);
   
   /* 그라데이션 정의: 진한 파랑 -> 밝은 하늘색 */
   background: linear-gradient(to right, #007aff, #66ccff); 
@@ -442,7 +452,18 @@ main{
 }
 
 /* 🌟 수정: 카드는 항상 띄우고 중앙 정렬을 위해 max-width만 설정 🌟 */
-.suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:12px; transition: margin-top var(--transition); }
+.suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:12px; transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; }
+.suggestions{
+    opacity: 0;
+    transform: translateY(20px); /* 등장 애니메이션 추가 */
+}
+
+/* 🌟 추가: 대화가 없을 때만 애니메이션 시작 🌟 */
+.initial-state.animate #title, .initial-state.animate .suggestions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .suggestion-card{ background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:10px; cursor:pointer; font-size:0.92rem; }
 .suggestion-card:active{ transform:translateY(1px); }
 .suggestions.disabled{ pointer-events: none; opacity: 0.6; }
@@ -454,7 +475,7 @@ main{
 .message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
 .message.bot{ align-self:flex-start; background:var(--input-bg); border:0.5px solid var(--border); color:var(--text); }
 
-/* 🌟 추가: 메시지 등장 애니메이션 🌟 */
+/* 🌟 추가: 메시지 등장 애니메이션 (부드러운 채팅 전환을 위해 사용) 🌟 */
 .message {
     opacity: 0;
     transform: translateY(10px);
@@ -843,6 +864,39 @@ let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
 
+// Global state for auto-scroll
+let isAutoScrollEnabled = true;
+
+/* 유틸: 스크롤 끝으로 */
+function scrollToBottom(){
+  // 🌟 자동 스크롤 비활성화 시 작동 중지 🌟
+  if(!isAutoScrollEnabled) return; 
+  requestAnimationFrame(()=>{ 
+    mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); 
+  });
+}
+
+// 🌟 추가: 지능형 자동 스크롤 로직 🌟
+mainEl.addEventListener('scroll', ()=>{
+  const scrollHeight = mainEl.scrollHeight;
+  const clientHeight = mainEl.clientHeight;
+  const scrollTop = mainEl.scrollTop;
+  const scrollThreshold = 5; // 바닥에서 5px 이내
+
+  // 1. 바닥에 도달했는지 확인 -> 자동 스크롤 재활성화
+  if(scrollTop >= scrollHeight - clientHeight - scrollThreshold){
+    if(!isAutoScrollEnabled){
+      isAutoScrollEnabled = true; // 바닥에 닿으면 다시 자동 스크롤 켜기
+    }
+  } else {
+    // 2. 바닥에서 떨어져 있으면 -> 자동 스크롤 해제
+    if(isAutoScrollEnabled) {
+      isAutoScrollEnabled = false; // 사용자가 스크롤하면 자동 스크롤 끄기
+    }
+  }
+});
+
+
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
 function updateTitle() {
@@ -856,12 +910,6 @@ function updateTitle() {
 }
 
 
-/* 유틸: 스크롤 끝으로 */
-function scrollToBottom(){
-  // 🌟 스크롤이 끝으로 부드럽게 이동 🌟
-  requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
-}
-
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
 function toggleInitialState(isInitial){
     // 🌟 수정: 애니메이션 로직 및 transform 조작을 제거하고 중앙 정렬 클래스만 관리하여 
@@ -872,6 +920,8 @@ function toggleInitialState(isInitial){
     } else {
       // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용)
       mainEl.classList.remove('initial-state');
+      // 🌟 애니메이션 클래스 제거 (대화가 있으면 필요 없음) 🌟
+      mainEl.classList.remove('animate');
     }
 }
 
@@ -930,18 +980,36 @@ function saveHistory() {
 }
 
 // 대화 기록 로드 및 렌더링
+// 🌟 수정: 대화 전환 시 부드럽게 메시지가 올라오도록 수정 🌟
 function loadHistory() {
   messagesEl.innerHTML = '';
-  // 🌟 수정: 메시지 렌더링 시 show 클래스를 즉시 추가 (새 대화에서는 애니메이션 없이) 🌟
-  chatHistory.forEach(item => {
+  
+  // 🌟 초기 상태 애니메이션 관리 🌟
+  const isInitial = chatHistory.length === 0;
+  toggleInitialState(isInitial);
+  
+  if (isInitial) {
+      // 대화가 없을 때만 제목/카드의 등장 애니메이션을 실행합니다.
+      mainEl.classList.remove('animate');
+      setTimeout(() => {
+          mainEl.classList.add('animate');
+      }, 50); // CSS transition이 작동하도록 딜레이를 줍니다.
+  }
+  
+  // 🌟 메시지 부드러운 등장 (채팅 전환) 🌟
+  chatHistory.forEach((item, index) => {
     const el = renderMessage(item.role, item.content);
-    el.classList.add('show');
+    // 메시지 등장 애니메이션에 인덱스 기반 딜레이 적용
+    setTimeout(() => {
+        el.classList.add('show');
+    }, 50 * index); // 50ms 간격으로 메시지 등장
   });
 
-  toggleInitialState(chatHistory.length === 0);
-
   if (chatHistory.length > 0) {
-      scrollToBottom();
+      // 🌟 로딩 완료 후 자동 스크롤 켜고 스크롤 🌟
+      isAutoScrollEnabled = true;
+      // 마지막 메시지 등장 후 스크롤
+      setTimeout(scrollToBottom, 50 * chatHistory.length + 100); 
   }
 }
 
@@ -1053,7 +1121,7 @@ function renderChatList() {
       chatListContainer.appendChild(item);
   });
   
-  // 🌟 채팅 검색 시 필터링을 위해 다시 호출 🌟
+  // 🌟 채팅 전환 시 검색어 초기화 🌟
   filterChatList(); 
 }
 
@@ -1249,7 +1317,11 @@ function renderTypingEffect(role, fullText, finalCallback) {
             // 한 글자씩 추가
             typingTextEl.textContent += textToType[index];
             index++;
-            scrollToBottom();
+            
+            // 🌟 추가: 타이핑 중에도 자동 스크롤 활성화 상태이면 스크롤 🌟
+            if (isAutoScrollEnabled) {
+                scrollToBottom();
+            }
             
             setTimeout(type, typingInterval); 
         } else {
@@ -1261,6 +1333,10 @@ function renderTypingEffect(role, fullText, finalCallback) {
             const finalWrap = renderMessage(role, fullText); 
             finalWrap.classList.add('show'); // 최종 메시지도 애니메이션 적용
 
+            // 🌟 추가: 타이핑 완료 시 자동 스크롤 켜기 및 스크롤 🌟
+            isAutoScrollEnabled = true; 
+            scrollToBottom();
+            
             if (finalCallback) {
                 finalCallback();
             }
@@ -1276,6 +1352,9 @@ async function sendMessage(){
   const text = userInput.value.trim();
   if(!text) return;
 
+  // 🌟 추가: 메시지 전송 시 자동 스크롤 켜기 🌟
+  isAutoScrollEnabled = true; 
+  
   disableUI();
   toggleInitialState(false); // 🌟 애니메이션 적용됨 🌟
 
@@ -1455,7 +1534,7 @@ function renderMessage(role, text, doMarkdown = true) {
 
 
   messagesEl.appendChild(wrap);
-  scrollToBottom();
+  // 🌟 renderMessage는 애니메이션 딜레이가 적용된 loadHistory나 renderTypingEffect에서 스크롤을 처리합니다.
   return wrap; 
 }
 
