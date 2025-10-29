@@ -968,6 +968,7 @@ const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_
 const MAX_MESSAGES_PER_DAY = 120;
 const ADMIN_ID = 'minsu0227'; 
 
+let username = null; 
 let dailyMessageCount = 0; // 일일 메시지 카운트
 let lastMessageDate = new Date().toDateString(); // 마지막 메시지 전송일
 
@@ -997,9 +998,9 @@ const limitFillEl = document.getElementById('limitFill');
 const profileResetBtn = document.getElementById('profileResetBtn');
 const titleEl = document.getElementById('title');
 
-  // 🌟 [추가] 이름 입력 모달 관련 DOM 요소 🌟
+// 🌟 [추가] 이름 입력 모달 관련 DOM 요소 🌟
 const nameInputModal = document.getElementById('nameInputModal'); // 모달 전체
-const nameInput = document.getElementById('nameInput'); // 이름 입력 필드
+const nameInput = document.getElementById('nameInputField'); // 👈 이 부분을 'nameInputField'로 수정하세요.
 const nameSubmitBtn = document.getElementById('nameSubmitBtn'); // '확인' 버튼
 // ---------------------------------------------
 
@@ -2221,6 +2222,7 @@ sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
 </html>
+
 
 
 
