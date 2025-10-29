@@ -243,122 +243,6 @@ body.menu-open {
     }
 }
 
-  /* ------------------------ 🌟 [추가] 프로필 버튼 및 팝업 스타일 🌟 ------------------------ */
-.profile-container { 
-    position: relative; 
-    margin-left: 8px; /* 다크모드 토글과의 간격 */
-}
-#profileBtn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--border-strong);
-    background: var(--accent-blue);
-    color: white;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-#profileBtn:hover {
-    opacity: 0.9;
-}
-
-#profilePopup {
-    position: absolute;
-    top: 48px; /* Nav height + gap */
-    right: 0;
-    width: 280px;
-    background: var(--menu-bg-primary);
-    color: var(--menu-text);
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    display: none;
-    z-index: 51; /* Nav보다 높게 */
-    border: 1px solid var(--border);
-}
-#profilePopup.visible {
-    display: block;
-}
-.profile-info h3 {
-    margin: 0 0 4px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-}
-.profile-info p {
-    margin: 0 0 16px;
-    font-size: 0.9rem;
-    color: var(--menu-text);
-}
-.profile-limit {
-    font-size: 0.95rem;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-}
-.limit-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    margin-top: 6px;
-    overflow: hidden;
-}
-.limit-fill {
-    height: 100%;
-    background: var(--accent-blue);
-    transition: width 0.5s ease-out;
-}
-.profile-reset-btn {
-    width: 100%;
-    padding: 8px;
-    background: #c53030;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-.profile-reset-btn:hover {
-    opacity: 0.9;
-}
-
-/* ------------------------ 🌟 [추가] ADMIN 배지 스타일 🌟 ------------------------ */
-.admin-badge {
-    background: #e3b000; /* 황금색 */
-    color: #111;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 8px;
-    text-transform: uppercase;
-}
-
-/* ------------------------ 🌟 [추가] ADMIN 제목 그라데이션 🌟 ------------------------ */
-@keyframes rainbow {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 100% 50%; }
-}
-
-#title.admin-gradient {
-    /* 무지개 그라데이션 */
-    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-    background-size: 400% 400%; /* 애니메이션을 위해 크기 확대 */
-    animation: rainbow 6s linear infinite; /* ease를 linear로 변경하여 부드러운 순환 */
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-fill-color: transparent;
-}
 
 /* 메뉴 내부 컨테이너 */
 .menu-header {
@@ -857,7 +741,11 @@ textarea{
         <div class="menu-upgrade-btn" id="upgradeBtn">
             <span>업그레이드</span>
         </div>
-      
+        
+        <div class="menu-bottom-item" id="resetNameMenuBtn" style="opacity: 0.9;">
+            <span>사용자 정보(이름) 초기화</span>
+        </div>
+        
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
         </div>
@@ -878,24 +766,7 @@ textarea{
     <label class="mode-toggle-label" id="modeToggleLabel" title="테마 전환">
         <input type="checkbox" id="modeToggleCheckbox" disabled> <span class="mode-toggle-slider"></span>
     </label>
-    
-    <div class="profile-container">
-        <button id="profileBtn" disabled>
-            <span id="profileInitial">M</span>
-        </button>
-        <div id="profilePopup">
-            <div class="profile-info">
-                <h3 id="profileName">로딩 중...</h3>
-                <p>일일 메시지 한도 (총 120개)</p>
-            </div>
-            <div class="profile-limit">
-                사용: <span id="messageUsed">0</span>개
-                <div class="limit-bar"><div id="limitFill" class="limit-fill" style="width: 0%;"></div></div>
-            </div>
-            <button class="profile-reset-btn" id="profileResetBtn">사용자 정보 초기화</button>
-        </div>
-    </div>
-</div>
+  </div>
 </nav>
 
 <main id="main" class="initial-state" style="opacity: 0.1; pointer-events: none;"> 
@@ -964,22 +835,6 @@ const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-
 const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
 
-  * 🌟 [추가] 한도 및 ADMIN 설정 🌟 */
-const MAX_MESSAGES_PER_DAY = 120;
-const ADMIN_ID = 'minsu0227'; 
-
-let abortController = null;
-let loadingMsg = null;
-// 🌟 [수정] username을 null로 초기화하여 로딩 시점 조정 🌟
-let username = null;
-let allConversations = {};
-// 🌟 [수정] currentChatId가 로컬에서 값을 가져오도록 수정 🌟
-let currentChatId = localStorage.getItem('currentChatId') || null;
-let chatHistory = [];
-
-// 🌟 [추가] 일일 한도 관련 변수 추가 🌟
-let dailyMessageCount = 0; // 일일 메시지 카운트
-let lastMessageDate = new Date().toDateString(); // 마지막 메시지 전송일
 /* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
 const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.' };
 
@@ -995,26 +850,6 @@ const modeToggleCheckbox = document.getElementById('modeToggleCheckbox');
 const suggestionsEl = document.getElementById('suggestions');
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
-  // 🌟 [추가] 프로필 관련 DOM 요소 🌟
-const profileContainer = document.querySelector('.profile-container');
-const profileBtn = document.getElementById('profileBtn');
-const profilePopup = document.getElementById('profilePopup');
-const profileNameEl = document.getElementById('profileName');
-const profileInitialEl = document.getElementById('profileInitial');
-const messageUsedEl = document.getElementById('messageUsed');
-const limitFillEl = document.getElementById('limitFill');
-const profileResetBtn = document.getElementById('profileResetBtn');
-const titleEl = document.getElementById('title');
-
-// 🌟 [추가] 이름 입력 모달 관련 DOM 요소 🌟
-const nameInputModal = document.getElementById('nameInputModal'); // 모달 전체
-const nameInput = document.getElementById('nameInputField'); // 👈 이 부분을 'nameInputField'로 수정하세요.
-const nameSubmitBtn = document.getElementById('nameSubmitBtn'); // '확인' 버튼
-// ---------------------------------------------
-  
-// 🌟 [추가] 메시지 전송 버튼 SVG 경로 (한도 초과 시 아이콘 변경용) 🌟
-const sendSvgPath = '<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>';
-const limitExceededSvgPath = '<circle cx="12" cy="12" r="10" fill="gray"/><path d="M12 8v4l3 3m6.1-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" fill="none"/>';
 // 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
 
@@ -1034,9 +869,7 @@ const locationDisplay = document.getElementById('locationDisplay');
 
 let abortController = null;
 let loadingMsg = null;
-// 기존 코드: let username = localStorage.getItem('username');
-// 🌟 [수정] 전역 변수로 선언만 하고 로드는 나중에 합니다.
-let username = null;
+let username = localStorage.getItem('username') || null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
@@ -1075,6 +908,7 @@ mainEl.addEventListener('scroll', ()=>{
 
 
 /* 이름 입력 및 제목 업데이트 */
+const titleEl = document.getElementById('title');
 function updateTitle() {
     if (username) {
         // 이름이 있으면 "안녕하세요! [이름]님"으로 업데이트
@@ -1083,20 +917,8 @@ function updateTitle() {
         // 이름이 없으면 기본 문구 유지
         titleEl.textContent = `안녕하세요!`;
     }
-    
-    // 🌟 [수정/추가] ADMIN 아이디 체크 및 그라데이션, 닉네임 변경 적용 🌟
-    if (username === ADMIN_ID) {
-        titleEl.textContent = `안녕하세요! ${'ADMIN'}님`; // 닉네임을 ADMIN으로 표시
-        titleEl.classList.add('admin-gradient');
-    } else {
-        titleEl.classList.remove('admin-gradient');
-    }
 }
 
-  /* 이름 로드 */
-function loadName() {
-    username = localStorage.getItem('username');
-}
 
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
 function toggleInitialState(isInitial){
@@ -1167,108 +989,6 @@ function saveHistory() {
   }
 }
 
-// 🌟 [추가] 일일 메시지 카운트 관리 🌟
-function loadDailyCount() {
-    const storedCount = localStorage.getItem('dailyMessageCount');
-    const storedDate = localStorage.getItem('lastMessageDate');
-    const today = new Date().toDateString();
-    
-    if (storedDate !== today) {
-        // 날짜가 바뀌면 초기화
-        dailyMessageCount = 0;
-        lastMessageDate = today;
-        saveDailyCount();
-    } else {
-        dailyMessageCount = storedCount ? parseInt(storedCount, 10) : 0;
-        lastMessageDate = storedDate;
-    }
-}
-
-function saveDailyCount() {
-    localStorage.setItem('dailyMessageCount', dailyMessageCount);
-    localStorage.setItem('lastMessageDate', lastMessageDate);
-    updateProfilePopup(); // 카운트 저장 시 팝업 업데이트
-    checkMessageLimit(); // 카운트 저장 시 한도 체크
-}
-
-// 🌟 [추가] 메시지 전송 버튼 활성화/비활성화 및 아이콘 변경 🌟
-function checkMessageLimit() {
-    const isLimitExceeded = dailyMessageCount >= MAX_MESSAGES_PER_DAY;
-
-function handleUserInput() {
-    const content = userInput.value.trim();
-    if (!content) return;
-    
-    // 🌟 [추가] 일일 메시지 한도 체크 🌟
-    if (dailyMessageCount >= MAX_MESSAGES_PER_DAY) {
-        alert(`일일 메시지 한도(${MAX_MESSAGES_PER_DAY}개)를 초과하여 메시지를 전송할 수 없습니다.`);
-        return;
-    }
-    
-    // 🌟 [추가] 일일 메시지 카운트 증가 🌟
-    dailyMessageCount++;
-    saveDailyCount();
-  
-    // 메시지 전송 버튼 활성화/비활성화
-    // (기존 userInput.value.trim() 체크 로직은 handleUserInput에서 하므로 여기서는 한도만 체크)
-    if (isLimitExceeded) {
-        sendBtn.disabled = true;
-    } else {
-        // 한도 미초과 시 입력창 값에 따라 활성화 여부 결정 (기존 로직)
-        sendBtn.disabled = !userInput.value.trim();
-    }
-    
-    // 한도 초과 시 아이콘 변경
-    const sendSvgEl = sendBtn.querySelector('svg');
-    if(sendSvgEl) {
-        sendSvgEl.innerHTML = isLimitExceeded ? limitExceededSvgPath : sendSvgPath;
-        if(isLimitExceeded) {
-            sendBtn.setAttribute('title', `일일 한도 ${MAX_MESSAGES_PER_DAY}개를 초과했습니다.`);
-        } else {
-            sendBtn.removeAttribute('title');
-        }
-    }
-}
-
-// 🌟 [추가] 프로필 팝업 업데이트 및 관리 🌟
-function updateProfilePopup() {
-    // 닉네임: ADMIN 아이디면 'ADMIN', 아니면 저장된 닉네임
-    const displayName = (username === ADMIN_ID) ? 'ADMIN' : username;
-    const initial = displayName ? displayName[0].toUpperCase() : 'M';
-    const percentage = Math.min(100, (dailyMessageCount / MAX_MESSAGES_PER_DAY) * 100);
-    
-    // 팝업 정보 업데이트
-    profileInitialEl.textContent = initial;
-    profileNameEl.innerHTML = `${displayName}님${(username === ADMIN_ID) ? ' <span class="admin-badge">ADMIN</span>' : ''}`;
-    messageUsedEl.textContent = dailyMessageCount;
-    limitFillEl.style.width = `${percentage}%`;
-    
-    // 한도 초과 시 막대 색상 변경
-    if (dailyMessageCount >= MAX_MESSAGES_PER_DAY) {
-        limitFillEl.style.backgroundColor = '#c53030'; // 빨간색
-    } else {
-        limitFillEl.style.backgroundColor = 'var(--accent-blue)';
-    }
-}
-
-function toggleProfilePopup() {
-    profilePopup.classList.toggle('visible');
-    if (profilePopup.classList.contains('visible')) {
-        updateProfilePopup();
-        // 팝업 외부 클릭 시 닫기 이벤트 추가
-        document.addEventListener('click', closeProfilePopupOutside);
-    } else {
-        document.removeEventListener('click', closeProfilePopupOutside);
-    }
-}
-
-function closeProfilePopupOutside(event) {
-    if (!profileContainer.contains(event.target)) {
-        profilePopup.classList.remove('visible');
-        document.removeEventListener('click', closeProfilePopupOutside);
-    }
-}
-  
 // 대화 기록 로드 및 렌더링
 // 🌟 수정: 대화 전환 시 부드럽게 메시지가 올라오도록 수정 🌟
 function loadHistory() {
@@ -1932,7 +1652,6 @@ userInput.addEventListener('input', ()=>{
   
   // 🌟🌟🌟 수정: 입력창 높이 변경 시 메인 패딩 및 info 버튼 위치 업데이트 🌟🌟🌟
   adjustForViewport(); 
-  
 });
 
 /* suggestions click */
@@ -2011,7 +1730,6 @@ const nameSubmitBtn = document.getElementById('nameSubmitBtn');
 function showNameInputModal() {
     // 🌟 이름 입력 필드를 비우고 모달 표시 🌟
     nameInputField.value = ''; 
-    nameSubmitBtn.disabled = true
     nameInputModal.classList.add('visible');
     nameInputField.focus();
 }
@@ -2155,70 +1873,7 @@ document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
   );
 });
 
-/* ------------- 초기화 함수 (새로 추가) ------------- */
-function init() {
-    // 🌟 [필수 수정] 가장 먼저 사용자 이름을 로드합니다. 🌟
-    loadName();
-    // 🌟 [추가] 일일 카운트 로드 및 초기 한도 체크 🌟
-    loadDailyCount();
-    checkMessageLimit();
-    updateProfilePopup();
-    profileBtn.disabled = false; // 프로필 버튼 활성화
 
-    // 기존 초기화 로직 (기존에 스크립트 마지막에 있던 코드들을 이 안으로 옮겨야 합니다)
-    loadAllConversations();
-    updateTitle();
-    
-    // 이름이 설정되어 있지 않으면 이름 입력 모달 표시 (기존 코드)
-    if (!username) {
-        showNameInputModal();
-    }
-}
-
-// 🌟 [추가] 프로필 버튼 클릭 이벤트 🌟
-profileBtn.addEventListener('click', (event) => {
-    event.stopPropagation(); // 버튼 클릭 시 문서 클릭 이벤트 전파 방지
-    toggleProfilePopup();
-});
-
-  / 🌟 [추가] 이름 입력 모달 내 입력 필드 이벤트 리스너 🌟// 이름 입력 필드에 내용이 있을 때만 '확인' 버튼 활성화
-
-nameInput.addEventListener('input', () => {
-
-// 입력 값의 앞뒤 공백을 제거한 후, 내용이 있으면 버튼 활성화
-
-nameSubmitBtn.disabled = !nameInput.value.trim();
-  
-// 🌟 [추가] 프로필 팝업 내 사용자 정보 초기화 버튼 이벤트 🌟
-profileResetBtn.addEventListener('click', () => {
-  showConfirmPopup(
-    `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
-    [
-      { id: 'cancel', text: '취소', class: 'reset-no' },
-      { id: 'reset_name', text: '초기화', class: 'reset-yes' },
-    ],
-    (actionId) => {
-      if (actionId === 'reset_name') {
-        localStorage.removeItem('username');
-        username = null;
-        // 🌟 일일 카운트도 함께 초기화 🌟
-        dailyMessageCount = 0; 
-        saveDailyCount();
-        
-        hideConfirmPopup();
-        toggleProfilePopup(); // 팝업 닫기
-        
-        // 초기화 후 이름 입력 모달 재실행
-        showNameInputModal(); 
-      } else {
-        hideConfirmPopup();
-      }
-    }
-  );
-});
-
-init();
-  
 /* load history and initial state */
 initializeApp();
 
@@ -2230,8 +1885,3 @@ sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
 </html>
-
-
-
-
-
