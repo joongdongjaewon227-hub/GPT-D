@@ -997,6 +997,12 @@ const limitFillEl = document.getElementById('limitFill');
 const profileResetBtn = document.getElementById('profileResetBtn');
 const titleEl = document.getElementById('title');
 
+  // 🌟 [추가] 이름 입력 모달 관련 DOM 요소 🌟
+const nameInputModal = document.getElementById('nameInputModal'); // 모달 전체
+const nameInput = document.getElementById('nameInput'); // 이름 입력 필드
+const nameSubmitBtn = document.getElementById('nameSubmitBtn'); // '확인' 버튼
+// ---------------------------------------------
+
 // 🌟 [추가] 메시지 전송 버튼 SVG 경로 (한도 초과 시 아이콘 변경용) 🌟
 const sendSvgPath = '<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>';
 const limitExceededSvgPath = '<circle cx="12" cy="12" r="10" fill="gray"/><path d="M12 8v4l3 3m6.1-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" fill="none"/>';
@@ -1019,7 +1025,9 @@ const locationDisplay = document.getElementById('locationDisplay');
 
 let abortController = null;
 let loadingMsg = null;
-let username = localStorage.getItem('username') || null;
+// 기존 코드: let username = localStorage.getItem('username');
+// 🌟 [수정] 전역 변수로 선언만 하고 로드는 나중에 합니다.
+let username = null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
@@ -1076,6 +1084,10 @@ function updateTitle() {
     }
 }
 
+  /* 이름 로드 */
+function loadName() {
+    username = localStorage.getItem('username');
+}
 
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
 function toggleInitialState(isInitial){
@@ -1911,6 +1923,7 @@ userInput.addEventListener('input', ()=>{
   
   // 🌟🌟🌟 수정: 입력창 높이 변경 시 메인 패딩 및 info 버튼 위치 업데이트 🌟🌟🌟
   adjustForViewport(); 
+  
 });
 
 /* suggestions click */
@@ -2134,6 +2147,8 @@ document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
 
 /* ------------- 초기화 함수 (새로 추가) ------------- */
 function init() {
+    // 🌟 [필수 수정] 가장 먼저 사용자 이름을 로드합니다. 🌟
+    loadName();
     // 🌟 [추가] 일일 카운트 로드 및 초기 한도 체크 🌟
     loadDailyCount();
     checkMessageLimit();
@@ -2156,6 +2171,14 @@ profileBtn.addEventListener('click', (event) => {
     toggleProfilePopup();
 });
 
+  / 🌟 [추가] 이름 입력 모달 내 입력 필드 이벤트 리스너 🌟// 이름 입력 필드에 내용이 있을 때만 '확인' 버튼 활성화
+
+nameInput.addEventListener('input', () => {
+
+// 입력 값의 앞뒤 공백을 제거한 후, 내용이 있으면 버튼 활성화
+
+nameSubmitBtn.disabled = !nameInput.value.trim();
+  
 // 🌟 [추가] 프로필 팝업 내 사용자 정보 초기화 버튼 이벤트 🌟
 profileResetBtn.addEventListener('click', () => {
   showConfirmPopup(
@@ -2197,4 +2220,5 @@ sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
 </html>
+
 
