@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Minsu GPT</title>
 <style>
+  /* ------------------------------------------------ */
+/* 🌟 [추가] 대화 시작 후에도 제목과 카드가 사라지지 않도록 유지 🌟 */
+/* :not(.initial-state)는 대화 기록이 생겨 initial-state 클래스가 제거되었을 때 작동합니다. */
+:not(.initial-state) #title,
+:not(.initial-state) .suggestions {
+    /* 기존 애니메이션 효과를 무시하고 항상 보이도록 설정 */
+    opacity: 1; 
+    transform: translateY(0);
+}
+/* ------------------------------------------------ */
 /* ------------------------ 회색 계열 테마 설정 ------------------------ */
 :root{
   --bg:#111111;
@@ -39,7 +49,7 @@
 body.light {
   --bg: #ffffff;
   --text: #111111;
-  --input-bg: #f5f5f5; 
+  --input-bg: #ffffff; /* 🌟 수정: --bg와 동일하게 설정 (요청 반영) 🌟 */
   --border: #dddddd;
   --border-strong: #aaaaaa;
   --button-bg: #111111;
@@ -59,6 +69,13 @@ body.light {
   --toggle-on-bg: var(--accent-blue); 
   /* 🌟 수정: 라이트 모드 글로우는 기존 색상 🌟 */
   --glow-color: rgba(0, 110, 255, 0.3); 
+}
+
+/* 🌟 추가: 스크롤바 숨기기 (모든 스크롤바에 적용) 🌟 */
+::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+html, body, main, textarea {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 /* 모바일 탭 하이라이트 제거 및 박스 사이즈 설정 */
@@ -412,24 +429,27 @@ main{
   min-height: 100vh; /* 최소 높이 설정 */
   justify-content: flex-start;
   transform: none;
-  transition: padding-top var(--transition), padding-bottom var(--transition), transform var(--transition); /* transform 추가 */
+  /* 🌟 수정: transform transition 제거 (UI 이동 방지) 🌟 */
+  transition: padding-top var(--transition), padding-bottom var(--transition);
 }
 
 /* 🌟 수정: 채팅 기록이 없을 때만 중앙 정렬을 적용하는 클래스 + 애니메이션 추가 🌟 */
+/* 🌟 수정: transform 관련 속성 제거 (UI 이동 방지 요청 반영) 🌟 */
 .initial-state {
     justify-content: center !important;
-    transform: translateY(-5%);
-    /* transition: justify-content var(--transition), transform var(--transition); */
-    /* justify-content는 transition을 적용하지 않고, transform만 적용합니다 */
-    transition: transform var(--transition); 
+    transform: none; /* 요청에 따라 애니메이션 제거 */
+    transition: none; /* 애니메이션 제거 */
 }
 
+/* 🌟 추가: 초기 상태 (제목 및 카드) 등장 애니메이션 설정 🌟 */
 #title{ 
   margin-top:0; 
   font-size:1.4rem; 
   font-weight:700; 
   text-align:center; 
-  transition: margin-top var(--transition); /* 부드러운 이동 */
+  transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; /* 등장 애니메이션 추가 */
+  opacity: 0;
+  transform: translateY(20px);
   
   /* 그라데이션 정의: 진한 파랑 -> 밝은 하늘색 */
   background: linear-gradient(to right, #007aff, #66ccff); 
@@ -442,7 +462,18 @@ main{
 }
 
 /* 🌟 수정: 카드는 항상 띄우고 중앙 정렬을 위해 max-width만 설정 🌟 */
-.suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:12px; transition: margin-top var(--transition); }
+.suggestions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; max-width:720px; margin-top:12px; transition: margin-top var(--transition), opacity 0.5s ease-out, transform 0.5s ease-out; }
+.suggestions{
+    opacity: 0;
+    transform: translateY(20px); /* 등장 애니메이션 추가 */
+}
+
+/* 🌟 추가: 대화가 없을 때만 애니메이션 시작 🌟 */
+.initial-state.animate #title, .initial-state.animate .suggestions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .suggestion-card{ background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:10px; cursor:pointer; font-size:0.92rem; }
 .suggestion-card:active{ transform:translateY(1px); }
 .suggestions.disabled{ pointer-events: none; opacity: 0.6; }
@@ -454,7 +485,7 @@ main{
 .message.user{ align-self:flex-end; background:var(--button-bg); color:var(--button-text); }
 .message.bot{ align-self:flex-start; background:var(--input-bg); border:0.5px solid var(--border); color:var(--text); }
 
-/* 🌟 추가: 메시지 등장 애니메이션 🌟 */
+/* 🌟 추가: 메시지 등장 애니메이션 (부드러운 채팅 전환을 위해 사용) 🌟 */
 .message {
     opacity: 0;
     transform: translateY(10px);
@@ -579,7 +610,8 @@ textarea{
 .btn{ width:44px; height:44px; border-radius:50%; border:none; background:var(--button-bg); color:var(--button-text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
 .btn:disabled{ opacity:0.3; cursor:not-allowed; }
 .stop-btn{ width:44px; height:44px; border-radius:50%; background:#c53030; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
-.stop-btn::before{ content:''; width:14px; height:14px; background:white; }
+/* 🌟 수정: 응답 중지 버튼 내부 사각형 크기 (14px -> 12px) */
+.stop-btn::before{ content:''; width:12px; height:12px; background:white; }
 
 /* info button */
 .info-btn{ position:fixed; right:14px; bottom:140px; /* JS가 이 값을 조정합니다 */ width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
@@ -766,7 +798,12 @@ textarea{
           <div class="model-option" data-model="2.5 Pro">2.5 Pro</div>
         </div>
       </div>
-      <button class="btn" id="sendBtn" disabled>&#9654;</button> <button class="stop-btn" id="stopBtn"></button>
+      <button class="btn" id="sendBtn" disabled>
+        <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+        </svg>
+      </button> 
+      <button class="stop-btn" id="stopBtn"></button>
     </div>
   </div>
 </div>
@@ -798,6 +835,9 @@ const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-
 const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
 
+/* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
+const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.' };
+
 /* --------------------------------- */
 
 const body = document.body;
@@ -810,7 +850,6 @@ const modeToggleCheckbox = document.getElementById('modeToggleCheckbox');
 const suggestionsEl = document.getElementById('suggestions');
 const infoBtn = document.getElementById('infoBtn');
 const infoPopup = document.getElementById('infoPopup');
-const inputBar = document.getElementById('inputBar');
 // 🌟 추가: 채팅 검색 입력창 🌟
 const chatSearchInput = document.getElementById('chatSearchInput');
 
@@ -835,6 +874,39 @@ let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
 
+// Global state for auto-scroll
+let isAutoScrollEnabled = true;
+
+/* 유틸: 스크롤 끝으로 */
+function scrollToBottom(){
+  // 🌟 자동 스크롤 비활성화 시 작동 중지 🌟
+  if(!isAutoScrollEnabled) return; 
+  requestAnimationFrame(()=>{ 
+    mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); 
+  });
+}
+
+// 🌟 추가: 지능형 자동 스크롤 로직 🌟
+mainEl.addEventListener('scroll', ()=>{
+  const scrollHeight = mainEl.scrollHeight;
+  const clientHeight = mainEl.clientHeight;
+  const scrollTop = mainEl.scrollTop;
+  const scrollThreshold = 5; // 바닥에서 5px 이내
+
+  // 1. 바닥에 도달했는지 확인 -> 자동 스크롤 재활성화
+  if(scrollTop >= scrollHeight - clientHeight - scrollThreshold){
+    if(!isAutoScrollEnabled){
+      isAutoScrollEnabled = true; // 바닥에 닿으면 다시 자동 스크롤 켜기
+    }
+  } else {
+    // 2. 바닥에서 떨어져 있으면 -> 자동 스크롤 해제
+    if(isAutoScrollEnabled) {
+      isAutoScrollEnabled = false; // 사용자가 스크롤하면 자동 스크롤 끄기
+    }
+  }
+});
+
+
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
 function updateTitle() {
@@ -848,36 +920,18 @@ function updateTitle() {
 }
 
 
-/* 유틸: 스크롤 끝으로 */
-function scrollToBottom(){
-  // 🌟 스크롤이 끝으로 부드럽게 이동 🌟
-  requestAnimationFrame(()=>{ mainEl.scrollTo({ top: mainEl.scrollHeight, behavior: 'smooth' }); });
-}
-
 /* 중앙 정렬 및 스크롤 모드 전환 함수 */
 function toggleInitialState(isInitial){
-    const transitionDuration = 350; // CSS var(--transition) 0.35s
-    
+    // 🌟 수정: 애니메이션 로직 및 transform 조작을 제거하고 중앙 정렬 클래스만 관리하여 
+    // 채팅 시작 시에도 부드럽게 화면 상단으로 전환되도록 합니다. 🌟
     if(isInitial){
-      // 대화가 없을 때: 중앙 정렬 유지 및 transform 설정
+      // 대화가 없을 때: 중앙 정렬 유지
       mainEl.classList.add('initial-state');
-      mainEl.style.transform = ''; // CSS에 설정된 transform: translateY(-5%)를 사용
     } else {
-      // 대화가 생겼을 때: 중앙 정렬 해제 및 부드러운 이동
-      
-      if(mainEl.classList.contains('initial-state')) {
-          // 1. transform을 초기화하여 부드럽게 'transform: none'으로 이동하도록 유도
-          // (CSS의 .initial-state에 transition이 적용되어 있음)
-          mainEl.style.transform = 'none'; 
-          
-          // 2. CSS transition 시간만큼 기다립니다. (글씨와 카드가 부드럽게 이동)
-          setTimeout(() => {
-              // 3. 정렬 해제 (이동이 끝난 후 정렬 변경 -> 점프 방지)
-              mainEl.classList.remove('initial-state');
-              // 4. transform 속성을 완전히 제거하여 추후 레이아웃에 지장이 없게 함
-              mainEl.style.transform = ''; 
-          }, transitionDuration + 50); // 400ms 후 실행 (여유시간 포함)
-      }
+      // 대화가 생겼을 때: 중앙 정렬 해제 (CSS의 flex-start 적용)
+      mainEl.classList.remove('initial-state');
+      // 🌟 애니메이션 클래스 제거 (대화가 있으면 필요 없음) 🌟
+      mainEl.classList.remove('animate');
     }
 }
 
@@ -936,18 +990,36 @@ function saveHistory() {
 }
 
 // 대화 기록 로드 및 렌더링
+// 🌟 수정: 대화 전환 시 부드럽게 메시지가 올라오도록 수정 🌟
 function loadHistory() {
   messagesEl.innerHTML = '';
-  // 🌟 수정: 메시지 렌더링 시 show 클래스를 즉시 추가 (새 대화에서는 애니메이션 없이) 🌟
-  chatHistory.forEach(item => {
+  
+  // 🌟 초기 상태 애니메이션 관리 🌟
+  const isInitial = chatHistory.length === 0;
+  toggleInitialState(isInitial);
+  
+  if (isInitial) {
+      // 대화가 없을 때만 제목/카드의 등장 애니메이션을 실행합니다.
+      mainEl.classList.remove('animate');
+      setTimeout(() => {
+          mainEl.classList.add('animate');
+      }, 50); // CSS transition이 작동하도록 딜레이를 줍니다.
+  }
+  
+  // 🌟 메시지 부드러운 등장 (채팅 전환) 🌟
+  chatHistory.forEach((item, index) => {
     const el = renderMessage(item.role, item.content);
-    el.classList.add('show');
+    // 메시지 등장 애니메이션에 인덱스 기반 딜레이 적용
+    setTimeout(() => {
+        el.classList.add('show');
+    }, 50 * index); // 50ms 간격으로 메시지 등장
   });
 
-  toggleInitialState(chatHistory.length === 0);
-
   if (chatHistory.length > 0) {
-      scrollToBottom();
+      // 🌟 로딩 완료 후 자동 스크롤 켜고 스크롤 🌟
+      isAutoScrollEnabled = true;
+      // 마지막 메시지 등장 후 스크롤
+      setTimeout(scrollToBottom, 50 * chatHistory.length + 100); 
   }
 }
 
@@ -1059,7 +1131,7 @@ function renderChatList() {
       chatListContainer.appendChild(item);
   });
   
-  // 🌟 채팅 검색 시 필터링을 위해 다시 호출 🌟
+  // 🌟 채팅 전환 시 검색어 초기화 🌟
   filterChatList(); 
 }
 
@@ -1255,7 +1327,11 @@ function renderTypingEffect(role, fullText, finalCallback) {
             // 한 글자씩 추가
             typingTextEl.textContent += textToType[index];
             index++;
-            scrollToBottom();
+            
+            // 🌟 추가: 타이핑 중에도 자동 스크롤 활성화 상태이면 스크롤 🌟
+            if (isAutoScrollEnabled) {
+                scrollToBottom();
+            }
             
             setTimeout(type, typingInterval); 
         } else {
@@ -1267,6 +1343,10 @@ function renderTypingEffect(role, fullText, finalCallback) {
             const finalWrap = renderMessage(role, fullText); 
             finalWrap.classList.add('show'); // 최종 메시지도 애니메이션 적용
 
+            // 🌟 추가: 타이핑 완료 시 자동 스크롤 켜기 및 스크롤 🌟
+            isAutoScrollEnabled = true; 
+            scrollToBottom();
+            
             if (finalCallback) {
                 finalCallback();
             }
@@ -1282,6 +1362,9 @@ async function sendMessage(){
   const text = userInput.value.trim();
   if(!text) return;
 
+  // 🌟 추가: 메시지 전송 시 자동 스크롤 켜기 🌟
+  isAutoScrollEnabled = true; 
+  
   disableUI();
   toggleInitialState(false); // 🌟 애니메이션 적용됨 🌟
 
@@ -1302,7 +1385,9 @@ async function sendMessage(){
   let streamClosed = false;
   
   try{
-    const payload = { message: text, history: chatHistory };
+    // 🌟 수정: 시스템 명령어(SYSTEM_INSTRUCTION)를 chatHistory 앞에 추가하여 백엔드로 전송 🌟
+    const historyToSend = [SYSTEM_INSTRUCTION, ...chatHistory];
+    const payload = { message: text, history: historyToSend }; // 수정된 히스토리 사용
     
     // 1. 요청 시작
     const res = await fetch(BACKEND_URL, {
@@ -1459,7 +1544,7 @@ function renderMessage(role, text, doMarkdown = true) {
 
 
   messagesEl.appendChild(wrap);
-  scrollToBottom();
+  // 🌟 renderMessage는 애니메이션 딜레이가 적용된 loadHistory나 renderTypingEffect에서 스크롤을 처리합니다.
   return wrap; 
 }
 
