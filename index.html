@@ -609,9 +609,9 @@ textarea{
 .model-option.active{ background:rgba(0,153,255,0.15); color:#66ccff; }
 .btn{ width:44px; height:44px; border-radius:50%; border:none; background:var(--button-bg); color:var(--button-text); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
 .btn:disabled{ opacity:0.3; cursor:not-allowed; }
-.stop-btn{ width:44px; height:44px; border-radius:50%; background:#c53030; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
+.stop-btn{ width:44px; height:44px; border-radius:50%; background:#FC7B7BFF; color:white; border:none; cursor:pointer; display:none; align-items:center; justify-content:center; flex-shrink:0; }
 /* 🌟 수정: 응답 중지 버튼 내부 사각형 크기 (14px -> 12px) */
-.stop-btn::before{ content:''; width:12px; height:12px; background:white; }
+.stop-btn::before{ content:''; width:12px; height:12px; background:#F43434FF; }
 
 /* info button */
 .info-btn{ position:fixed; right:14px; bottom:140px; /* JS가 이 값을 조정합니다 */ width:36px;height:36px;border-radius:50%; background:var(--input-bg); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; z-index:45; cursor:pointer; color:var(--text); font-weight:600; }
@@ -1885,4 +1885,5 @@ sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
 </html>
+
 
