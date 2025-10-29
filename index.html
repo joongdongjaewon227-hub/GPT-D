@@ -2002,6 +2002,7 @@ const nameSubmitBtn = document.getElementById('nameSubmitBtn');
 function showNameInputModal() {
     // 🌟 이름 입력 필드를 비우고 모달 표시 🌟
     nameInputField.value = ''; 
+    nameSubmitBtn.disabled = true
     nameInputModal.classList.add('visible');
     nameInputField.focus();
 }
@@ -2220,5 +2221,6 @@ sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
 </html>
+
 
 
