@@ -10,6 +10,9 @@
 /* :not(.initial-state)는 대화 기록이 생겨 initial-state 클래스가 제거되었을 때 작동합니다. */
 :not(.initial-state) #title,
 :not(.initial-state) .suggestions {
+    /* 기존 애니메이션 효과를 무시하고 항상 보이도록 설정 */
+    opacity: 1; 
+    transform: translateY(0);
 }
 /* ------------------------------------------------ */
 /* ------------------------ 회색 계열 테마 설정 ------------------------ */
