@@ -968,10 +968,18 @@ const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_
 const MAX_MESSAGES_PER_DAY = 120;
 const ADMIN_ID = 'minsu0227'; 
 
-let username = null; 
+let abortController = null;
+let loadingMsg = null;
+// 🌟 [수정] username을 null로 초기화하여 로딩 시점 조정 🌟
+let username = null;
+let allConversations = {};
+// 🌟 [수정] currentChatId가 로컬에서 값을 가져오도록 수정 🌟
+let currentChatId = localStorage.getItem('currentChatId') || null;
+let chatHistory = [];
+
+// 🌟 [추가] 일일 한도 관련 변수 추가 🌟
 let dailyMessageCount = 0; // 일일 메시지 카운트
 let lastMessageDate = new Date().toDateString(); // 마지막 메시지 전송일
-
 /* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
 const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.' };
 
@@ -1003,7 +1011,7 @@ const nameInputModal = document.getElementById('nameInputModal'); // 모달 전�
 const nameInput = document.getElementById('nameInputField'); // 👈 이 부분을 'nameInputField'로 수정하세요.
 const nameSubmitBtn = document.getElementById('nameSubmitBtn'); // '확인' 버튼
 // ---------------------------------------------
-
+  
 // 🌟 [추가] 메시지 전송 버튼 SVG 경로 (한도 초과 시 아이콘 변경용) 🌟
 const sendSvgPath = '<path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>';
 const limitExceededSvgPath = '<circle cx="12" cy="12" r="10" fill="gray"/><path d="M12 8v4l3 3m6.1-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="white" stroke-width="2" fill="none"/>';
@@ -2222,6 +2230,7 @@ sendBtn.addEventListener('click', sendMessage);
 </script>
 </body>
 </html>
+
 
 
 
