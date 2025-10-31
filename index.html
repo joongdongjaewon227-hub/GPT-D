@@ -42,8 +42,26 @@
   --toggle-on-bg: var(--accent-blue);
   --glow-color: rgba(255, 255, 255, 0.25); 
   
-  /* 🌟 메뉴 토글 아이콘 필터: 어두운 아이콘을 흰색으로 보이게 함 🌟 */
-  --menu-toggle-filter: invert(1);
+  /* 🌟 수정: 메뉴 토글 아이콘 필터: 다크모드에서도 필터 없음 (원래 색상 유지) 🌟 */
+  --menu-toggle-filter: none;
+  
+  /* 🌟 추가: 프로필 버튼 배경색 🌟 */
+  --profile-btn-bg: #444444; 
+  --profile-btn-text: #ffffff;
+
+  /* 🌟 프로필 드롭다운 특정 색상 (다크 모드) 🌟 */
+  --profile-dropdown-bg: #1c1c1c;
+  --profile-dropdown-border: #333333;
+  --profile-greeting-text: #f0f0f0;
+  --profile-disclaimer-text: #cccccc;
+  --profile-bar-bg: #333333;
+  --profile-bar-gradient-start: #007aff;
+  --profile-bar-gradient-end: #66ccff;
+  --profile-message-limit-text: #f0f0f0;
+  --profile-menu-item-text: #f0f0f0;
+  --profile-menu-item-hover-bg: rgba(255, 255, 255, 0.05);
+  --profile-menu-item-border: #333333; /* 맨 아래 초기화 버튼 테두리 */
+  --profile-menu-item-reset-color: #ff4d4d; /* 초기화 버튼 색상 */
 }
 /* 라이트 모드 회색 계열 조정 */
 body.light {
@@ -71,6 +89,24 @@ body.light {
   
   /* 🌟 메뉴 토글 아이콘 필터: 필터 없음 (아이콘 본연의 색) 🌟 */
   --menu-toggle-filter: none;
+  
+  /* 🌟 수정: 프로필 버튼 배경색 (라이트 모드) 🌟 */
+  --profile-btn-bg: #333333; /* 진한 회색 */
+  --profile-btn-text: #ffffff; /* 흰색 텍스트 */
+
+  /* 🌟 프로필 드롭다운 특정 색상 (라이트 모드) 🌟 */
+  --profile-dropdown-bg: #f9f9f9;
+  --profile-dropdown-border: #dddddd;
+  --profile-greeting-text: #111111;
+  --profile-disclaimer-text: #555555;
+  --profile-bar-bg: #dddddd;
+  --profile-bar-gradient-start: #007aff;
+  --profile-bar-gradient-end: #66ccff;
+  --profile-message-limit-text: #111111;
+  --profile-menu-item-text: #111111;
+  --profile-menu-item-hover-bg: rgba(0, 0, 0, 0.05);
+  --profile-menu-item-border: #dddddd;
+  --profile-menu-item-reset-color: #ff4d4d;
 }
 
 /* 🌟 추가: 스크롤바 숨기기 (모든 스크롤바에 적용) 🌟 */
@@ -96,7 +132,14 @@ html,body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Rob
 /* 상단 */
 nav{ position:fixed; top:0; left:0; right:0; height:56px; display:flex; align-items:center; padding:0 12px; z-index:30; border-bottom:1px solid var(--border); background:var(--bg); }
 .nav-left{ display:flex; align-items:center; gap:10px; }
-.logo{ font-weight:600; font-size:0.98rem; white-space:nowrap; flex-grow: 1; }
+/* 🌟 수정: 로고 색상을 강조색으로 고정하여 테마에 관계없이 색상 유지 🌟 */
+.logo{ 
+    font-weight:600; 
+    font-size:0.98rem; 
+    white-space:nowrap; 
+    flex-grow: 1; 
+    color: var(--accent-blue); 
+}
 .actions{ display:flex; gap:8px; align-items:center; margin-left: auto; }
 
 /* 메뉴 토글 버튼 */
@@ -171,6 +214,150 @@ body.light .menu-toggle:hover {
 .mode-toggle-label input:checked + .mode-toggle-slider:before {
     transform: translateX(20px);
 }
+/* ------------------------------------------------------------------- */
+
+/* 🌟 수정/추가: 프로필 버튼 및 드롭다운 스타일 🌟 */
+.profile-area {
+    position: relative;
+    z-index: 50; 
+}
+
+/* 🌟 수정: 프로필 버튼 - 이름 글자 표시 스타일 🌟 */
+.profile-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--profile-btn-bg); /* 배경색 적용 */
+    color: var(--profile-btn-text); /* 텍스트 색상 적용 */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem; /* 글자 크기 조정 */
+    font-weight: 600;
+    line-height: 1;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+.profile-btn:hover {
+    opacity: 0.85;
+}
+
+/* 🌟 수정: 프로필 드롭다운 스타일 (제공된 이미지와 동일하게) 🌟 */
+.profile-dropdown {
+    position: absolute;
+    top: 45px; 
+    right: 0;
+    width: 300px; /* 너비 조정 */
+    background: var(--profile-dropdown-bg);
+    border: 1px solid var(--profile-dropdown-border);
+    border-radius: 12px;
+    padding: 0; /* 패딩 제거 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    overflow: hidden; /* 내부 요소가 둥근 모서리를 넘지 않도록 */
+}
+.profile-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 프로필 드롭다운 헤더 (사용자 이름 안녕하세요!) */
+.profile-dropdown-header {
+    background: var(--profile-dropdown-bg);
+    padding: 20px 20px 15px 20px; /* 상하 패딩 조정 */
+    border-radius: 12px 12px 0 0; /* 상단 모서리만 둥글게 */
+    text-align: left;
+    font-size: 1.4rem; /* 이미지와 동일한 크기 */
+    font-weight: 700;
+    color: var(--profile-greeting-text); /* 기본 텍스트 색상 */
+}
+.profile-dropdown-header strong {
+    background: linear-gradient(to right, var(--accent-blue), var(--profile-bar-gradient-end)); 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    background-clip: text; 
+    text-fill-color: transparent; 
+    font-weight: 700;
+}
+
+/* 메시지 한도 섹션 */
+.profile-usage-section {
+    background: var(--profile-dropdown-bg);
+    padding: 10px 20px 20px 20px; /* 패딩 조정 */
+    margin-top: -10px; /* 헤더와의 간격 조절 */
+}
+
+.profile-usage-label {
+    font-size: 0.95rem;
+    color: var(--profile-message-limit-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.profile-usage-bar-container {
+    width: 100%;
+    height: 12px; /* 막대 높이 */
+    background: var(--profile-bar-bg); /* 막대 배경색 */
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.profile-usage-bar {
+    height: 100%;
+    width: 0%; /* JavaScript에서 변경 */
+    background: linear-gradient(to right, var(--profile-bar-gradient-start), var(--profile-bar-gradient-end));
+    border-radius: 6px;
+    transition: width 0.5s ease-out;
+}
+
+/* 🌟 추가: 프로필 드롭다운 메뉴 아이템 스타일 🌟 */
+.profile-menu-section {
+    background: var(--profile-dropdown-bg);
+    padding: 10px 20px 0 20px; /* 상단 패딩 추가 */
+}
+
+.profile-menu-item {
+    padding: 10px 14px; 
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--profile-menu-item-reset-color); /* 빨간색 텍스트 */
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--profile-menu-item-border); 
+}
+
+.profile-menu-item:hover {
+    background: rgba(255, 77, 77, 0.1);
+}
+/* 라이트 모드 오버라이드 */
+body.light .profile-menu-item:hover {
+    background: rgba(255, 77, 77, 0.1);
+}
+
+/* 하단 Disclaimer 텍스트 */
+.profile-disclaimer {
+    background: var(--profile-dropdown-bg);
+    padding: 15px 20px 20px 20px; 
+    font-size: 0.75rem;
+    color: var(--profile-disclaimer-text);
+    text-align: center;
+    border-top: 1px solid var(--profile-dropdown-border); /* 구분선 */
+    margin-top: 10px; /* 메뉴 섹션과의 간격 */
+    line-height: 1.4;
+}
+
 /* ------------------------------------------------------------------- */
 
 
@@ -771,9 +958,6 @@ body.light .disclaimer-text {
             <span>업그레이드</span>
         </div>
         
-        <div class="menu-bottom-item" id="resetNameMenuBtn" style="opacity: 0.9;">
-            <span>사용자 정보(이름) 초기화</span>
-        </div>
         
         <div class="menu-bottom-item" id="resetAllMenuBtn" style="opacity: 0.7;">
             <span>대화 전체 초기화</span>
@@ -798,6 +982,36 @@ body.light .disclaimer-text {
     <label class="mode-toggle-label" id="modeToggleLabel" title="테마 전환">
         <input type="checkbox" id="modeToggleCheckbox"> <span class="mode-toggle-slider"></span>
     </label>
+    
+    <div class="profile-area">
+        <button class="profile-btn" id="profileBtn" title="프로필 및 사용량"></button>
+        
+        <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-dropdown-header">
+                <span id="profileGreeting"></span>
+            </div>
+            
+            <div class="profile-usage-section">
+                <div class="profile-usage-label">
+                    <span>메시지 한도</span>
+                    <span id="profileUsage">0/100</span>
+                </div>
+                <div class="profile-usage-bar-container">
+                    <div class="profile-usage-bar" id="profileUsageBar"></div>
+                </div>
+            </div>
+            
+            <div class="profile-menu-section">
+                <div class="profile-menu-item" id="resetNameProfileBtn">
+                    <span>사용자 정보 초기화</span>
+                </div>
+            </div>
+
+            <div class="profile-disclaimer">
+                Minsu GPT는 실수할 수 있으니 다시 한번 확인하세요.
+            </div>
+        </div>
+    </div>
   </div>
 </nav>
 
@@ -869,6 +1083,9 @@ const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-
 const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
 
+/* 🌟 추가: 일일 메시지 한도 상수 🌟 */
+const DAILY_MESSAGE_LIMIT = 100;
+
 /* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
 const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.' };
 
@@ -898,12 +1115,22 @@ const resetAllMenuBtn = document.getElementById('resetAllMenuBtn');
 const locationDisplay = document.getElementById('locationDisplay'); 
 const inputBar = document.getElementById('inputBar'); // inputBar DOM 추가
 
+// 프로필 관련 요소
+const profileBtn = document.getElementById('profileBtn');
+const profileDropdown = document.getElementById('profileDropdown');
+const profileGreetingEl = document.getElementById('profileGreeting'); // 🌟 새로운 요소 🌟
+const profileUsageEl = document.getElementById('profileUsage');
+const profileUsageBar = document.getElementById('profileUsageBar'); // 🌟 새로운 요소 🌟
+const resetNameProfileBtn = document.getElementById('resetNameProfileBtn'); // 🌟 새로 추가된 버튼 🌟
+
+
 let abortController = null;
 let loadingMsg = null;
 let username = localStorage.getItem('username') || null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
+let dailyUsage = 0; // 🌟 추가: 일일 사용량 변수 🌟
 
 // Global state for auto-scroll
 let isAutoScrollEnabled = true;
@@ -942,11 +1169,32 @@ mainEl.addEventListener('scroll', ()=>{
 
 /* 이름 입력 및 제목 업데이트 */
 const titleEl = document.getElementById('title');
+
+// 🌟 수정: 프로필 버튼에 사용자 이름 이니셜 표시 🌟
+function getUsernameInitials(name) {
+    if (!name) return 'U';
+    // 한글 첫 글자
+    if (/[가-힣]/.test(name)) {
+        return name.charAt(0);
+    }
+    // 영어 두 글자
+    const words = name.trim().split(/\s+/);
+    if (words.length >= 2) {
+        return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+    }
+    // 영어 한 글자
+    return name.charAt(0).toUpperCase();
+}
+
 function updateTitle() {
     if (username) {
         titleEl.textContent = `안녕하세요! ${username}님`;
+        profileGreetingEl.innerHTML = `<strong>${username}</strong>님 안녕하세요!`; // 🌟 프로필 드롭다운 인사말 업데이트 🌟
+        profileBtn.textContent = getUsernameInitials(username); // 🌟 프로필 버튼 이니셜 업데이트 🌟
     } else {
         titleEl.textContent = `안녕하세요!`;
+        profileGreetingEl.innerHTML = `안녕하세요!`; // 🌟 프로필 드롭다운 인사말 업데이트 🌟
+        profileBtn.textContent = 'U'; // 🌟 프로필 버튼 이니셜 업데이트 🌟
     }
 }
 
@@ -1176,6 +1424,45 @@ function resetAllChats() {
 
 /* -------------------- UI/UX 기능 -------------------- */
 
+// 🌟 수정: 일일 사용량 관리 및 UI 업데이트 🌟
+function updateDailyUsage() {
+    const today = new Date().toDateString();
+    const stored = JSON.parse(localStorage.getItem('dailyUsage')) || { date: today, count: 0 };
+
+    if (stored.date !== today) {
+        dailyUsage = 0;
+        localStorage.setItem('dailyUsage', JSON.stringify({ date: today, count: 0 }));
+    } else {
+        dailyUsage = stored.count;
+    }
+    
+    // 🌟 프로필 드롭다운 사용량 업데이트 🌟
+    profileUsageEl.textContent = `${dailyUsage}/${DAILY_MESSAGE_LIMIT}`;
+    const usagePercentage = (dailyUsage / DAILY_MESSAGE_LIMIT) * 100;
+    profileUsageBar.style.width = `${Math.min(usagePercentage, 100)}%`; // 100% 초과 금지
+    
+    const isLimitExceeded = dailyUsage >= DAILY_MESSAGE_LIMIT;
+    
+    // 한도 초과 시 버튼 비활성화 및 경고 표시
+    if (isLimitExceeded) {
+        sendBtn.disabled = true;
+        userInput.placeholder = '일일 메시지 한도(100개)를 초과했습니다.';
+    } else if (userInput) {
+        sendBtn.disabled = !userInput.value.trim();
+        userInput.placeholder = 'Minsu GPT에게 물어보기';
+    }
+    
+    return isLimitExceeded;
+}
+
+function incrementDailyUsage() {
+    dailyUsage++;
+    const today = new Date().toDateString();
+    localStorage.setItem('dailyUsage', JSON.stringify({ date: today, count: dailyUsage }));
+    updateDailyUsage(); 
+}
+// -----------------------------------------------------
+
 // 앱 활성화 (이름 입력 후)
 function activateAppUI() {
     mainEl.style.opacity = '1';
@@ -1184,7 +1471,9 @@ function activateAppUI() {
     inputBar.style.pointerEvents = 'auto';
     menuToggle.disabled = false;
     modeToggleCheckbox.disabled = false;
+    profileBtn.disabled = false; // 🌟 프로필 버튼 활성화 🌟
     
+    updateDailyUsage(); // 🌟 사용량 업데이트 및 한도 체크 🌟
     userInput.focus();
 }
 
@@ -1263,16 +1552,18 @@ function disableUI(){
     userInput.disabled = true;
     suggestionsEl.classList.add('disabled');
     menuToggle.disabled = true;
+    profileBtn.disabled = true; // 🌟 프로필 버튼 비활성화 🌟
 }
 
 // 응답 완료 후 UI를 재활성화하는 함수
 function enableUI(){
     sendBtn.style.display = 'flex';
     stopBtn.style.display = 'none';
-    userInput.disabled = false;
-    sendBtn.disabled = !userInput.value.trim();
+    userInput.disabled = updateDailyUsage(); // 🌟 한도 초과 시 비활성 유지 🌟
+    sendBtn.disabled = userInput.disabled || !userInput.value.trim();
     suggestionsEl.classList.remove('disabled');
     menuToggle.disabled = false;
+    profileBtn.disabled = false; // 🌟 프로필 버튼 활성화 🌟
 }
 
 /* 🌟🌟🌟 수정: visualViewport adjustments for mobile keyboard (메시지 가려짐 해결) 🌟🌟🌟 */
@@ -1303,7 +1594,7 @@ if(window.visualViewport){
   visualViewport.addEventListener('scroll', adjustForViewport);
 }
 window.addEventListener('resize', adjustForViewport);
-adjustForViewport();
+adjustForViewport(); 
 
 /* -------------------- 스트리밍 응답 처리 (로딩 바 유지 및 타이핑 효과) -------------------- */
 
@@ -1371,6 +1662,11 @@ function renderTypingEffect(role, fullText, finalCallback) {
 async function sendMessage(){
   const text = userInput.value.trim();
   if(!text) return;
+  
+  if (updateDailyUsage()) { // 🌟 한도 초과 체크 🌟
+    alert(`일일 메시지 한도(${DAILY_MESSAGE_LIMIT}개)를 초과했습니다. 내일 다시 이용해주세요.`);
+    return;
+  }
 
   isAutoScrollEnabled = true; 
   
@@ -1444,6 +1740,7 @@ async function sendMessage(){
     renderTypingEffect('bot', fullResponse, () => {
         chatHistory.push({role:'bot', content:fullResponse});
         saveHistory();
+        incrementDailyUsage(); // 🌟 메시지 전송 성공 시 사용량 증가 🌟
         enableUI();
     });
     
@@ -1612,14 +1909,51 @@ modelDropdown.addEventListener('click', (e)=>{
 
 document.addEventListener('click', ()=>{
   modelDropdown.classList.remove('show');
+  profileDropdown.classList.remove('show'); // 🌟 프로필 드롭다운 닫기 🌟
 });
+
+/* 🌟 프로필 버튼 토글 로직 🌟 */
+profileBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    updateDailyUsage(); // 클릭 시 최신 사용량 반영
+    profileDropdown.classList.toggle('show');
+    updateTitle(); // 🌟 프로필 드롭다운 인사말도 업데이트 🌟
+});
+
+/* 🌟 프로필 드롭다운의 이름 초기화 버튼 이벤트 🌟 */
+resetNameProfileBtn.addEventListener('click', () => {
+  showConfirmPopup(
+    `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
+    [
+      { id: 'cancel', text: '취소', class: 'reset-no' },
+      { id: 'reset_name', text: '초기화', class: 'reset-yes' },
+    ],
+    (actionId) => {
+      if (actionId === 'reset_name') {
+        localStorage.removeItem('username');
+        username = null;
+        hideConfirmPopup();
+        profileDropdown.classList.remove('show'); // 프로필 드롭다운 닫기
+        showNameInputModal(); 
+      } else {
+        hideConfirmPopup();
+      }
+    }
+  );
+});
+
 
 /* input autosize and send button enable/disable */
 userInput.addEventListener('input', ()=>{
   userInput.style.height = 'auto';
   userInput.style.height = Math.min(userInput.scrollHeight, 168) + 'px'; 
-  if(!userInput.disabled) {
+  
+  // 🌟 한도 초과 확인 후 비활성화 적용 🌟
+  const isLimitExceeded = dailyUsage >= DAILY_MESSAGE_LIMIT;
+  if(!userInput.disabled && !isLimitExceeded) {
     sendBtn.disabled = !userInput.value.trim();
+  } else {
+    sendBtn.disabled = true;
   }
   
   adjustForViewport(); 
@@ -1769,10 +2103,10 @@ function initializeAppAfterName() {
     adjustForViewport();
     updateRealLocation();
     
-    // 🌟 요청 반영: savedMode가 없을 경우 Light Mode를 기본으로 설정 🌟
+    // 🌟 요청 반영: savedMode가 없을 경우 Dark Mode를 기본으로 설정 🌟
     let savedMode = localStorage.getItem('mode');
     if (savedMode === null) {
-        savedMode = 'dark'; // Dark 모드 기본값으로 변경 (기존 코드와 일치)
+        savedMode = 'light'; 
     }
     const isLightMode = savedMode === 'light'; 
     modeToggleCheckbox.checked = isLightMode;
@@ -1819,27 +2153,8 @@ document.getElementById('upgradeBtn').addEventListener('click', () => {
     if (window.innerWidth < 1024) { hideSideMenu(); }
 });
 
-document.getElementById('resetNameMenuBtn').addEventListener('click', () => {
-  showConfirmPopup(
-    `사용자 정보("${username}")를 초기화하고 다시 이름을 입력하시겠습니까?`,
-    [
-      { id: 'cancel', text: '취소', class: 'reset-no' },
-      { id: 'reset_name', text: '초기화', class: 'reset-yes' },
-    ],
-    (actionId) => {
-      if (actionId === 'reset_name') {
-        localStorage.removeItem('username');
-        username = null;
-        hideConfirmPopup();
-        hideSideMenu();
-        showNameInputModal(); 
-      } else {
-        hideConfirmPopup();
-      }
-    }
-  );
-});
 
+// 전체 초기화는 하단 메뉴 항목으로 이동
 document.getElementById('resetAllMenuBtn').addEventListener('click', () => {
   showConfirmPopup(
     '모든 대화 기록을 완전히 삭제하고 초기화할까요?',
