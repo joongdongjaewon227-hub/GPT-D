@@ -6,6 +6,67 @@
     transform: translateY(0);
 }
 /* ------------------------------------------------ */
+
+/* ------------------------ ADMIN 전용 스타일 ------------------------ */
+
+/* 🌈 무지개 그라데이션 키프레임 */
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* 🌈 무지개 텍스트 스타일 (General) */
+.rainbow-text {
+  background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; 
+  -webkit-text-fill-color: transparent; 
+  background-clip: text; 
+  text-fill-color: transparent; 
+  animation: rainbow 6s ease-in-out infinite alternate;
+}
+
+/* #title에 적용 */
+#title.rainbow-text {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    background-size: 200% 100%;
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    background-clip: text; 
+    text-fill-color: transparent; 
+    animation: rainbow 6s ease-in-out infinite alternate;
+}
+
+/* 프로필 드롭다운 인사말 내부 strong 태그에 적용 */
+.profile-dropdown-header.rainbow-text strong {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    background-size: 200% 100%;
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    background-clip: text; 
+    text-fill-color: transparent; 
+    animation: rainbow 6s ease-in-out infinite alternate;
+}
+
+/* 🛡️ ADMIN 배지 스타일 */
+.admin-badge {
+    display: none; /* 기본 숨김 */
+    background: linear-gradient(45deg, #FF6B6B, #FFD93D); /* 밝은 그라데이션 */
+    color: #111;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 12px;
+    line-height: 1;
+    margin-right: 4px; /* 프로필 버튼과의 간격 */
+    text-transform: uppercase;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+    /* 🌟 flex로 설정하여 JS에서 display:block 대신 display:flex로 보이게 함 */
+    align-items: center; 
+    justify-content: center;
+}
+/* ------------------------------------------------------------------- */
+
 /* ------------------------ 회색 계열 테마 설정 ------------------------ */
 :root{
   --bg:#111111;
@@ -268,6 +329,7 @@ body.light .menu-toggle:hover {
     font-weight: 700;
     color: var(--profile-greeting-text); /* 기본 텍스트 색상 */
 }
+/* 기본 그라데이션 (ADMIN 아닐 때) */
 .profile-dropdown-header strong {
     background: linear-gradient(to right, var(--accent-blue), var(--profile-bar-gradient-end)); 
     -webkit-background-clip: text; 
@@ -641,6 +703,7 @@ main{
   opacity: 0;
   transform: translateY(20px);
   
+  /* ADMIN 아닐 때의 기본 그라데이션 */
   background: linear-gradient(to right, #007aff, #66ccff); 
   
   -webkit-background-clip:text; 
