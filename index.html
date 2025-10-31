@@ -57,6 +57,8 @@
         <input type="checkbox" id="modeToggleCheckbox"> <span class="mode-toggle-slider"></span>
     </label>
     
+    <span id="adminBadge" class="admin-badge">ADMIN</span>
+    
     <div class="profile-area">
         <button class="profile-btn" id="profileBtn" title="프로필 및 사용량"></button>
         
@@ -113,7 +115,7 @@
       <div class="model-selector">
         <button class="model-select-btn" id="modelSelectBtn">
           <span id="selectedModel">2.5 Flash</span>
-          <span>▼</span> 
+          <span>∨</span> 
         </button>
         <div class="model-dropdown" id="modelDropdown">
           <div class="model-option active" data-model="2.5 Flash">2.5 Flash</div>
@@ -153,12 +155,16 @@
 /* ------------- 설정 ------------- */
 // ⚠️ 주의: 이 주소를 실제 PythonAnywhere 서버 주소로 변경해야 합니다.
 const BACKEND_URL = 'https://jaewons0227.pythonanywhere.com/ask'; 
-const INITIAL_INPUT_BAR_HEIGHT = 80; // input-wrapper의 최소 높이 (CSS min-height: 80px)
-const INITIAL_INPUT_PADDING = 32; // input-bar의 상하 패딩 합계 (16px * 2)
+const INITIAL_INPUT_BAR_HEIGHT = 80; 
+const INITIAL_INPUT_PADDING = 32; 
 const INPUT_BAR_TOTAL_INITIAL_HEIGHT = INITIAL_INPUT_BAR_HEIGHT + INITIAL_INPUT_PADDING;
 
 /* 🌟 추가: 일일 메시지 한도 상수 🌟 */
 const DAILY_MESSAGE_LIMIT = 100;
+
+/* 🌟 ADMIN 설정 🌟 */
+const ADMIN_USERNAME = 'minsu0227';
+let isAdmin = false; 
 
 /* 🌟 추가: 시스템 프롬프트 (요청 사항) 🌟 */
 const SYSTEM_INSTRUCTION = { role: 'system', content: '넌 Minsu GPT야 신재원이 널 만들었어 기억해. 따로 물어보지 않으면 만든사람 소개하지마.' };
@@ -192,10 +198,11 @@ const inputBar = document.getElementById('inputBar'); // inputBar DOM 추가
 // 프로필 관련 요소
 const profileBtn = document.getElementById('profileBtn');
 const profileDropdown = document.getElementById('profileDropdown');
-const profileGreetingEl = document.getElementById('profileGreeting'); // 🌟 새로운 요소 🌟
+const profileGreetingEl = document.getElementById('profileGreeting'); 
 const profileUsageEl = document.getElementById('profileUsage');
-const profileUsageBar = document.getElementById('profileUsageBar'); // 🌟 새로운 요소 🌟
-const resetNameProfileBtn = document.getElementById('resetNameProfileBtn'); // 🌟 새로 추가된 버튼 🌟
+const profileUsageBar = document.getElementById('profileUsageBar'); 
+const resetNameProfileBtn = document.getElementById('resetNameProfileBtn'); 
+const adminBadgeEl = document.getElementById('adminBadge'); // 🌟 ADMIN 배지 요소 🌟
 
 
 let abortController = null;
@@ -204,7 +211,7 @@ let username = localStorage.getItem('username') || null;
 let allConversations = {};
 let currentChatId = null;
 let chatHistory = [];
-let dailyUsage = 0; // 🌟 추가: 일일 사용량 변수 🌟
+let dailyUsage = 0; 
 
 // Global state for auto-scroll
 let isAutoScrollEnabled = true;
@@ -261,14 +268,33 @@ function getUsernameInitials(name) {
 }
 
 function updateTitle() {
+    // 1. 클래스 초기화
+    titleEl.classList.remove('rainbow-text');
+    profileGreetingEl.classList.remove('rainbow-text');
+    
+    let displayName = username;
+
+    if (isAdmin) {
+        displayName = 'ADMIN';
+        // 레인보우 텍스트 클래스 추가
+        titleEl.classList.add('rainbow-text');
+        profileGreetingEl.classList.add('rainbow-text');
+        
+        // ADMIN 배지 표시
+        adminBadgeEl.style.display = 'flex';
+    } else {
+        // ADMIN 배지 숨김
+        adminBadgeEl.style.display = 'none';
+    }
+
     if (username) {
-        titleEl.textContent = `안녕하세요! ${username}님`;
-        profileGreetingEl.innerHTML = `<strong>${username}</strong>님 안녕하세요!`; // 🌟 프로필 드롭다운 인사말 업데이트 🌟
-        profileBtn.textContent = getUsernameInitials(username); // 🌟 프로필 버튼 이니셜 업데이트 🌟
+        titleEl.textContent = `안녕하세요! ${displayName}님`;
+        profileGreetingEl.innerHTML = `<strong>${displayName}</strong>님 안녕하세요!`; 
+        profileBtn.textContent = getUsernameInitials(username); 
     } else {
         titleEl.textContent = `안녕하세요!`;
-        profileGreetingEl.innerHTML = `안녕하세요!`; // 🌟 프로필 드롭다운 인사말 업데이트 🌟
-        profileBtn.textContent = 'U'; // 🌟 프로필 버튼 이니셜 업데이트 🌟
+        profileGreetingEl.innerHTML = `안녕하세요!`; 
+        profileBtn.textContent = 'U'; 
     }
 }
 
@@ -500,6 +526,15 @@ function resetAllChats() {
 
 // 🌟 수정: 일일 사용량 관리 및 UI 업데이트 🌟
 function updateDailyUsage() {
+    // 🌟 ADMIN: 한도 무제한 🌟
+    if (isAdmin) {
+        profileUsageEl.textContent = `무제한`;
+        profileUsageBar.style.width = `100%`;
+        sendBtn.disabled = !userInput.value.trim();
+        userInput.placeholder = 'Minsu GPT에게 물어보기';
+        return false; // 한도 초과 아님
+    }
+    
     const today = new Date().toDateString();
     const stored = JSON.parse(localStorage.getItem('dailyUsage')) || { date: today, count: 0 };
 
@@ -513,7 +548,7 @@ function updateDailyUsage() {
     // 🌟 프로필 드롭다운 사용량 업데이트 🌟
     profileUsageEl.textContent = `${dailyUsage}/${DAILY_MESSAGE_LIMIT}`;
     const usagePercentage = (dailyUsage / DAILY_MESSAGE_LIMIT) * 100;
-    profileUsageBar.style.width = `${Math.min(usagePercentage, 100)}%`; // 100% 초과 금지
+    profileUsageBar.style.width = `${Math.min(usagePercentage, 100)}%`; 
     
     const isLimitExceeded = dailyUsage >= DAILY_MESSAGE_LIMIT;
     
@@ -530,6 +565,8 @@ function updateDailyUsage() {
 }
 
 function incrementDailyUsage() {
+    if (isAdmin) return; // ADMIN은 사용량 증가 안 함
+    
     dailyUsage++;
     const today = new Date().toDateString();
     localStorage.setItem('dailyUsage', JSON.stringify({ date: today, count: dailyUsage }));
@@ -545,9 +582,9 @@ function activateAppUI() {
     inputBar.style.pointerEvents = 'auto';
     menuToggle.disabled = false;
     modeToggleCheckbox.disabled = false;
-    profileBtn.disabled = false; // 🌟 프로필 버튼 활성화 🌟
+    profileBtn.disabled = false; 
     
-    updateDailyUsage(); // 🌟 사용량 업데이트 및 한도 체크 🌟
+    updateDailyUsage(); 
     userInput.focus();
 }
 
@@ -626,18 +663,18 @@ function disableUI(){
     userInput.disabled = true;
     suggestionsEl.classList.add('disabled');
     menuToggle.disabled = true;
-    profileBtn.disabled = true; // 🌟 프로필 버튼 비활성화 🌟
+    profileBtn.disabled = true; 
 }
 
 // 응답 완료 후 UI를 재활성화하는 함수
 function enableUI(){
     sendBtn.style.display = 'flex';
     stopBtn.style.display = 'none';
-    userInput.disabled = updateDailyUsage(); // 🌟 한도 초과 시 비활성 유지 🌟
+    userInput.disabled = updateDailyUsage(); 
     sendBtn.disabled = userInput.disabled || !userInput.value.trim();
     suggestionsEl.classList.remove('disabled');
     menuToggle.disabled = false;
-    profileBtn.disabled = false; // 🌟 프로필 버튼 활성화 🌟
+    profileBtn.disabled = false; 
 }
 
 /* 🌟🌟🌟 수정: visualViewport adjustments for mobile keyboard (메시지 가려짐 해결) 🌟🌟🌟 */
@@ -814,7 +851,7 @@ async function sendMessage(){
     renderTypingEffect('bot', fullResponse, () => {
         chatHistory.push({role:'bot', content:fullResponse});
         saveHistory();
-        incrementDailyUsage(); // 🌟 메시지 전송 성공 시 사용량 증가 🌟
+        incrementDailyUsage(); // 🌟 메시지 전송 성공 시 사용량 증가 (ADMIN 아닐 경우) 🌟
         enableUI();
     });
     
@@ -983,7 +1020,7 @@ modelDropdown.addEventListener('click', (e)=>{
 
 document.addEventListener('click', ()=>{
   modelDropdown.classList.remove('show');
-  profileDropdown.classList.remove('show'); // 🌟 프로필 드롭다운 닫기 🌟
+  profileDropdown.classList.remove('show'); 
 });
 
 /* 🌟 프로필 버튼 토글 로직 🌟 */
@@ -1007,7 +1044,7 @@ resetNameProfileBtn.addEventListener('click', () => {
         localStorage.removeItem('username');
         username = null;
         hideConfirmPopup();
-        profileDropdown.classList.remove('show'); // 프로필 드롭다운 닫기
+        profileDropdown.classList.remove('show'); 
         showNameInputModal(); 
       } else {
         hideConfirmPopup();
@@ -1023,7 +1060,7 @@ userInput.addEventListener('input', ()=>{
   userInput.style.height = Math.min(userInput.scrollHeight, 168) + 'px'; 
   
   // 🌟 한도 초과 확인 후 비활성화 적용 🌟
-  const isLimitExceeded = dailyUsage >= DAILY_MESSAGE_LIMIT;
+  const isLimitExceeded = dailyUsage >= DAILY_MESSAGE_LIMIT && !isAdmin;
   if(!userInput.disabled && !isLimitExceeded) {
     sendBtn.disabled = !userInput.value.trim();
   } else {
@@ -1171,6 +1208,9 @@ function initializePCMenuState() {
 
 // 이름 입력 후 실행되어야 할 초기화 로직
 function initializeAppAfterName() {
+    // 🌟 ADMIN 체크 🌟
+    isAdmin = username === ADMIN_USERNAME;
+
     activateAppUI(); 
     updateTitle();
     loadAllConversations();
@@ -1180,7 +1220,7 @@ function initializeAppAfterName() {
     // 🌟 요청 반영: savedMode가 없을 경우 Dark Mode를 기본으로 설정 🌟
     let savedMode = localStorage.getItem('mode');
     if (savedMode === null) {
-        savedMode = 'dark'; 
+        savedMode = 'light'; 
     }
     const isLightMode = savedMode === 'light'; 
     modeToggleCheckbox.checked = isLightMode;
